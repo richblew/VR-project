@@ -20,11 +20,13 @@ MonoBehaviour:
   guideLengthNose: 0.06
   guideLengthMotor: 0.08
   guideLengthCap: 0.04
+  guideLengthTube: 0.1
   orientationTolerancePlates: 40
   orientationToleranceOthers: 45
   seatDuration: 0.12
   seatDurationMotor: 0.3
   noseMagnetism: 0.5
+  guideBlendDuration: 0.1
   capLockAngle: 180
   capDetentAngle: 30
   capUnlockedGap: 0.002
