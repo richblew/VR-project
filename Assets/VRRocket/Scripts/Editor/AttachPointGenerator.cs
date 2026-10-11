@@ -12,7 +12,7 @@ namespace VRRocket.Editor
     /// </summary>
     public static class AttachPointGenerator
     {
-        public const string JsonRelativePath = "SourceArt/VR_Rocket_Kit_Parts_v2/attach_points.json";
+        public const string JsonRelativePath = "Assets/VRRocket/Models/attach_points.json";
         public const string ContainerName = "AttachPoints";
 
         [Serializable]

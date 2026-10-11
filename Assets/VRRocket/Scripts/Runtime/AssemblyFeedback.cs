@@ -26,6 +26,10 @@ namespace VRRocket
 
         public static AssemblyFeedback instance { get; private set; }
 
+        /// <summary>Forgets the previous session's instance when Play mode starts without a domain reload.</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => instance = null;
+
         public FeedbackLibrary library
         {
             get => m_Library;
@@ -250,7 +254,7 @@ namespace VRRocket
             if (haptic.isSilent) return;
             m_Hands.RemoveAll(h => h == null);
             if (m_Hands.Count == 0)
-                foreach (var nf in FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None)) m_Hands.Add(nf);
+                foreach (var nf in FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include)) m_Hands.Add(nf);
             foreach (var h in m_Hands) Play(h, haptic);
         }
 

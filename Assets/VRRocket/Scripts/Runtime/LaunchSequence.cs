@@ -131,7 +131,7 @@ namespace VRRocket
             var ejected = false;
             while (!model.IsFinished(m_SuccessAltitude))
             {
-                model.Step(Time.deltaTime);
+                model.Step(Mathf.Min(Time.deltaTime, 0.1f));   // a hitch must not throw the flight forward
                 if (m_Vehicle != null)
                 {
                     var offset = new Vector3(model.horizontalX, model.altitude, model.horizontalZ) * m_VisualScale;

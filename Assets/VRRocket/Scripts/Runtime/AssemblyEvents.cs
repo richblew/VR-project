@@ -9,6 +9,28 @@ namespace VRRocket
     /// </summary>
     public static class AssemblyEvents
     {
+        /// <summary>Clears every subscriber when Play mode starts. Projects may enter Play mode without a domain reload,
+        /// and a subscriber left over from the previous session would then fire on a destroyed object.</summary>
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            GuideEngaged = null;
+            GuideReleased = null;
+            PartSeated = null;
+            PartRemoved = null;
+            PartRespawned = null;
+            CapDetent = null;
+            CapLocked = null;
+            PrototypeComplete = null;
+            PartImpact = null;
+            PartHovered = null;
+            PartGrabbed = null;
+            PartReleased = null;
+            GuideSlideTick = null;
+            TwistTexture = null;
+            KitSpawned = null;
+        }
+
         public static event Action<RocketPart, AttachPoint> GuideEngaged;
         public static event Action<RocketPart, AttachPoint> GuideReleased;   // break away: deliberately no feedback
         public static event Action<RocketPart, AttachPoint> PartSeated;

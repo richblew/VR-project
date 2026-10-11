@@ -24,10 +24,10 @@ namespace VRRocket.Tests
 
         IEnumerator FindFlow()
         {
-            flow = Object.FindFirstObjectByType<GameFlowController>();
-            bin = Object.FindFirstObjectByType<SubmissionBin>();
-            launch = Object.FindFirstObjectByType<LaunchSequence>();
-            menu = Object.FindFirstObjectByType<MenuPanel>(FindObjectsInactive.Include);
+            flow = Object.FindAnyObjectByType<GameFlowController>();
+            bin = Object.FindAnyObjectByType<SubmissionBin>();
+            launch = Object.FindAnyObjectByType<LaunchSequence>();
+            menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
             Assert.IsNotNull(flow, "GameFlowController in Env_ControlRoom");
             Assert.IsNotNull(bin, "SubmissionBin in Env_ControlRoom");
             Assert.IsNotNull(launch, "LaunchSequence in Env_ControlRoom");

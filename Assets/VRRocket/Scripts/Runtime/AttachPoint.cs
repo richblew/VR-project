@@ -17,6 +17,10 @@ namespace VRRocket
         /// <summary>Every enabled attach point in the scene. Read-only; iterate without allocating.</summary>
         public static IReadOnlyList<AttachPoint> active => s_Active;
 
+        /// <summary>Empties the registry when Play mode starts, for projects that enter Play mode without a domain reload.</summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics() => s_Active.Clear();
+
         [SerializeField] string m_PointName = "";
         [SerializeField] PartType m_Accepts = PartType.TailFin;
         [SerializeField, Tooltip("Yaw of the point around the tube axis, from attach_points.json.")] float m_YawDegrees;

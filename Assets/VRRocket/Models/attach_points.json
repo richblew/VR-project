@@ -1,0 +1,113 @@
+{
+ "space": "BodyTube local space in Unity: metres, +Y to the nose. A part placed with rotation (0, yaw, 0) has its local +Z pointing outward.",
+ "points": [
+  {
+   "name": "FinSlot_1",
+   "yaw_deg": 0,
+   "pos_m": [
+    0.0,
+    0.0353,
+    0.01685
+   ]
+  },
+  {
+   "name": "FinSlot_2",
+   "yaw_deg": 120,
+   "pos_m": [
+    0.01459,
+    0.0353,
+    -0.00842
+   ]
+  },
+  {
+   "name": "FinSlot_3",
+   "yaw_deg": 240,
+   "pos_m": [
+    -0.01459,
+    0.0353,
+    -0.00843
+   ]
+  },
+  {
+   "name": "FlapSlot_Mid_1",
+   "yaw_deg": 0,
+   "pos_m": [
+    0.0,
+    0.15,
+    0.01685
+   ]
+  },
+  {
+   "name": "FlapSlot_Mid_2",
+   "yaw_deg": 120,
+   "pos_m": [
+    0.01459,
+    0.15,
+    -0.00842
+   ]
+  },
+  {
+   "name": "FlapSlot_Mid_3",
+   "yaw_deg": 240,
+   "pos_m": [
+    -0.01459,
+    0.15,
+    -0.00843
+   ]
+  },
+  {
+   "name": "FlapSlot_Low_1",
+   "yaw_deg": 60,
+   "pos_m": [
+    0.01459,
+    0.109,
+    0.00843
+   ]
+  },
+  {
+   "name": "FlapSlot_Low_2",
+   "yaw_deg": 180,
+   "pos_m": [
+    0.0,
+    0.109,
+    -0.01685
+   ]
+  },
+  {
+   "name": "FlapSlot_Low_3",
+   "yaw_deg": 300,
+   "pos_m": [
+    -0.01459,
+    0.109,
+    0.00843
+   ]
+  },
+  {
+   "name": "NoseSeat",
+   "yaw_deg": 0,
+   "pos_m": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "name": "MotorSeat",
+   "yaw_deg": 0,
+   "pos_m": [
+    0,
+    -0.011,
+    0
+   ]
+  },
+  {
+   "name": "CapSeat",
+   "yaw_deg": 0,
+   "pos_m": [
+    0,
+    0,
+    0
+   ]
+  }
+ ]
+}

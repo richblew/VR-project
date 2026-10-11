@@ -66,6 +66,8 @@ namespace VRRocket
         void Awake()
         {
             homeParent = transform.parent;
+            // Throws and tumbles were tuned with a 7 rad/s spin limit; Unity 6.6 projects default to 50.
+            if (body != null) body.maxAngularVelocity = 7f;
             HookGrab();
         }
 

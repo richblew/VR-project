@@ -60,7 +60,7 @@ namespace VRRocket.Tests
                 if (p != tube) Assert.AreEqual(RigidbodyInterpolation.None, p.body.interpolation, p.name + " is not interpolated while attached");
 
             // carry it to the submission zone and let go there
-            var zone = Object.FindFirstObjectByType<SubmissionZoneStub>();
+            var zone = Object.FindAnyObjectByType<SubmissionZoneStub>();
             Assert.IsNotNull(zone, "submission zone stub in the dev scene");
             yield return CarryToZone(tube, zone);
             Assert.IsTrue(zone.rocketInside, "a loose complete rocket is inside the zone");
@@ -82,7 +82,7 @@ namespace VRRocket.Tests
             Assert.IsFalse(tube.gameObject.activeInHierarchy, "the stub bin took it away");
 
             // failed launch: inspect-only return plus a new build
-            var readout = Object.FindFirstObjectByType<OutcomeReadoutStub>();
+            var readout = Object.FindAnyObjectByType<OutcomeReadoutStub>();
             Assert.IsNotNull(readout, "outcome readout stub in the dev scene");
             readout.OnFailedLaunchPressed();
             yield return new WaitForSeconds(0.5f);
@@ -110,12 +110,12 @@ namespace VRRocket.Tests
         {
             var tube = Tube;
             yield return BuildPrototype();
-            var zone = Object.FindFirstObjectByType<SubmissionZoneStub>();
+            var zone = Object.FindAnyObjectByType<SubmissionZoneStub>();
             yield return CarryToZone(tube, zone);
             zone.OnSubmitPressed();
             Assert.AreEqual(AssemblyState.Submitted, assembly.State);
 
-            var readout = Object.FindFirstObjectByType<OutcomeReadoutStub>();
+            var readout = Object.FindAnyObjectByType<OutcomeReadoutStub>();
             readout.OnAbortPressed();
             yield return new WaitForSeconds(0.5f);
             Assert.AreEqual(AssemblyState.PrototypeComplete, assembly.State, "the same rocket is editable again");
