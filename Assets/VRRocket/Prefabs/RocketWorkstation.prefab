@@ -201,9 +201,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.RocketWorkstation
   m_Tuning: {fileID: 11400000, guid: 5bec0ada554af36478887b4b612ebda8, type: 2}
   m_ScaledRoot: {fileID: 1394878050380027377}
-  m_Stand: {fileID: 0}
   m_Respawner: {fileID: 327382929471172723}
   m_PartsTray: {fileID: 2630717172771602948}
+  m_Tube: {fileID: 0}
   m_TubePrefab: {fileID: 8271089385511902616, guid: 669a4c1b444fed3439b203a1a24ede77, type: 3}
   m_TailFinPrefab: {fileID: 4196712881287361451, guid: c2d1167b7a435274eb3b39e9686e1e11, type: 3}
   m_WingFlapPrefab: {fileID: 5451651290296874308, guid: 005ea0b05c083824f814218336c4b2b5, type: 3}
@@ -239,7 +239,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.RocketAssembly
   m_Tuning: {fileID: 11400000, guid: 5bec0ada554af36478887b4b612ebda8, type: 2}
   m_Workstation: {fileID: 5020538025137371216}
-  m_Stand: {fileID: 0}
   m_Respawner: {fileID: 327382929471172723}
   onStateChanged:
     m_PersistentCalls:
