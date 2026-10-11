@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bc5464ee8a2bd46188a2a988aa568caa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - mainScreen: {instanceID: 0}
+  - nasaLogoMaterial: {fileID: 2100000, guid: 20e593919751b4b3e811af6c5da73575, type: 2}
+  - videoMaterial: {fileID: 2100000, guid: 5a65f7e4890c04fe9a686f0cc44b6fb5, type: 2}
+  - announcementAudio: {instanceID: 0}
+  - announcementClip: {instanceID: 0}
+  - videoPlayer: {instanceID: 0}
+  - transmissionTexture: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
