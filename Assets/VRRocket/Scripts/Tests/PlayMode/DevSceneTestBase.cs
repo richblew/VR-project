@@ -42,24 +42,26 @@ namespace VRRocket.Tests
             LogAssert.ignoreFailingMessages = true;
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
-            workstation = Object.FindFirstObjectByType<RocketWorkstation>();
-            assembly = Object.FindFirstObjectByType<RocketAssembly>();
-            manager = Object.FindFirstObjectByType<XRInteractionManager>();
+            workstation = Object.FindAnyObjectByType<RocketWorkstation>();
+            assembly = Object.FindAnyObjectByType<RocketAssembly>();
+            manager = Object.FindAnyObjectByType<XRInteractionManager>();   // replaced below by the hand's own manager
             for (var frame = 0; frame < 120 && hand == null; frame++)
             {
-                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include))
                     if (nf.transform.parent != null && nf.transform.parent.name.StartsWith("Right") && nf.gameObject.activeInHierarchy) hand = nf;
                 if (hand == null) yield return null;
             }
             if (hand == null)
             {
-                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include))
                     if (nf.transform.parent != null && nf.transform.parent.name.StartsWith("Right")) hand = nf;
             }
             Assert.IsNotNull(workstation, "RocketWorkstation in the dev scene");
             Assert.IsNotNull(hand, "right NearFarInteractor");
+            // XRI can auto-create a second manager; use the one the hand is registered with
+            if (hand.interactionManager != null) manager = hand.interactionManager;
             yield return null;
-            foreach (var modality in Object.FindObjectsByType<XRInputModalityManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            foreach (var modality in Object.FindObjectsByType<XRInputModalityManager>(FindObjectsInactive.Include))
                 modality.enabled = false;
             yield return null;
             controller = hand.transform.parent;

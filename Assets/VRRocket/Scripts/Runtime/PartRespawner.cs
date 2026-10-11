@@ -81,12 +81,17 @@ namespace VRRocket
             RegisterParts();
         }
 
-        /// <summary>Is this world position below the floor level or outside the workstation bounds?</summary>
+        /// <summary>
+        /// Is this world position outside the workstation bounds and every safe zone, or below the floor level? A safe zone wins over
+        /// the floor rule, so a rocket resting in a bin shaft lower than the bench never counts as dropped.
+        /// </summary>
         public bool IsOutOfBounds(Vector3 position, out bool belowFloor)
         {
+            belowFloor = false;
+            if (Contains(position)) return false;
             belowFloor = m_Pad != null && position.y < m_Pad.position.y + m_FloorOffset;
             if (belowFloor) return true;
-            return m_Bounds != null && !Contains(position);
+            return m_Bounds != null;
         }
 
         void Update()
@@ -102,14 +107,14 @@ namespace VRRocket
                 var grab = part.grabInteractable;
                 if (grab != null && grab.isSelected) { m_OutsideTimers[part] = 0f; continue; }
                 var pos = part.transform.position;
-                if (pos.y < floorY)
-                {
-                    Respawn(part);
-                    continue;
-                }
                 if (Contains(pos))
                 {
                     m_OutsideTimers[part] = 0f;
+                    continue;
+                }
+                if (pos.y < floorY)
+                {
+                    Respawn(part);
                     continue;
                 }
                 var t = m_OutsideTimers[part] + Time.deltaTime;

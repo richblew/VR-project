@@ -21,7 +21,7 @@ namespace VRRocket
         {
             get
             {
-                if (m_Assembly == null) m_Assembly = FindFirstObjectByType<RocketAssembly>();
+                if (m_Assembly == null) m_Assembly = FindAnyObjectByType<RocketAssembly>();
                 return m_Assembly;
             }
             set => m_Assembly = value;
