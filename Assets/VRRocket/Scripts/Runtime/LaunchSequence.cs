@@ -34,6 +34,8 @@ namespace VRRocket
         [Header("Flight tuning")]
         [SerializeField] float m_SuccessAltitude = 1200f;
         [SerializeField] float m_VisualScale = 1f;
+        [SerializeField, Tooltip("Scale the vehicle starts from when it arrives on the pad and grows to full size: the model's 1/36, so it begins at prototype size.")]
+        float m_ArrivalScale = 1f / 36f;
 
         public RocketFlightModel model { get; } = new RocketFlightModel();
         public bool isRunning { get; private set; }
@@ -57,9 +59,15 @@ namespace VRRocket
 
         Vector3 m_FlameLocalPos;
         Quaternion m_FlameLocalRot;
+        Vector3 m_VehicleScale = Vector3.one;
+        Coroutine m_Grow;
+
+        /// <summary>True while the vehicle is still growing from prototype size to full size on the pad.</summary>
+        public bool isGrowing => m_Grow != null;
 
         void Awake()
         {
+            if (m_Vehicle != null) m_VehicleScale = m_Vehicle.transform.localScale;
             if (m_VehicleMotor != null) { m_MotorParent = m_VehicleMotor.parent; m_MotorLocalPos = m_VehicleMotor.localPosition; m_MotorLocalRot = m_VehicleMotor.localRotation; }
             if (m_VehicleCap != null) { m_CapParent = m_VehicleCap.parent; m_CapLocalPos = m_VehicleCap.localPosition; }
             if (m_Flame != null) { m_FlameLocalPos = m_Flame.transform.localPosition; m_FlameLocalRot = m_Flame.transform.localRotation; }
@@ -71,6 +79,7 @@ namespace VRRocket
         public void ResetPad()
         {
             if (m_Flight != null) { StopCoroutine(m_Flight); m_Flight = null; }
+            if (m_Grow != null) { StopCoroutine(m_Grow); m_Grow = null; }
             isRunning = false;
             StopEffects();
             if (m_ActiveExplosion != null) Destroy(m_ActiveExplosion);
@@ -80,19 +89,40 @@ namespace VRRocket
             if (m_Vehicle != null)
             {
                 m_Vehicle.transform.SetPositionAndRotation(m_PadOrigin != null ? m_PadOrigin.position : m_Vehicle.transform.position, m_PadOrigin != null ? m_PadOrigin.rotation : Quaternion.identity);
+                m_Vehicle.transform.localScale = m_VehicleScale;
                 m_Vehicle.SetActive(false);
             }
             if (m_PadCamera != null) m_PadCamera.enabled = false;
             model.Reset();
         }
 
-        /// <summary>The scaled prototype arrives on the pad.</summary>
-        public void PlaceVehicleOnPad()
+        /// <summary>
+        /// The prototype arrives on the pad. With <paramref name="growSeconds"/> above zero it appears at prototype size and grows to
+        /// full size over that time, so "scaling for launch" is something the player sees, through the window and on the pad feed.
+        /// </summary>
+        public void PlaceVehicleOnPad(float growSeconds = 0f)
         {
             ResetPad();
-            if (m_Vehicle != null) m_Vehicle.SetActive(true);
+            if (m_Vehicle != null)
+            {
+                m_Vehicle.SetActive(true);
+                if (growSeconds > 0f) m_Grow = StartCoroutine(Grow(growSeconds));
+            }
             UpdatePadCamera(0f);
             if (m_PadCamera != null) m_PadCamera.enabled = true;
+        }
+
+        IEnumerator Grow(float seconds)
+        {
+            var t = m_Vehicle.transform;
+            var from = m_VehicleScale * m_ArrivalScale;
+            for (var elapsed = 0f; elapsed < seconds; elapsed += Time.deltaTime)
+            {
+                t.localScale = Vector3.LerpUnclamped(from, m_VehicleScale, Mathf.SmoothStep(0f, 1f, elapsed / seconds));
+                yield return null;
+            }
+            t.localScale = m_VehicleScale;
+            m_Grow = null;
         }
 
         /// <summary>Engine start, a few seconds before liftoff.</summary>
@@ -120,6 +150,8 @@ namespace VRRocket
 
         IEnumerator Flight(LaunchOutcome outcome, Action onFinished)
         {
+            if (m_Grow != null) { StopCoroutine(m_Grow); m_Grow = null; }
+            if (m_Vehicle != null) m_Vehicle.transform.localScale = m_VehicleScale;
             isRunning = true;
             model.outcome = outcome;
             model.Reset();

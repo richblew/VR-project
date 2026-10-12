@@ -81,20 +81,31 @@ namespace VRRocket
             else RoomLoaded += callback;
         }
 
-        /// <summary>Finds a GameObject in a scene by its hierarchy path ("Root/Child/Grandchild"), including inactive objects.</summary>
+        /// <summary>
+        /// Finds a GameObject in a scene by its hierarchy path ("Root/Child/Grandchild"), including inactive objects. A segment ending
+        /// in '*' matches the first object whose name starts with the rest of it, for names with characters that do not survive
+        /// copying around (their big TV is "TV LED 30" plus a diaeresis).
+        /// </summary>
         public static GameObject FindByPath(Scene scene, string path)
         {
             if (!scene.IsValid() || !scene.isLoaded || string.IsNullOrEmpty(path)) return null;
-            var slash = path.IndexOf('/');
-            var rootName = slash < 0 ? path : path.Substring(0, slash);
+            var segments = path.Split('/');
             foreach (var root in scene.GetRootGameObjects())
             {
-                if (root.name != rootName) continue;
-                if (slash < 0) return root.gameObject;
-                var child = root.transform.Find(path.Substring(slash + 1));
-                if (child != null) return child.gameObject;
+                if (!Matches(root.name, segments[0])) continue;
+                var t = root.transform;
+                for (var i = 1; i < segments.Length && t != null; i++)
+                {
+                    Transform next = null;
+                    foreach (Transform c in t) if (Matches(c.name, segments[i])) { next = c; break; }
+                    t = next;
+                }
+                if (t != null) return t.gameObject;
             }
             return null;
         }
+
+        static bool Matches(string name, string segment) =>
+            segment.EndsWith("*") ? name.StartsWith(segment.Substring(0, segment.Length - 1)) : name == segment;
     }
 }

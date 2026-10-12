@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
@@ -243,6 +244,7 @@ namespace VRRocket
             if (haptic.isSilent || interactor == null) return false;
             var player = PlayerFor(interactor);
             if (player == null) return false;
+            if (m_Library != null) haptic = m_Library.Tune(haptic, DeviceName(interactor));
             var ok = Pulse(player, haptic.amplitude, haptic.duration, haptic.frequency);
             if (haptic.hasSecond) StartCoroutine(SecondPulse(player, haptic));
             return ok;
@@ -274,6 +276,18 @@ namespace VRRocket
             }
             if (player != null) m_Players[interactor] = player;
             return player;
+        }
+
+        /// <summary>Layout and product name of the controller in the interactor's hand, for <see cref="FeedbackLibrary.Tune"/>.</summary>
+        public static string DeviceName(IXRInteractor interactor)
+        {
+            XRController device = null;
+            if (interactor != null)
+            {
+                if (interactor.handedness == InteractorHandedness.Left) device = XRController.leftHand;
+                else if (interactor.handedness == InteractorHandedness.Right) device = XRController.rightHand;
+            }
+            return device != null ? device.layout + " " + device.description.product : "";
         }
 
         static bool Pulse(HapticImpulsePlayer player, float amplitude, float duration, float frequency)
