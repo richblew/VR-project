@@ -77,14 +77,14 @@ namespace VRRocket
         public static string FirstSentences(string s, int count)
         {
             if (string.IsNullOrEmpty(s) || count <= 0) return s;
-            var end = 0;
+            int end = 0, from = 0;
             for (var n = 0; n < count; n++)
             {
-                var dot = s.IndexOf(". ", end, System.StringComparison.Ordinal);
-                var bar = s.IndexOf(" | ", end, System.StringComparison.Ordinal);
+                var dot = s.IndexOf(". ", from, System.StringComparison.Ordinal);
+                var bar = s.IndexOf(" | ", from, System.StringComparison.Ordinal);
                 if (dot < 0 && bar < 0) return s;
-                if (dot >= 0 && (bar < 0 || dot < bar)) end = dot + 1;
-                else end = bar;
+                if (dot >= 0 && (bar < 0 || dot < bar)) { end = dot + 1; from = dot + 2; }
+                else { end = bar; from = bar + 3; }
             }
             return s.Substring(0, end).TrimEnd();
         }
