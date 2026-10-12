@@ -2,7 +2,7 @@
 
 Version 1.0, 8 October 2026. Written from the submitted treatment (VR Rocket Treatment, Wu, Blewett, Jaravani) plus measurements of the actual model files.
 
-> **In the team project (12 October 2026).** This spec came over with the VR Rocket port onto the `interactions` branch. It still describes the rocket and its interactions exactly. Where it talks about rooms, rigs or scenes, read `Docs/PORTING.md` for how they map onto the team's room: the experience runs in `Assets/VRRocket/Scenes/VRRocket_Main.unity`, which loads `Assets/Scenes/room.unity` at runtime and uses its `Player` rig. Decision D12 below records the ported working versions of the team's systems.
+> **In the team project (12 October 2026).** This spec came over with the VR Rocket port onto the `interactions` branch. It still describes the rocket and its interactions exactly. Where it talks about rooms, rigs or scenes, read `Docs/PORTING.md` for how they map onto the team's room: the experience runs in `Assets/Scenes/VRRocket_Main.unity`, which loads `Assets/Scenes/room.unity` at runtime and uses its `Player` rig. Decision D12 below records the ported working versions of the team's systems.
 
 ## 0. How to use this document
 
@@ -82,7 +82,7 @@ Layout, recreated from treatment Figure 1.2. The user spawns in the middle facin
 
 The dev room is greybox primitives and stays that way. Environment art belongs to the teammates (section 3.1); no art kit is a dependency of this project (decision of 8 Oct 2026).
 
-- `Assets/VRRocket/Scenes/Dev_Interactions.unity`: a floor, one desk-height surface for the workstation and a second for the mission control stubs, built from Unity primitives.
+- `Assets/Scenes/Dev_Interactions.unity`: a floor, one desk-height surface for the workstation and a second for the mission control stubs, built from Unity primitives.
 - Use the XR rig prefab `Assets/XRI_Examples/Global/Prefabs/Complete XR Origin Set Up Variant.prefab`. Teleport and continuous move are disabled in this scene.
 - Keep the dev room cheap: one directional light, no post-processing that the Quest cannot afford.
 - Everything rocket-related lives in one prefab (section 8.1) so it can be dropped into the teammates' final scene unchanged. Nothing in the rocket code may reference environment assets.
@@ -98,7 +98,7 @@ Kit-derived meshes come from "Model Rocket Kit" by ellipticaloptician (printable
 
 ### 4.2 Model files
 
-All files are in `SourceArt/VR_Rocket_Kit_Parts_v2/` and must be copied into `Assets/VRRocket/Models/`. They replace the four files from the first pass (`BodyTube_StandIn.fbx` is obsolete, delete it).
+All files are in `SourceArt/VR_Rocket_Kit_Parts_v2/` and must be copied into `Assets/Models/Rocket/`. They replace the four files from the first pass (`BodyTube_StandIn.fbx` is obsolete, delete it).
 
 | File | Triangles | Materials | Size (mm) | Source |
 |---|---|---|---|---|
@@ -350,7 +350,7 @@ public sealed class BuildReport {
 
 ### 8.1 One prefab
 
-`Assets/VRRocket/Prefabs/RocketWorkstation.prefab` contains everything in this section. Its root sits on the workstation desk surface. Dropping it into any scene with an XR rig must give a fully working assembly task. A single child, `ScaledRoot`, holds all rocket geometry so that `rocketScale` can enlarge the whole kit without touching any other number.
+`Assets/Prefabs/Rocket/RocketWorkstation.prefab` contains everything in this section. Its root sits on the workstation desk surface. Dropping it into any scene with an XR rig must give a fully working assembly task. A single child, `ScaledRoot`, holds all rocket geometry so that `rocketScale` can enlarge the whole kit without touching any other number.
 
 ### 8.2 Assembly stand (removed 9 Oct 2026)
 
@@ -420,24 +420,23 @@ Recreated from the treatment so the agent knows what the rocket plugs into. The 
 
 ### 10.1 Layout
 
+Since 12 October 2026 the project is organised by type, with VR Rocket's files in named subfolders of the shared type folders. The full map, and the few paths written in code, are in `specs/12-project-layout-and-tools.md` section 2.
+
 ```
-Assets/VRRocket/
-  Models/        the six FBX files
-  Materials/     Rocket_White, Rocket_Orange, Rocket_Black, Rocket_Cardboard, Glow, particle and screen materials
-  Prefabs/       RocketWorkstation, one prefab per part, stubs, Launch/ (LaunchVehicle, Explosion)
-  Scenes/        Dev_Interactions.unity, Env_ControlRoom.unity
-  Scripts/
-    Runtime/     VRRocket.Runtime.asmdef, namespace VRRocket
-    Editor/      attach point generator
-    Tests/       edit mode and play mode tests
-  Settings/      AssemblyTuning.asset, FeedbackLibrary.asset
+Assets/
+  Scenes/        VRRocket_Main.unity (the game), Dev_Interactions.unity, room.unity (the room team's)
+  Scripts/       Runtime/ (VRRocket.Runtime.asmdef, namespace VRRocket, Room/), Editor/, Tests/
+  Prefabs/       Rocket/ (RocketWorkstation, one prefab per part), Launch/, Console/, Stubs/
+  Models/Rocket/ the six FBX files, attach_points.json
+  Materials/     Rocket/, Launch/, Screens/, Environment/
+  Texture/       Particles/, Screens/
+  Settings/      Rocket/ (AssemblyTuning.asset, FeedbackLibrary.asset), BuildProfiles/
   Audio/Kenney/  CC0 clips used by the feedback library and the launch
-  Textures/      particle sprites
   UI/            fonts (with TMP font assets) and sprites for the menu and screens
-  Environment/   the greybox room, its materials, textures and prefabs (Docs/ENVIRONMENT.md)
+  ThirdParty/    XRI_Examples (the push button)
 ```
 
-Read-only folders: `Assets/XRI_Examples` and `Assets/Samples`. Copy from them, never edit them.
+Read-only folders: `Assets/ThirdParty/XRI_Examples` (copied from Unity's examples) and `Assets/Samples`. Copy from them, never edit them.
 
 ### 10.2 Scripts and responsibilities
 

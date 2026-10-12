@@ -2,11 +2,13 @@
 
 What the `interactions` branch adds to this project, how it hangs together, and what to keep stable in `room.unity` so it keeps working. `main` is untouched: everything arrives by pull request from `interactions`.
 
+For how each system is set up, where it is in the Editor and how to debug it, start at [`specs/README.md`](../specs/README.md).
+
 ## 1. Play it
 
-- **In the Editor:** open `Assets/VRRocket/Scenes/VRRocket_Main.unity` and press Play. The room loads by itself a moment later. Having `room.unity` open next to it is fine too: it is used as it is, not loaded twice.
+- **In the Editor:** open `Assets/Scenes/VRRocket_Main.unity` and press Play. The room loads by itself a moment later. Having `room.unity` open next to it is fine too: it is used as it is, not loaded twice.
 - **Builds:** File > Build Profiles.
-  - `Assets/VRRocket/Settings/BuildProfiles/VRRocket_Windows`: PC VR. Set SteamVR as the OpenXR runtime for a Vive or Index; a Quest works through Link or Virtual Desktop.
+  - `Assets/Settings/BuildProfiles/VRRocket_Windows`: PC VR. Set SteamVR as the OpenXR runtime for a Vive or Index; a Quest works through Link or Virtual Desktop.
   - `VRRocket_Quest`: Quest 3 standalone (Android).
 
   Both list `VRRocket_Main` and then `room.unity`. The global scene list in Build Settings is not changed.
@@ -60,7 +62,7 @@ When you move one of these on purpose:
 
 **Modules and coordinates** are in `Docs/ENVIRONMENT.md`. **The rocket's interface** for your own systems is in `Docs/INTEGRATION.md`.
 
-## 3. What changed outside `Assets/VRRocket`
+## 3. What changed in the shared settings
 
 Each change is its own commit on `interactions`.
 

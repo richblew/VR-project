@@ -292,3 +292,14 @@ The rocket, its interactions and the working versions of the team's systems now 
   - legibility of the big screen at 11.6 m;
   - button and desk heights;
   - frame rate through the flight.
+
+## 2026-10-12: Specs for the team, Claude Code setup, and a by-type folder layout (done)
+
+Work moves to sessions started in this repository, and the teammates need to follow and debug everything.
+
+- **`specs/`.** A main spec (`specs/README.md`) that connects every system, and twelve linked sub-specs: scenes and the room, the game engine, rocket kit and assembly, the launch simulator, screens, the start menu (written for Richard's restyle), console and bin, XR rig and controls, feedback, testing and debugging, builds, project layout. Each says where things are in the Editor and gives the saved values, checked against the code and the scenes.
+- **`.claude/CLAUDE.md`.** Instructions for Claude Code sessions in this repository.
+- **Folder layout.** `Assets/VRRocket` is gone: VR Rocket's files now sit by type next to the room team's (`Assets/Scenes/VRRocket_Main.unity` and `Dev_Interactions.unity` beside `room.unity`, `Assets/Scripts`, `Assets/Prefabs/{Rocket,Launch,Console,Stubs}`, and `Rocket/`, `Launch/`, `Screens/`, `Environment/` subfolders in `Assets/Models`, `Materials`, `Texture` and `Settings`). Everything was moved inside Unity, so every GUID and reference is kept; the paths written in code (the test scenes, the attach point JSON, the window wall builder) and the build profiles' scene lists were updated. Map in `specs/12-project-layout-and-tools.md` section 2.
+- **Found, not changed:** with the free build order, a rocket with the motor and cap fitted counts as complete even with fins, flaps or the nose missing, and missing fins or nose are not in the build report (`specs/03-rocket-assembly.md` section 6).
+- **Fixed:** a stale path in `AttachPointGenerator`'s summary comment.
+- **Verified:** edit mode 36/36 and play mode 26/26, twice in a row after the move, with no compile errors.

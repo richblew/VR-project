@@ -1,6 +1,6 @@
 # VR Rocket modules on the room
 
-Every object `Assets/VRRocket/Scenes/VRRocket_Main.unity` adds on top of `Assets/Scenes/room.unity`. All positions are world space in the room's frame: +Y up, the big TV is at −Z, the assembly desk at +Z, and the window is in the room's "Right wall" at +X. Each module is one root object. Delete a root and that piece is gone, and nothing in the rocket breaks. (The game flow needs the console add-on and the launch site; see `Docs/INTEGRATION.md` for replacing them.)
+Every object `Assets/Scenes/VRRocket_Main.unity` adds on top of `Assets/Scenes/room.unity`. All positions are world space in the room's frame: +Y up, the big TV is at −Z, the assembly desk at +Z, and the window is in the room's "Right wall" at +X. Each module is one root object. Delete a root and that piece is gone, and nothing in the rocket breaks. (The game flow needs the console add-on and the launch site; see `Docs/INTEGRATION.md` for replacing them.)
 
 The room's look is kept:
 
@@ -36,9 +36,9 @@ The room's look is kept:
 | Invisible colliders | console body, the shelf around the bin opening, the keyboard | hq has no colliders of its own; these keep the player, the teleport ray and parts out of it. |
 | Console mirror | on hq's centre monitor | Repeats the big screen: surface, title, clock and the full status text, at reading distance. Off during the menu. |
 
-**New assets** used by the modules, under `Assets/VRRocket/Environment`:
+**New assets** used by the modules:
 
 - `Meshes/RightWall_Window.asset`: the wall mesh. To change the opening, edit `WindowOpening` on `WindowWall`, open `room.unity` additively, run **VR Rocket > Rebuild Window Wall**, and save `VRRocket_Main`. It rebuilds the mesh, colliders, glass and frame and records the new expected bounds.
-- `Materials/Mat_ScreenBand.mat` (translucent band behind screen text).
-- `Materials/Mat_Whiteboard.mat`.
+- `Assets/Materials/Screens/Mat_ScreenBand.mat` (translucent band behind screen text).
+- `Assets/Materials/Environment/Mat_Whiteboard.mat`.
 - `VRRocketMain.lighting`: baked and realtime GI both off, so an accidental Generate Lighting only refreshes the environment.
