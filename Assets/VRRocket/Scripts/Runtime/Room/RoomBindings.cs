@@ -42,6 +42,8 @@ namespace VRRocket
             public Vector3 localPosition;
             public Quaternion localRotation = Quaternion.identity;
             public bool recorded;
+            [Tooltip("Keep the follower inactive in the scene and switch it on once placed, so components that cache their world pose in Start (push buttons) start where they will stay. It is switched on even if the room object is missing.")]
+            public bool activateAfterPlacing;
         }
 
         [Serializable]
@@ -81,10 +83,10 @@ namespace VRRocket
             m_Swaps.Add(new Swap { roomPath = roomPath, replacement = replacement, expectedBounds = expectedBounds });
         }
 
-        public void AddFollow(string roomPath, Transform follower, Vector3 localPosition, Quaternion localRotation)
+        public void AddFollow(string roomPath, Transform follower, Vector3 localPosition, Quaternion localRotation, bool activateAfterPlacing = false)
         {
             m_Follows.RemoveAll(f => f.follower == follower);
-            m_Follows.Add(new Follow { roomPath = roomPath, follower = follower, localPosition = localPosition, localRotation = localRotation, recorded = true });
+            m_Follows.Add(new Follow { roomPath = roomPath, follower = follower, localPosition = localPosition, localRotation = localRotation, recorded = true, activateAfterPlacing = activateAfterPlacing });
         }
 
         public void AddCheck(string roomPath, Bounds expectedBounds, string consequence)
@@ -161,11 +163,15 @@ namespace VRRocket
             }
             foreach (var f in m_Follows)
             {
-                if (f.follower == null || !f.recorded) continue;
-                var target = RoomSceneLoader.FindByPath(room, f.roomPath);
-                if (target == null) { Warn("RoomBindings: the room has no '" + f.roomPath + "'; " + f.follower.name + " keeps its saved pose."); continue; }
-                var t = target.transform;
-                f.follower.SetPositionAndRotation(t.TransformPoint(f.localPosition), t.rotation * f.localRotation);
+                if (f.follower == null) continue;
+                var target = f.recorded ? RoomSceneLoader.FindByPath(room, f.roomPath) : null;
+                if (target == null) Warn("RoomBindings: the room has no '" + f.roomPath + "'; " + f.follower.name + " keeps its saved pose.");
+                else
+                {
+                    var t = target.transform;
+                    f.follower.SetPositionAndRotation(t.TransformPoint(f.localPosition), t.rotation * f.localRotation);
+                }
+                if (f.activateAfterPlacing && !f.follower.gameObject.activeSelf) f.follower.gameObject.SetActive(true);
             }
             foreach (var c in m_Checks)
             {

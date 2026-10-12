@@ -8,7 +8,9 @@
         "Unity.XR.CoreUtils",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "VRRocket.ThirdParty.XRIExamples",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
