@@ -215,7 +215,8 @@ public class TransmissionController : MonoBehaviour
     private void SetAlert(bool on)
     {
         for (int i = 0; i < alertLights.Length; i++)
-            alertLights[i].color = on ? alertColor : alertOriginalColors[i];
+            if (alertLights[i] != null) // the room may be unloading: its lights can go before this does
+                alertLights[i].color = on ? alertColor : alertOriginalColors[i];
 
         foreach (GameObject g in extraAlertLights)
             if (g != null) g.SetActive(on);
