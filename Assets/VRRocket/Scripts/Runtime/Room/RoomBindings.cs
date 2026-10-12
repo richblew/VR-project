@@ -146,8 +146,10 @@ namespace VRRocket
                 var target = RoomSceneLoader.FindByPath(room, s.roomPath);
                 if (target == null)
                 {
-                    Warn("RoomBindings: the room has no '" + s.roomPath + "'; keeping our replacement only.");
-                    if (s.replacement != null) s.replacement.SetActive(true);
+                    // Renamed, moved in the hierarchy, or replaced by their own version: switching ours on could put two walls
+                    // in the same place, so leave the room as it is.
+                    Warn("RoomBindings: the room has no '" + s.roomPath + "'; leaving " + (s.replacement != null ? s.replacement.name : "the replacement") + " off.");
+                    if (s.replacement != null) s.replacement.SetActive(false);
                     continue;
                 }
                 if (!BoundsMatch(target, s.expectedBounds, out var actual))
@@ -197,15 +199,69 @@ namespace VRRocket
         }
 
 #if UNITY_EDITOR
-        /// <summary>
-        /// With the room scene open next to ours in the Editor, records each follower's pose relative to its room object and the
-        /// current bounds of every swapped and checked room object.
-        /// </summary>
-        [ContextMenu("Record follow offsets and expected bounds")]
-        public void RecordFromOpenRoom()
+        // Editor tools, run with the room scene open next to ours. Followers follow their room objects by themselves at runtime, so
+        // moving the TV or the console needs none of these; they put the Editor view in step and refresh the expected bounds.
+
+        Scene OpenRoom()
         {
             var room = SceneManager.GetSceneByPath(m_Loader != null ? m_Loader.roomScenePath : "Assets/Scenes/room.unity");
-            if (!room.isLoaded) { Debug.LogWarning("RoomBindings: open the room scene additively before recording.", this); return; }
+            if (!room.isLoaded) Debug.LogWarning("RoomBindings: open the room scene additively first.", this);
+            return room;
+        }
+
+        /// <summary>Places every follower where it will be at runtime, using the recorded offsets and the room as it is now.</summary>
+        [ContextMenu("Snap followers to the open room")]
+        public void SnapFollowersToOpenRoom()
+        {
+            var room = OpenRoom();
+            if (!room.isLoaded) return;
+            foreach (var f in m_Follows)
+            {
+                if (f.follower == null || !f.recorded) continue;
+                var target = RoomSceneLoader.FindByPath(room, f.roomPath);
+                if (target == null) { Debug.LogWarning("RoomBindings: the room has no '" + f.roomPath + "'.", this); continue; }
+                UnityEditor.Undo.RecordObject(f.follower, "Snap followers to the room");
+                var t = target.transform;
+                f.follower.SetPositionAndRotation(t.TransformPoint(f.localPosition), t.rotation * f.localRotation);
+            }
+        }
+
+        /// <summary>Takes the current bounds of the checked room objects (desk, floor) as the expected ones. Check that our things still fit first.</summary>
+        [ContextMenu("Record check bounds from the open room")]
+        public void RecordCheckBounds()
+        {
+            var room = OpenRoom();
+            if (!room.isLoaded) return;
+            UnityEditor.Undo.RecordObject(this, "Record check bounds");
+            foreach (var c in m_Checks)
+            {
+                var target = RoomSceneLoader.FindByPath(room, c.roomPath);
+                if (target != null && TryGetWorldBounds(target, out var b)) c.expectedBounds = b;
+            }
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+
+        /// <summary>Takes the current bounds of the swapped room objects as expected. Only after rebuilding the replacement for them (VR Rocket > Rebuild Window Wall does this).</summary>
+        public void RecordSwapBounds()
+        {
+            var room = OpenRoom();
+            if (!room.isLoaded) return;
+            UnityEditor.Undo.RecordObject(this, "Record swap bounds");
+            foreach (var s in m_Swaps)
+            {
+                var target = RoomSceneLoader.FindByPath(room, s.roomPath);
+                if (target != null && TryGetWorldBounds(target, out var b)) s.expectedBounds = b;
+            }
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+
+        /// <summary>Re-records each follower's offset from where it stands now. Only after deliberately moving our overlay relative to their object.</summary>
+        [ContextMenu("Re-record follow offsets from the current placement")]
+        public void RerecordFollowOffsets()
+        {
+            var room = OpenRoom();
+            if (!room.isLoaded) return;
+            UnityEditor.Undo.RecordObject(this, "Re-record follow offsets");
             foreach (var f in m_Follows)
             {
                 var target = RoomSceneLoader.FindByPath(room, f.roomPath);
@@ -214,16 +270,6 @@ namespace VRRocket
                 f.localPosition = t.InverseTransformPoint(f.follower.position);
                 f.localRotation = Quaternion.Inverse(t.rotation) * f.follower.rotation;
                 f.recorded = true;
-            }
-            foreach (var s in m_Swaps)
-            {
-                var target = RoomSceneLoader.FindByPath(room, s.roomPath);
-                if (target != null && TryGetWorldBounds(target, out var b)) s.expectedBounds = b;
-            }
-            foreach (var c in m_Checks)
-            {
-                var target = RoomSceneLoader.FindByPath(room, c.roomPath);
-                if (target != null && TryGetWorldBounds(target, out var b)) c.expectedBounds = b;
             }
             UnityEditor.EditorUtility.SetDirty(this);
         }

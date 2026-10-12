@@ -66,7 +66,13 @@ namespace VRRocket
             m_Transmission.StopAllCoroutines();
             Get<VideoPlayer>("standbyPlayer")?.Stop();
             Get<VideoPlayer>("videoPlayer")?.Stop();
-            Get<AudioSource>("announcementAudio")?.Stop();
+            var announcement = Get<AudioSource>("announcementAudio");
+            if (announcement != null)
+            {
+                announcement.Stop();
+                // switched off as well: a disabled source is silent whatever state the audio system reports
+                announcement.enabled = false;
+            }
             // its OnDisable restores the alert light colours and the room's light, ambient and reflection levels
             m_Transmission.enabled = false;
             var screen = Get<Renderer>("mainScreen");

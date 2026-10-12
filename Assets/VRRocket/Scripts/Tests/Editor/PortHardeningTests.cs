@@ -98,6 +98,8 @@ namespace VRRocket.Tests
             Assert.AreEqual("T+12.5 s     ALT 120 m", LaunchScreenController.FirstSentences("T+12.5 s     ALT 120 m", 1), "decimals are not sentence ends");
             Assert.AreEqual("All of it. Really.", LaunchScreenController.FirstSentences("All of it. Really.", 0));
             Assert.AreEqual("", LaunchScreenController.FirstSentences("", 1));
+            Assert.AreEqual("A | B", LaunchScreenController.FirstSentences("A | B | C", 2), "a second sentence after a bar");
+            Assert.AreEqual("Failed: cap   |   It is returned.", LaunchScreenController.FirstSentences("Failed: cap   |   It is returned. A new kit is out.", 2));
         }
     }
 }

@@ -46,14 +46,20 @@ namespace VRRocket.Tests
             for (var i = 0; i < 30 && !adapter.isApplied; i++) yield return null;
             Assert.IsTrue(adapter.isApplied);
             var origin = adapter.origin;
-            foreach (var h in origin.GetComponentsInChildren<SimpleHapticFeedback>(true))
+            var haptics = origin.GetComponentsInChildren<SimpleHapticFeedback>(true);
+            Assert.Greater(haptics.Length, 0, "the rig has generic haptics to silence");
+            foreach (var h in haptics)
                 Assert.IsFalse(h.playHoverEntered || h.playSelectEntered, h.name + ": generic buzz off");
-            foreach (var jump in origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.Jump.JumpProvider>(true))
+            var jumps = origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.Jump.JumpProvider>(true);
+            Assert.Greater(jumps.Length, 0, "the rig has a jump provider");
+            foreach (var jump in jumps)
                 Assert.IsFalse(jump.enabled, "Jump off");
             Assert.Less(origin.transform.position.y, 0.1f, "the rig stands on the floor (their spawn is in the air)");
             Assert.Greater(origin.transform.position.y, 0.0f);
             var rocketLayer = InteractionLayerMask.GetMask("RocketPart");
-            foreach (var nf in origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true))
+            var hands = origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true);
+            Assert.AreEqual(2, hands.Length, "two near-far hands");
+            foreach (var nf in hands)
                 Assert.AreNotEqual(0, nf.interactionLayers.value & rocketLayer, nf.name + " can grab rocket parts");
         }
 
@@ -69,7 +75,9 @@ namespace VRRocket.Tests
             var wall = RoomSceneLoader.FindByPath(room, "Environment/Floorplan/Right wall");
             Assert.IsNotNull(wall);
             Assert.IsFalse(wall.activeSelf, "their solid right wall is swapped out");
+            Assert.AreEqual(1, bindings.swaps.Count, "one swap: the window wall");
             foreach (var s in bindings.swaps) Assert.IsTrue(s.replacement.activeInHierarchy, s.replacement.name + " is in");
+            Assert.AreEqual(3, bindings.follows.Count, "the TV overlay, the corner clock and the console add-on follow the room");
             var tv = RoomSceneLoader.FindByPath(room, "Environment/TV/TV LED 30*");
             Assert.IsNotNull(tv, "their big TV, found by prefix");
             var title = GameObject.Find("ScreenTitle");
@@ -150,6 +158,25 @@ namespace VRRocket.Tests
             Assert.AreEqual(GamePhase.Menu, Object.FindAnyObjectByType<GameFlowController>().phase, "the console buttons do nothing in the menu");
         }
 
+        [UnityTest]
+        public IEnumerator A_Swap_Whose_Room_Object_Is_Missing_Leaves_The_Room_Alone()
+        {
+            var go = new GameObject("TestBindings");
+            go.SetActive(false);
+            var bindings = go.AddComponent<RoomBindings>();
+            bindings.Configure(RoomSceneLoader.instance);
+            var replacement = new GameObject("TestReplacement");
+            replacement.SetActive(false);
+            bindings.AddSwap("Environment/Floorplan/No such wall", replacement, new Bounds(Vector3.zero, Vector3.one));
+            go.SetActive(true);
+            yield return null;   // Start: the room is loaded already, so it applies at once
+            Assert.IsTrue(bindings.isApplied);
+            Assert.AreEqual(1, bindings.warningCount, "the missing wall is reported");
+            Assert.IsFalse(replacement.activeSelf, "a renamed or replaced wall does not get our wall switched on next to it");
+            Object.Destroy(go);
+            Object.Destroy(replacement);
+        }
+
         static XRPushButton Button(string name)
         {
             var go = GameObject.Find(name);
@@ -176,7 +203,20 @@ namespace VRRocket.Tests
             yield return null;
             Assert.IsNotNull(bridge.transmission, "the room's intro controller was found");
             Assert.IsTrue(bridge.transmission.enabled, "the intro runs while the menu is up");
+            Assert.AreEqual(3, displays.gameDisplays.Count, "screen overlay, corner clock and console mirror");
             foreach (var d in displays.gameDisplays) Assert.IsFalse(d.activeSelf, d.name + " off during the menu");
+            // the intro is still on its logo this early: start its announcement as if it were mid-sequence
+            var roomScene = RoomSceneLoader.instance.roomScene;
+            var announcementGo = RoomSceneLoader.FindByPath(roomScene, "Incoming_Transmission");
+            Assert.IsNotNull(announcementGo, "the intro's announcement source");
+            var announcementSource = announcementGo.GetComponent<AudioSource>();
+            if (announcementSource.clip == null) announcementSource.clip = AudioClip.Create("test", 44100, 1, 44100, false);
+            announcementSource.Play();
+            // let the audio system really start it: a Play and a Stop in the same frame is not what happens in a game
+            for (var i = 0; i < 5; i++) yield return null;
+            Assert.IsTrue(announcementSource.enabled);
+            var ambient = RenderSettings.ambientIntensity;
+            RenderSettings.ambientIntensity = ambient * 0.05f;   // as if the room were dimmed for the video
 
             flow.StartGame();
             yield return null;
@@ -188,8 +228,12 @@ namespace VRRocket.Tests
                 var player = RoomSceneLoader.FindByPath(room, name);
                 if (player != null) Assert.IsFalse(player.GetComponent<VideoPlayer>().isPlaying, name + " stopped");
             }
-            var announcement = RoomSceneLoader.FindByPath(room, "Incoming_Transmission");
-            if (announcement != null) Assert.IsFalse(announcement.GetComponent<AudioSource>().isPlaying, "announcement stopped");
+            var field = bridge.transmission.GetType().GetField("announcementAudio");
+            Assert.AreSame(announcementSource, field != null ? field.GetValue(bridge.transmission) : null, "the test drives the intro's own announcement source");
+            // A switched-off AudioSource is silent. isPlaying is not checked: in some full runs (with a second Unity Editor open at
+            // the time) it still reported the stopped source as playing, which made this test flaky.
+            Assert.IsFalse(announcementSource.enabled, "the announcement is stopped and its source switched off, so nothing of the intro plays on");
+            Assert.AreEqual(ambient, RenderSettings.ambientIntensity, 1e-4f, "the intro's OnDisable put the ambient light back");
             foreach (var d in displays.gameDisplays) Assert.IsTrue(d.activeSelf, d.name + " on for the game");
             var title = GameObject.Find("ScreenTitle");
             Assert.IsNotNull(title);

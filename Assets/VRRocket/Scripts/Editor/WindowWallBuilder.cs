@@ -31,7 +31,7 @@ namespace VRRocket.Editor
             if (wall == null) { EditorUtility.DisplayDialog("Rebuild Window Wall", "Open Assets/Scenes/room.unity additively next to VRRocket_Main, so the wall '" + opening.roomWallPath + "' can be read.", "OK"); return; }
             Rebuild(opening, wall);
             var bindings = Object.FindAnyObjectByType<RoomBindings>(FindObjectsInactive.Include);
-            if (bindings != null) bindings.RecordFromOpenRoom();
+            if (bindings != null) bindings.RecordSwapBounds();
             EditorSceneManager.MarkSceneDirty(opening.gameObject.scene);
             Debug.Log("Window wall rebuilt from " + opening.roomWallPath + ". Save VRRocket_Main (not room.unity).", opening);
         }
