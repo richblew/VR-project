@@ -93,11 +93,16 @@ namespace CablePuzzle
 
             if (zone == null) zone = FindFirstObjectByType<WalkableZone>();
             headT = head != null ? head : (Camera.main != null ? Camera.main.transform : null);
+            /*
             CreatePrompt();
 
             if (TryLoad())
                 Say("Room calibration loaded.\nTo recalibrate: press " + startKey + " on the keyboard\n(click the Game view first) or the left menu button.", 6f);
             else if (startIfUncalibrated)
+                BeginCalibration();
+            */
+
+            if (!TryLoad() && startIfUncalibrated)
                 BeginCalibration();
         }
 
