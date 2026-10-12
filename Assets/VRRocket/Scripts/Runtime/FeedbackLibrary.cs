@@ -36,6 +36,28 @@ namespace VRRocket
             public bool hasSecond => secondAmplitude > 0f && secondDuration > 0f;
         }
 
+        /// <summary>
+        /// Per-controller correction applied to every haptic. The table above is designed for Touch Plus voice coils; an eccentric
+        /// motor (HTC Vive wand) cannot spin up within 10-20 ms at low amplitude, so short soft pulses would never be felt there.
+        /// </summary>
+        [Serializable]
+        public struct DeviceTuning
+        {
+            [Tooltip("Matched, ignoring case, against the controller's Input System layout and product name, e.g. 'vive' or 'index'.")]
+            public string match;
+            [Range(0f, 1f), Tooltip("Pulses that are not silent get at least this amplitude.")] public float amplitudeFloor;
+            [Tooltip("Pulses get at least this many seconds.")] public float durationFloor;
+            [Tooltip("Pass the designed frequency through. Off sends the runtime default, for actuators that ignore or misread it.")] public bool useFrequency;
+
+            public DeviceTuning(string match, float amplitudeFloor, float durationFloor, bool useFrequency)
+            {
+                this.match = match;
+                this.amplitudeFloor = amplitudeFloor;
+                this.durationFloor = durationFloor;
+                this.useFrequency = useFrequency;
+            }
+        }
+
         [Header("Audio clips (placeholders until the audio owner delivers)")]
         public AudioClip guideEngage;        // soft tick
         public AudioClip seat;               // click: fin, flap, motor
@@ -88,10 +110,45 @@ namespace VRRocket
         [Tooltip("A push button coming back up.")]
         public Haptic hapticButtonRelease = new Haptic(0.25f, 0.02f, 180f);
 
+        [Header("Controllers other than Touch Plus (first match wins; no match plays the table as designed)")]
+        public DeviceTuning[] deviceTunings =
+        {
+            new DeviceTuning("vive", 0.35f, 0.04f, false),
+            new DeviceTuning("index", 0.25f, 0.02f, true),
+        };
+
         [Header("Texture spacing (before rocketScale)")]
         [Tooltip("Metres of guided travel between slide ticks.")] public float hapticSlideTickDistance = 0.004f;
         [Tooltip("Degrees of new cap progress between thread-texture ticks. Detent frames skip the texture tick.")] public float hapticTwistTextureAngle = 6f;
         [Tooltip("Minimum seconds between two hover ticks from the same part.")] public float hapticHoverCooldown = 0.25f;
+
+        /// <summary>The tuning for a controller described by <paramref name="device"/> (layout and product name), if any matches.</summary>
+        public bool TryGetTuning(string device, out DeviceTuning tuning)
+        {
+            tuning = default;
+            if (string.IsNullOrEmpty(device) || deviceTunings == null) return false;
+            foreach (var t in deviceTunings)
+            {
+                if (string.IsNullOrEmpty(t.match)) continue;
+                if (device.IndexOf(t.match, StringComparison.OrdinalIgnoreCase) >= 0) { tuning = t; return true; }
+            }
+            return false;
+        }
+
+        /// <summary><paramref name="haptic"/> as it should be sent to the controller described by <paramref name="device"/>.</summary>
+        public Haptic Tune(Haptic haptic, string device)
+        {
+            if (haptic.isSilent || !TryGetTuning(device, out var t)) return haptic;
+            haptic.amplitude = Mathf.Max(haptic.amplitude, t.amplitudeFloor);
+            haptic.duration = Mathf.Max(haptic.duration, t.durationFloor);
+            if (haptic.hasSecond)
+            {
+                haptic.secondAmplitude = Mathf.Max(haptic.secondAmplitude, t.amplitudeFloor);
+                haptic.secondDuration = Mathf.Max(haptic.secondDuration, t.durationFloor);
+            }
+            if (!t.useFrequency) haptic.frequency = 0f;
+            return haptic;
+        }
 
         public AudioClip SeatClipFor(PartType type)
         {

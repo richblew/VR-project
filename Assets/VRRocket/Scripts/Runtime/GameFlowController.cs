@@ -27,6 +27,9 @@ namespace VRRocket
         [SerializeField] float m_IgnitionAt = 3f;
         [SerializeField] float m_ResultSeconds = 9f;
         [SerializeField] float m_SubmitToPadSeconds = 2.5f;
+        [Header("Text")]
+        [SerializeField, TextArea, Tooltip("Hint shown when assembly starts. The big screen shows its first sentence, the console mirror all of it.")]
+        string m_AssemblyHint = "Build the rocket on the bench. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, motor nozzle down, then twist the cap until it clicks.";
 
         public UnityEvent<GamePhase> onPhaseChanged = new UnityEvent<GamePhase>();
         public event Action<GamePhase> PhaseChanged;
@@ -39,6 +42,7 @@ namespace VRRocket
         public float countdownSeconds { get => m_CountdownSeconds; set => m_CountdownSeconds = value; }
         public float resultSeconds { get => m_ResultSeconds; set => m_ResultSeconds = value; }
         public float submitToPadSeconds { get => m_SubmitToPadSeconds; set => m_SubmitToPadSeconds = value; }
+        public string assemblyHint { get => m_AssemblyHint; set => m_AssemblyHint = value; }
 
         AudioClip m_Beep, m_BeepHigh, m_Chime, m_Buzz;
         Coroutine m_Routine;
@@ -106,7 +110,7 @@ namespace VRRocket
         {
             if (phase != GamePhase.Menu) return;
             if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
-            EnterAssembly("Build the rocket on the bench. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, motor nozzle down, then twist the cap until it clicks.");
+            EnterAssembly(m_AssemblyHint);
         }
 
         // ---- assembly ----
@@ -151,9 +155,10 @@ namespace VRRocket
             m_PadReady = false;
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
-            if (m_Screen != null) m_Screen.ShowTitle("PROTOTYPE RECEIVED", "Scaling for launch...");
+            // the prototype appears on the pad at its own size and grows to full size while the screen says so
+            if (m_Launch != null) m_Launch.PlaceVehicleOnPad(m_SubmitToPadSeconds);
+            if (m_Screen != null) m_Screen.ShowReceived();
             yield return new WaitForSeconds(m_SubmitToPadSeconds);
-            if (m_Launch != null) m_Launch.PlaceVehicleOnPad();
             m_PadReady = true;
             if (m_Screen != null) m_Screen.ShowPreLaunch();
             if (m_Blueprint != null) m_Blueprint.ShowText("Rocket on the pad.\nLAUNCH or ABORT at the console.");

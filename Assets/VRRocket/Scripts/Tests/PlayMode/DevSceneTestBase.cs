@@ -42,6 +42,10 @@ namespace VRRocket.Tests
             LogAssert.ignoreFailingMessages = true;
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
+            // A scene that loads the teammates' room additively gets its rig from the room: wait for it.
+            var loader = Object.FindAnyObjectByType<RoomSceneLoader>();
+            for (var frame = 0; loader != null && !loader.isRoomLoaded && frame < 900; frame++) yield return null;
+            if (loader != null) Assert.IsTrue(loader.isRoomLoaded, "the room scene loaded");
             workstation = Object.FindAnyObjectByType<RocketWorkstation>();
             assembly = Object.FindAnyObjectByType<RocketAssembly>();
             manager = Object.FindAnyObjectByType<XRInteractionManager>();   // replaced below by the hand's own manager
