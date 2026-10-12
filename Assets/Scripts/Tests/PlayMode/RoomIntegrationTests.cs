@@ -55,6 +55,8 @@ namespace VRRocket.Tests
             foreach (var jump in jumps)
                 Assert.IsFalse(jump.enabled, "Jump off");
             Assert.Less(origin.transform.position.y, 0.1f, "the rig stands on the floor (their spawn is in the air)");
+            Assert.AreEqual(XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "floor tracking: the player is their real height, no 1.36 m device offset on top");
+            Assert.AreEqual(0f, origin.CameraYOffset, "no camera offset to add height in any mode");
             Assert.Greater(origin.transform.position.y, 0.0f);
             var rocketLayer = InteractionLayerMask.GetMask("RocketPart");
             var hands = origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true);

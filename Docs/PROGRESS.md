@@ -317,3 +317,9 @@ Work moves to sessions started in this repository, and the teammates need to fol
 As planned with Richard: the blueprint panel gives the step in text, and a new monitor beside it (`BuildStepMonitor`) shows the rocket as it should look after that step. Five pictures of `AssembledRocket_Static` at each stage are rendered by VR Rocket > Capture Build Step Images into `Assets/Texture/BuildSteps`; VR Rocket > Set Up Build Step Monitor builds and wires the monitor. `BlueprintDisplay` swaps the picture with the build state.
 
 **Verified:** edit mode 36/36, play mode 26/26 (`GameFlowTests` now checks the picture follows the build). **Not verified in the headset:** legibility of the pictures from the desk.
+
+## 2026-10-12: Player height fixed; build-step monitor tested (done)
+
+- **Height:** in the headset the player stood far too tall and had to bend to the desks. The room's rig asks for tracking origin "Not Specified", which on Quest can become Device mode, where the rig's 1.36 m camera offset is added on top of the real head height. `XRRigAdapter` now sets Floor tracking and a zero camera offset at runtime (`room.unity` untouched). `Rig_Is_Adapted` checks it.
+- **Build-step monitor:** new edit-mode `BlueprintDisplayTests` walk every build stage, including taking a part off, and check the text and the picture really on the screen.
+- **Verified:** edit mode 38/38 and play mode 26/26, twice in a row. **Headset check:** the player's height on Quest 3.
