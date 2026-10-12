@@ -6,13 +6,15 @@ using UnityEngine.InputSystem;
 namespace CablePuzzle
 {
     /// <summary>
-    /// Links the virtual room to the physical room with two floor marks.
+    /// Links the virtual room to the physical room.
     ///
-    /// Physical: tape mark O and tape mark X on the floor.
+    /// Physical: tape mark O and tape mark X on the floor, at two corners of the walkable area.
     /// Virtual:  Virtual_O and Virtual_X placed at the same two spots in the virtual room.
     ///
-    /// Calibrate: hold the controller on mark O and press the trigger, then on mark X and press the trigger.
-    /// The result moves the RoomAnchor (the parent of the XR Origin) so the two rooms line up, and is saved.
+    /// Steps: (1) hold the controller on mark O and press the trigger, (2) the same on mark X,
+    /// (3) stand in the middle of the walkable area and press the trigger.
+    /// Step 3 tells the script which side of the O-X line the room is on, so the virtual walkable area
+    /// can't end up mirrored onto the wrong side. The result moves the RoomAnchor and is saved.
     ///
     /// Start a calibration with the start key (default C, click the Game view first), the left controller's
     /// menu button, or automatically on the first run. Instructions appear in the headset and in the Console.
@@ -22,11 +24,12 @@ namespace CablePuzzle
         [Header("Rig")]
         public Transform roomAnchor;                 // parent of the XR Origin (this is what gets moved)
         public Transform xrOrigin;                   // the XR Origin object (must sit at local zero under the anchor)
-        public Transform head;                       // the XR camera (for the on-screen prompt); falls back to Camera.main
+        public Transform head;                       // the XR camera; falls back to Camera.main
 
         [Header("Reference points (virtual twins of the tape marks)")]
         public Transform virtualPointA;              // mark O
         public Transform virtualPointB;              // mark X
+        public WalkableZone zone;                    // optional, found automatically; its centre is used for step 3
 
         [Header("Input")]
         public Transform controllerTip;              // right controller
@@ -38,15 +41,30 @@ namespace CablePuzzle
         [Header("Cables to reset after calibrating")]
         public VerletCable[] cables;
 
-        const string PrefKey = "CablePuzzle.RoomCalibration.v1";
-        enum Step { Idle, WaitForA, WaitForB }
+        const string PrefKey = "CablePuzzle.RoomCalibration.v2";
+        const float MinMarkSpacing = 0.5f;
+        const float MinCentreDistance = 0.3f;        // how far from the O-X line you must stand for step 3
+
+        enum Step { Idle, WaitForA, WaitForB, WaitForCentre }
 
         Step step = Step.Idle;
-        Vector3 pointA;
+        Vector3 pointA, pointB;
+        Transform headT;
         InputAction fallbackConfirm;
         InputAction startAction;
         TextMeshPro prompt;
         float hidePromptAt;
+
+        // Step 3 (stand in the middle) is only needed when the virtual centre is off the O-X line. If the marks' line
+        // passes through the middle of the walkable area, the area looks the same from both sides, so it is skipped.
+        bool UseCentre
+        {
+            get
+            {
+                if (zone == null || zone.corners == null || zone.corners.Length < 3 || headT == null) return false;
+                return DistanceToLine(VirtualCentre(), virtualPointA.position, virtualPointB.position) >= MinCentreDistance;
+            }
+        }
 
         void OnEnable()
         {
@@ -58,7 +76,6 @@ namespace CablePuzzle
                 fallbackConfirm.Enable();
             }
 
-            // Optional controller shortcut to start a calibration: the left controller's menu button.
             startAction = new InputAction("CalibrateStart", InputActionType.Button);
             startAction.AddBinding("<XRController>{LeftHand}/{MenuButton}");
             startAction.Enable();
@@ -73,6 +90,9 @@ namespace CablePuzzle
         void Start()
         {
             if (!ValidateReferences()) { enabled = false; return; }
+
+            if (zone == null) zone = FindFirstObjectByType<WalkableZone>();
+            headT = head != null ? head : (Camera.main != null ? Camera.main.transform : null);
             CreatePrompt();
 
             if (TryLoad())
@@ -97,20 +117,44 @@ namespace CablePuzzle
 
             if (!ConfirmPressed()) return;
 
-            Vector3 p = CurrentTip();
+            int total = UseCentre ? 3 : 2;
+
             if (step == Step.WaitForA)
             {
-                pointA = p;
+                pointA = FloorPoint(controllerTip.TransformPoint(tipOffset));
                 step = Step.WaitForB;
-                Say("Mark O recorded.\n\nCALIBRATION 2 of 2\nHold the controller on floor mark X,\nthen press the trigger.");
+                Say($"Mark O recorded.\n\nCALIBRATION 2 of {total}\nHold the controller on floor mark X,\nthen press the trigger.");
             }
-            else
+            else if (step == Step.WaitForB)
             {
-                if (Apply(pointA, p))
+                pointB = FloorPoint(controllerTip.TransformPoint(tipOffset));
+                if ((pointB - pointA).magnitude < MinMarkSpacing)
                 {
-                    Save(pointA, p);
-                    Say("Calibration complete and saved.", 4f);
+                    Say("The two marks are less than 0.5 m apart.\nStart again with the left menu button or " + startKey + ".", 6f);
+                    step = Step.Idle;
+                    return;
                 }
+
+                if (UseCentre)
+                {
+                    step = Step.WaitForCentre;
+                    Say("Mark X recorded.\n\nCALIBRATION 3 of 3\nStand in the middle of the walkable area,\nthen press the trigger.");
+                }
+                else
+                {
+                    if (Apply(pointA, pointB, null)) { Save(pointA, pointB, null); Say("Calibration complete and saved.", 4f); }
+                    step = Step.Idle;
+                }
+            }
+            else // WaitForCentre
+            {
+                Vector3 centre = FloorPoint(headT.position);
+                if (DistanceToLine(centre, pointA, pointB) < MinCentreDistance)
+                {
+                    Say("You are too close to the line between the marks.\nStand in the middle of the walkable area\nand press the trigger again.");
+                    return;
+                }
+                if (Apply(pointA, pointB, centre)) { Save(pointA, pointB, centre); }
                 step = Step.Idle;
             }
         }
@@ -118,8 +162,9 @@ namespace CablePuzzle
         /// <summary>Start (or restart) a calibration.</summary>
         public void BeginCalibration()
         {
+            int total = UseCentre ? 3 : 2;
             step = Step.WaitForA;
-            Say("CALIBRATION 1 of 2\nHold the controller on floor mark O,\nthen press the trigger.");
+            Say($"CALIBRATION 1 of {total}\nHold the controller on floor mark O,\nthen press the trigger.");
         }
 
         bool ConfirmPressed()
@@ -128,26 +173,54 @@ namespace CablePuzzle
             return action != null && action.WasPressedThisFrame();
         }
 
-        // Position in tracking space (relative to the XR Origin), flattened to the floor.
-        Vector3 CurrentTip()
+        // World position -> tracking space (relative to the XR Origin), flattened to the floor.
+        Vector3 FloorPoint(Vector3 world)
         {
-            Vector3 world = controllerTip.TransformPoint(tipOffset);
             Vector3 local = xrOrigin.InverseTransformPoint(world);
             local.y = 0f;
             return local;
         }
 
-        bool Apply(Vector3 a, Vector3 b)
+        static float Cross(Vector3 d, Vector3 e) => d.z * e.x - d.x * e.z;   // y component of d x e
+
+        static float DistanceToLine(Vector3 p, Vector3 a, Vector3 b)
+        {
+            Vector3 d = b - a; d.y = 0f;
+            return d.sqrMagnitude < 1e-6f ? 0f : Mathf.Abs(Cross(d, p - a)) / d.magnitude;
+        }
+
+        Vector3 VirtualCentre()
+        {
+            Vector3 sum = Vector3.zero;
+            foreach (var c in zone.corners) sum += c.position;
+            Vector3 mean = sum / zone.corners.Length;
+            mean.y = 0f;
+            return mean;
+        }
+
+        bool Apply(Vector3 a, Vector3 b, Vector3? centre)
         {
             Vector3 vA = virtualPointA.position, vB = virtualPointB.position;
+            vA.y = vB.y = virtualPointA.position.y;
+            bool reversed = false;
+
+            // Which side of the O-X line is the room on? If the physical room and the virtual walkable area are on
+            // opposite sides, use the marks in reverse order, which puts the virtual area on the physical room's side.
+            if (centre.HasValue && UseCentre)
+            {
+                Vector3 vC = VirtualCentre();
+                Vector3 vFlat = new Vector3(vA.x, 0f, vA.z);
+                float physicalSide = Cross(b - a, centre.Value - a);
+                float virtualSide = Cross(new Vector3(vB.x - vA.x, 0f, vB.z - vA.z), vC - vFlat);
+                if (physicalSide * virtualSide < 0f)
+                {
+                    (vA, vB) = (vB, vA);
+                    reversed = true;
+                }
+            }
+
             Vector3 dl = b - a; dl.y = 0f;
             Vector3 dw = vB - vA; dw.y = 0f;
-
-            if (dl.magnitude < 0.5f)
-            {
-                Say("The two marks are less than 0.5 m apart.\nCalibration ignored. Start again.", 6f);
-                return false;
-            }
 
             float error = Mathf.Abs(dl.magnitude - dw.magnitude);
             if (error > 0.05f)
@@ -157,19 +230,24 @@ namespace CablePuzzle
             float yaw = Vector3.SignedAngle(dl, dw, Vector3.up);
             Quaternion rot = Quaternion.AngleAxis(yaw, Vector3.up);
             Vector3 pos = vA - rot * a;
-            pos.y = vA.y;                            // the virtual floor height comes from the reference point
+            pos.y = virtualPointA.position.y;        // the virtual floor height comes from the reference point
 
             roomAnchor.SetPositionAndRotation(pos, rot);
 
             if (cables != null)
                 foreach (var c in cables)
                     if (c != null) c.ResetRope();
+
+            string msg = "Calibration complete and saved.";
+            if (reversed) msg += "\n(The room is on the other side of the marks,\nso they were used in reverse order.)";
+            Say(msg, 6f);
             return true;
         }
 
-        static void Save(Vector3 a, Vector3 b)
+        static void Save(Vector3 a, Vector3 b, Vector3? c)
         {
             string s = string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", a.x, a.z, b.x, b.z);
+            if (c.HasValue) s += string.Format(CultureInfo.InvariantCulture, ",{0},{1}", c.Value.x, c.Value.z);
             PlayerPrefs.SetString(PrefKey, s);
             PlayerPrefs.Save();
         }
@@ -178,23 +256,23 @@ namespace CablePuzzle
         {
             if (!PlayerPrefs.HasKey(PrefKey)) return false;
             var parts = PlayerPrefs.GetString(PrefKey).Split(',');
-            if (parts.Length != 4) return false;
-            float[] v = new float[4];
-            for (int i = 0; i < 4; i++)
+            if (parts.Length != 4 && parts.Length != 6) return false;
+            float[] v = new float[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
                 if (!float.TryParse(parts[i], NumberStyles.Float, CultureInfo.InvariantCulture, out v[i])) return false;
             // Stored as tracking-space points, so moving the virtual reference points later still works.
-            return Apply(new Vector3(v[0], 0f, v[1]), new Vector3(v[2], 0f, v[3]));
+            Vector3? centre = parts.Length == 6 ? new Vector3(v[4], 0f, v[5]) : (Vector3?)null;
+            return Apply(new Vector3(v[0], 0f, v[1]), new Vector3(v[2], 0f, v[3]), centre);
         }
 
         // ---------- on-screen prompt ----------
 
         void CreatePrompt()
         {
-            Transform h = head != null ? head : (Camera.main != null ? Camera.main.transform : null);
-            if (h == null) return;
+            if (headT == null) return;
 
             var go = new GameObject("CalibrationPrompt");
-            go.transform.SetParent(h, false);
+            go.transform.SetParent(headT, false);
             go.transform.localPosition = new Vector3(0f, -0.05f, 0.9f);
 
             prompt = go.AddComponent<TextMeshPro>();

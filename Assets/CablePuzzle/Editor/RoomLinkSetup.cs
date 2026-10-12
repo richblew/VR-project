@@ -136,6 +136,8 @@ namespace CablePuzzle.EditorTools
             walkable.corners = corners;
             walkable.head = head;
             EditorUtility.SetDirty(walkable);
+            calibrator.zone = walkable;
+            EditorUtility.SetDirty(calibrator);
 
             Undo.CollapseUndoOperations(undoGroup);
             EditorSceneManager.MarkSceneDirty(scene);
