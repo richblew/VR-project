@@ -94,7 +94,7 @@ XRI needs one `XRInteractionManager`. The room scene has none, so `VRRocket_Main
 
 ## 8. Teleporting
 
-You can teleport onto `RoomFit/TeleportFloor`: seven thin boxes (`TeleportArea_0` to `_6`) that cover the room's floor but leave out the console and the desk, so you cannot teleport inside furniture.
+You can teleport onto `RoomFit/TeleportFloor`: six thin boxes (`TeleportArea_0` and `_2` to `_6`; `_1` was removed when the room was shortened) that cover the room's floor but leave out the console and the desk, so you cannot teleport inside furniture.
 
 | `TeleportationArea` setting | Value |
 |---|---|

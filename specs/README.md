@@ -104,7 +104,7 @@ Open `Assets/Scenes/VRRocket_Main.unity`. These are its root objects. Each is on
 | `LaunchSite` | The pad, the 36× vehicle, effects, sounds and the pad camera | `LaunchSequence` | [04](04-launch-simulator.md) |
 | `Outside` | Ground, launch pad disc and gantry tower | meshes and colliders | [04](04-launch-simulator.md) |
 | `WindowWall` | Our copy of the room's right wall, with a window cut in. **Saved switched off on purpose.** | `WindowOpening` | [01](01-scenes-and-room.md) |
-| `RoomFit/TeleportFloor` | Seven thin boxes you can teleport onto | `TeleportationArea` | [08](08-xr-rig-and-input.md) |
+| `RoomFit/TeleportFloor` | Six thin boxes you can teleport onto | `TeleportationArea` | [08](08-xr-rig-and-input.md) |
 | `Sun` | Directional light for the outside | `Light` | [01](01-scenes-and-room.md) |
 
 There is also a second scene, `Assets/Scenes/Dev_Interactions.unity`: a grey test room with only the rocket kit and its own rig, used by most of the automated tests. See [spec 10](10-testing-and-debugging.md).
@@ -114,7 +114,7 @@ There is also a second scene, `Assets/Scenes/Dev_Interactions.unity`: a grey tes
 Top view, drawn the way the player sees the room at the start: facing the big TV. In Unity terms the TV is at −Z, so the window (+X) is on the player's **left** and the help board (−X) on the **right**.
 
 ```
-                          FRONT WALL (z = -11.35)
+                          FRONT WALL (z = -8.15)
         +-----------------------------------------------------+
         |            [ BIG TV + LaunchScreen ]   [clock TV]    |
         |                     x = 0              x = -3.1      |

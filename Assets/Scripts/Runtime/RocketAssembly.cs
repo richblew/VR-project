@@ -327,6 +327,9 @@ namespace VRRocket
             m_LastReport = GetReport();
             m_Machine.SetSubmitted(true);
             m_Frozen = true;
+            // At most two rockets in the room: the one just submitted and, after a failed launch, that one for inspection.
+            // The previous failed rocket goes as soon as a new one is submitted.
+            DiscardInspectPrototype();
             var body = m_Tube.body;
             if (body != null)
             {
@@ -337,6 +340,16 @@ namespace VRRocket
             Submitted?.Invoke(m_LastReport);
             onSubmitted.Invoke(m_LastReport);
             return true;
+        }
+
+        /// <summary>Removes the rocket kept for inspection after a failed launch (with its attached parts), if there is one.</summary>
+        public void DiscardInspectPrototype()
+        {
+            if (m_InspectPrototype == null || m_InspectPrototype == m_Tube) return;
+            Destroy(m_InspectPrototype.gameObject);
+            m_InspectPrototype = null;
+            m_InspectAnchor = null;
+            m_InspectOutsideTimer = 0f;
         }
 
         /// <summary>Stub helper for the bin animation: hides or shows the submitted rocket.</summary>

@@ -256,7 +256,9 @@ Or, without code: add an entry to **On Phase Changed** on `GameFlowController` a
 
 **Give the player longer to read the result.** Set Result Seconds.
 
-**Add the wire puzzle before launch (SPEC 9).** Today LAUNCH is accepted as soon as the vehicle is on the pad. The cleanest way to add a puzzle without changing the engine:
+**The submission mini game (Yi-Xuan).** The gate is already written and commented out: search for `TODO(Yi-Xuan)` in `GameFlowController.cs` (the `m_MiniGameSolved` state and `MiniGameSolved()`, reset in `EnterMenu`) and `SubmissionBin.cs` (SUBMIT refused until solved). The rules: it can be solved at any time in a play, even before building; SUBMIT refuses the rocket until it is solved; it stays solved after a failed launch; a new play after a success needs it again. Uncomment those lines and call `MiniGameSolved()` from the mini game.
+
+**Add a puzzle before launch instead (SPEC 9).** Today LAUNCH is accepted as soon as the vehicle is on the pad. The cleanest way to add a puzzle without changing the engine:
 
 1. Build the puzzle as its own object with a component that knows when it is solved.
 2. On `ConsoleAddOn/ControlPanel/LaunchButton`, change the second **On Press** entry from `GameFlowController.Launch` to your puzzle component's method, which calls `GameFlowController.Launch()` only when the puzzle is solved (and buzzes otherwise).

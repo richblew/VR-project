@@ -103,6 +103,18 @@ namespace VRRocket.Tests
             Assert.IsTrue(Point("FinSlot_1").Accepts(Part(PartType.TailFin, 1)), "the new tube accepts parts");
             // only one inspection prototype at a time: the old inspect rocket's points are gated off
             foreach (var ap in tube.GetComponentsInChildren<AttachPoint>()) Assert.IsFalse(ap.gatingAllows, ap.pointName + " of the inspection prototype is dead");
+
+            // the next submission clears the old failed rocket: at most the rocket in hand and the last failed one exist
+            StandTubeUpright();
+            yield return new WaitForFixedUpdate();
+            var second = assembly.tube;
+            yield return BuildPrototype();
+            yield return CarryToZone(second, zone);
+            zone.OnSubmitPressed();
+            Assert.AreEqual(AssemblyState.Submitted, assembly.State, "the second rocket is submitted");
+            yield return null;
+            Assert.IsTrue(tube == null, "the previous failed rocket is removed when the next one is submitted");
+            Assert.IsNull(assembly.inspectPrototype);
         }
 
         [UnityTest]

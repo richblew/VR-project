@@ -217,7 +217,7 @@ A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits
 | Mode | When | What happens |
 |---|---|---|
 | `Editable` | ABORT | the same rocket goes back to its spot on the desk with all its parts, unfrozen and editable; the state leaves Submitted |
-| `InspectOnly` | failed launch | the rocket is placed at the bin's return spot on the console shelf as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
+| `InspectOnly` | failed launch (the previous inspection prototype is removed when the next rocket is submitted, so at most two rockets exist: the one being built and the last failed one) | the rocket is placed at the bin's return spot on the console shelf as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
 
 **A new kit** (`BeginNewBuild`, after every launch): the loose parts and the working rocket are destroyed (not the inspection prototype), and a fresh tube and nine parts are spawned from the prefabs in the `RocketWorkstation` component, in the places they started. Both hands get a soft pulse ("kit spawned").
 

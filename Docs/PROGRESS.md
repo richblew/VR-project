@@ -303,3 +303,11 @@ Work moves to sessions started in this repository, and the teammates need to fol
 - **Found, not changed:** with the free build order, a rocket with the motor and cap fitted counts as complete even with fins, flaps or the nose missing, and missing fins or nose are not in the build report (`specs/03-rocket-assembly.md` section 6).
 - **Fixed:** a stale path in `AttachPointGenerator`'s summary comment.
 - **Verified:** edit mode 36/36 and play mode 26/26, twice in a row after the move, with no compile errors.
+
+## 2026-10-12: Richard's room changes merged, two-rocket rule, mini game gate prepared (done)
+
+- **Merged `origin/main`:** framed posters, the light dim feature, the monitor fix, and a shorter room (front wall now at z -8.15). Our overlay and clock follow the moved TVs by themselves. The window wall was rebuilt for their shortened right wall, the floor check re-recorded, and the teleport floor trimmed to the new front wall (`TeleportArea_1` removed). `room.unity` was not edited.
+- **Two rockets at most:** submitting a rocket now removes the previous failed (inspection) rocket. Covered by `Build_Carry_Submit_FailedLaunch_NewBuild`.
+- **Submission mini game (Yi-Xuan):** state and `MiniGameSolved()` written but commented out, with `TODO(Yi-Xuan)` in `GameFlowController.cs` and `SubmissionBin.cs`.
+- **Action items** from the build-guidance discussion: `Docs/ACTION_ITEMS.md`.
+- **Verified:** edit mode 36/36, play mode 26/26.

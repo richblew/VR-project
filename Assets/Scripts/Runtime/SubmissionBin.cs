@@ -59,6 +59,9 @@ namespace VRRocket
         {
             var a = assembly;
             if (a == null) return;
+            // TODO(Yi-Xuan): uncomment when the submission mini game exists (see the mini game block in GameFlowController.cs).
+            // var flow = FindAnyObjectByType<GameFlowController>();
+            // if (flow != null && !flow.miniGameSolved) { onRefused.Invoke(); return; }
             if (!rocketInside || a.State != AssemblyState.PrototypeComplete)
             {
                 onRefused.Invoke();
