@@ -3,6 +3,8 @@ using NUnit.Framework;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using UnityEngine.XR.Content.Interaction;
 using UnityEngine.TestTools;
 using UnityEngine.Video;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -99,6 +101,69 @@ namespace VRRocket.Tests
                 return h.collider.GetComponentInParent<BaseTeleportationInteractable>() != null;
             }
             return false;
+        }
+
+        [UnityTest]
+        public IEnumerator Console_Buttons_And_Start_Are_Wired()
+        {
+            yield return null;
+            var flow = Object.FindAnyObjectByType<GameFlowController>();
+            var bin = Object.FindAnyObjectByType<SubmissionBin>();
+            Assert.IsNotNull(bin, "the console add-on is switched on once placed on their console");
+            AssertCalls(Button("SubmitButton").onPress, bin, "Submit");
+            AssertCalls(Button("LaunchButton").onPress, flow, "Launch");
+            AssertCalls(Button("AbortButton").onPress, flow, "Abort");
+            var menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
+            var start = menu.GetComponentInChildren<UnityEngine.UI.Button>(true);
+            Assert.IsNotNull(start, "START button");
+            AssertCalls(start.onClick, flow, "StartGame");
+            Assert.IsNotNull(menu.GetComponent<UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster>(), "the menu takes XR rays");
+        }
+
+        [UnityTest]
+        public IEnumerator Console_Buttons_Press_With_The_Hand()
+        {
+            foreach (var name in new[] { "SubmitButton", "LaunchButton", "AbortButton" })
+            {
+                var button = Button(name);
+                var presses = 0;
+                UnityAction count = () => presses++;
+                button.onPress.AddListener(count);
+                var up = button.transform.up;
+                var basePos = button.button != null ? button.button.position : button.transform.position;
+                controller.rotation = Quaternion.LookRotation(Vector3.forward, up);
+                controller.position = basePos + up * 0.3f;
+                yield return null;
+                yield return null;
+                for (var d = 0.3f; d > -0.03f; d -= 0.01f)
+                {
+                    controller.position = basePos + up * d;
+                    yield return null;
+                }
+                yield return null;
+                button.onPress.RemoveListener(count);
+                Assert.Greater(presses, 0, name + " is pressed by pushing the hand down onto it");
+                controller.position = basePos + up * 0.5f;
+                yield return null;
+                yield return null;
+            }
+            Assert.AreEqual(GamePhase.Menu, Object.FindAnyObjectByType<GameFlowController>().phase, "the console buttons do nothing in the menu");
+        }
+
+        static XRPushButton Button(string name)
+        {
+            var go = GameObject.Find(name);
+            Assert.IsNotNull(go, name);
+            var b = go.GetComponent<XRPushButton>();
+            Assert.IsNotNull(b, name + " is a push button");
+            return b;
+        }
+
+        static void AssertCalls(UnityEventBase e, Object target, string method)
+        {
+            for (var i = 0; i < e.GetPersistentEventCount(); i++)
+                if (e.GetPersistentTarget(i) == target && e.GetPersistentMethodName(i) == method) return;
+            Assert.Fail("not wired to " + target + "." + method);
         }
 
         [UnityTest]
