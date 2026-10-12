@@ -127,6 +127,7 @@ namespace CablePuzzle.EditorTools
             calibrator.virtualPointA = vo;
             calibrator.virtualPointB = vx;
             calibrator.controllerTip = rightHand;
+            calibrator.head = head;
             calibrator.confirm = FindActivateReference();
             calibrator.cables = Object.FindObjectsByType<VerletCable>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             EditorUtility.SetDirty(calibrator);
