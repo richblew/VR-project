@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace VRRocket.Tests
 {
     /// <summary>
-    /// The menu, game flow and launch sequence wired into Env_ControlRoom: parts locked until START, build, carry to the bin,
+    /// The menu, game flow and launch sequence wired into VRRocket_Main on the teammates' room: parts locked until START, build, carry to the bin,
     /// submit at the console, countdown, launch outside, result, and the returns of SPEC 8.4 (inspect-only after a failure,
     /// editable after an abort, new kit after a success). Timings are shortened; the flight itself runs at full length.
     /// </summary>
@@ -14,7 +14,7 @@ namespace VRRocket.Tests
     {
         const float k_Orbit = 0.06f;
 
-        protected override string scenePath => "Assets/VRRocket/Scenes/Env_ControlRoom.unity";
+        protected override string scenePath => "Assets/VRRocket/Scenes/VRRocket_Main.unity";
 
         GameFlowController flow;
         SubmissionBin bin;
@@ -28,10 +28,10 @@ namespace VRRocket.Tests
             bin = Object.FindAnyObjectByType<SubmissionBin>();
             launch = Object.FindAnyObjectByType<LaunchSequence>();
             menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
-            Assert.IsNotNull(flow, "GameFlowController in Env_ControlRoom");
-            Assert.IsNotNull(bin, "SubmissionBin in Env_ControlRoom");
-            Assert.IsNotNull(launch, "LaunchSequence in Env_ControlRoom");
-            Assert.IsNotNull(menu, "MenuPanel in Env_ControlRoom");
+            Assert.IsNotNull(flow, "GameFlowController in VRRocket_Main");
+            Assert.IsNotNull(bin, "SubmissionBin in VRRocket_Main");
+            Assert.IsNotNull(launch, "LaunchSequence in VRRocket_Main");
+            Assert.IsNotNull(menu, "MenuPanel in VRRocket_Main");
             vehicle = launch.transform.Find("LaunchVehicle").gameObject;
             flow.countdownSeconds = 1f;
             flow.resultSeconds = 1f;
@@ -138,11 +138,15 @@ namespace VRRocket.Tests
             Assert.IsTrue(bin.rocketInside);
             bin.Submit();
             Assert.AreEqual(GamePhase.PreLaunch, flow.phase);
+            Assert.IsTrue(vehicle.activeInHierarchy && launch.isGrowing, "the prototype appears on the pad and grows to full size");
+            Assert.Less(vehicle.transform.localScale.x, 0.5f, "it starts at prototype size");
             flow.Launch();
             Assert.AreEqual(GamePhase.PreLaunch, flow.phase, "launch is refused until the vehicle is on the pad");
             yield return new WaitForSeconds(1.8f);   // sink animation and the pad transfer
             Assert.IsFalse(tube.gameObject.activeInHierarchy, "the bin took the prototype away");
             Assert.IsTrue(vehicle.activeInHierarchy, "the full-size vehicle stands on the pad");
+            Assert.IsFalse(launch.isGrowing);
+            Assert.AreEqual(1f, vehicle.transform.localScale.x, 1e-4f, "full size before the countdown");
             flow.Launch();
             Assert.AreEqual(GamePhase.Countdown, flow.phase, "launch starts the countdown from pre-launch");
             yield return WaitForPhase(GamePhase.Launch, 3f);
