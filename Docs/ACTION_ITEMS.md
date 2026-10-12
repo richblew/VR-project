@@ -1,0 +1,23 @@
+# Action items (12 October 2026)
+
+From Praise's message to Richard and the follow-up chat. Owner in brackets; tick when done.
+
+## Build guidance at the assembly desk
+
+- [ ] **(Richard)** Review the blueprint screen above the workbench (`BlueprintPanel`, text per build stage) in the headset and say what to keep. Playtest feedback: the step text tells a first-time player what is expected of them.
+- [ ] **(Richard)** Add a monitor to the work desk for build slides: a proper screen, copied from one of the smaller screens, replacing the current canvas-style panel.
+- [ ] **(Richard, Praise)** Decide the layout: two screens side by side (left: step text such as "Step 1: attach the flaps", right: an image of the rocket at that step), or one screen with a slideshow.
+- [ ] **(Praise)** Capture images of the rocket model at each build stage, in a separate empty scene (not headset screenshots), and send them to Richard. Stages: bare tube, fins on, flaps on, nose on, motor in, cap on and locked.
+- [ ] **(Richard)** Turn those images into an AI-made wall poster in the style of a Lego building guide, and hang it on the wall.
+- [ ] **(Praise)** Wire the step images into the screens so the image follows the current build state (the steps are in `BlueprintDisplay.ShowState`).
+- [ ] **(Team, to try)** A pre-built reference rocket, for example a hologram the player can pick up and turn, next to the steps screen. Test it against the images, or combine both.
+- Keep in mind: parts attach in any order (only the motor must be in before the cap can be twisted on). The steps are a guide, not a rule.
+
+## Gameplay
+
+- [x] **(Praise)** Only two rockets at a time: the one being built and the last failed one. Submitting a new rocket now removes the previous failed rocket (`RocketAssembly.DiscardInspectPrototype`).
+- [ ] **(Yi-Xuan)** Submission mini game. The gate is prepared and commented out: search `TODO(Yi-Xuan)` in `Assets/Scripts/Runtime/GameFlowController.cs` and `SubmissionBin.cs`. Rules: solvable at any time in a play (even before building); SUBMIT refuses the rocket until it is solved; it stays solved after a failed launch and a new kit; a new play after a success needs it again. Uncomment the marked lines and call `GameFlowController.MiniGameSolved()` when it is solved.
+
+## Meeting
+
+- [ ] Environment review together tomorrow at 10:00.

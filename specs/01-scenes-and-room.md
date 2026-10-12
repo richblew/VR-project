@@ -80,7 +80,7 @@ Every problem becomes a yellow Console warning starting with `RoomBindings:` and
 
 | Room path | Our replacement | Expected bounds of their object |
 |---|---|---|
-| `Environment/Floorplan/Right wall` | `WindowWall` | x 3.9 to 4.1, y 0 to 4, z −12 to 4 (centre (4, 2, −4), extents (0.1, 2, 8)) |
+| `Environment/Floorplan/Right wall` | `WindowWall` | x 3.9 to 4.1, y 0 to 4, z −11.91 to 3.91 (since the room was shortened on 12 October 2026) |
 
 **Follows**
 
@@ -201,7 +201,7 @@ If the room team ever cuts a real window into their wall, delete `WindowWall` an
 
 ## 8. Other objects on the room
 
-- `RoomFit/TeleportFloor`: seven thin boxes with `TeleportationArea`, covering the room's floor but not the console or desk. See [spec 08](08-xr-rig-and-input.md).
+- `RoomFit/TeleportFloor`: six thin boxes with `TeleportationArea`, covering the room's floor but not the console or desk. See [spec 08](08-xr-rig-and-input.md).
 - `Outside`: ground (300 × 300 m), the launch pad disc and the gantry tower. See [spec 04](04-launch-simulator.md).
 - Exact positions of every module are listed in `Docs/ENVIRONMENT.md`.
 

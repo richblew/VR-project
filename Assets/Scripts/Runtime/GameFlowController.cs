@@ -44,6 +44,27 @@ namespace VRRocket
         public float submitToPadSeconds { get => m_SubmitToPadSeconds; set => m_SubmitToPadSeconds = value; }
         public string assemblyHint { get => m_AssemblyHint; set => m_AssemblyHint = value; }
 
+        // TODO(Yi-Xuan): submission mini game. Uncomment this block and the two marked lines (EnterMenu here, Submit in
+        // SubmissionBin.cs) when the mini game exists, and call MiniGameSolved() from it when the player solves it.
+        // Rules agreed with Praise:
+        // - it can be solved at any time in a play, even before the rocket is built;
+        // - without it solved, SUBMIT refuses the rocket (so there is no launch);
+        // - once solved it stays solved for the rest of the play: after a failed launch and a new kit, no need to solve it again;
+        // - a new play (back to the menu after a successful flight) needs it solved again.
+        //
+        // bool m_MiniGameSolved;
+        //
+        // /// <summary>True once the submission mini game is solved in this play. The bin's SUBMIT is refused until then.</summary>
+        // public bool miniGameSolved => m_MiniGameSolved;
+        //
+        // /// <summary>Called by the mini game when the player solves it.</summary>
+        // public void MiniGameSolved()
+        // {
+        //     if (m_MiniGameSolved) return;
+        //     m_MiniGameSolved = true;
+        //     if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
+        // }
+
         AudioClip m_Beep, m_BeepHigh, m_Chime, m_Buzz;
         Coroutine m_Routine;
         bool m_PadReady;   // the vehicle is on the pad; Launch is refused before that
@@ -98,6 +119,7 @@ namespace VRRocket
             if (m_Routine != null) { StopCoroutine(m_Routine); m_Routine = null; }
             SetPhase(GamePhase.Menu);
             m_PadReady = false;
+            // m_MiniGameSolved = false;   // TODO(Yi-Xuan): a new play solves the mini game again (see the mini game block above)
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Launch != null) m_Launch.ResetPad();
             if (m_Screen != null) m_Screen.ShowTitle(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Flight " + attempts + " reached orbit insertion. Press START to build another." : "Build it. Submit it. Launch it.");
