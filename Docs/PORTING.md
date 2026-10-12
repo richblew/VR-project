@@ -82,9 +82,9 @@ Each change is its own commit on `interactions`.
 
 **Quest (Android):**
 
-- With Android active, the OpenXR project validator asked for two things:
-  - the Quest latency mode, now applied (its own commit);
-  - removing SSAO from the mobile renderer because it is expensive on the headset, left for you to decide.
+- With Android active, the OpenXR project validator asked for the Quest latency mode. It is applied, in its own commit.
+- The validator also warns about SSAO (screen-space ambient occlusion). That check looks at every renderer in the project, and the only one with SSAO is `PC_Renderer`. That renderer has carried it since the project was created from Unity's URP template; it was not set up for the Vive. The Quest build uses `Mobile_Renderer`, which has no SSAO, so nothing needs doing for Quest.
+- On PC VR, SSAO costs GPU time for both eyes at full resolution. Turn it off, or set it to downsample, if frame timing in the Vive is over budget.
 - `VRRocket_Quest` builds an APK (61 MB, IL2CPP, ARM64) with no errors.
 - The app id is still the template's `com.UnityTechnologies.com.unity.template.urpblank`; set your own before installing it next to other builds.
 
