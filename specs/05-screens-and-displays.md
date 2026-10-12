@@ -141,6 +141,22 @@ On the back wall above the assembly desk, at (0.85, 1.75, 3.885), 0.9 × 0.6 m. 
 
 The steps are worked out from the attached counts, in this order, whatever order the player builds in. The game engine calls `ShowState` on every build change, `ShowIdle` in the menu and `ShowText` for free text.
 
+### The build-step monitor (`BuildStepMonitor`)
+
+Beside the blueprint panel, 1.1 m to its left as you face the desk, hangs a second screen of the same size: `BuildStepMonitor` (`MonitorFrame`, `MonitorScreen` with `Assets/Materials/Screens/Mat_BuildStep.mat`). It shows a picture of the rocket as it should look **after** the current step, so the step text and its picture sit side by side (planned with Richard, 12 October 2026).
+
+| Step on the blueprint | Picture (`Assets/Texture/BuildSteps/`) |
+|---|---|
+| STEP 1 tail fins | `BuildStep_1_Fins.png`: tube with the three fins |
+| STEP 2 wing flaps | `BuildStep_2_Flaps.png`: plus the flaps at the midpoint |
+| STEP 3 nose cone | `BuildStep_3_Nose.png` |
+| STEP 4 motor | `BuildStep_4_Motor.png` |
+| STEP 5 motor cap, COMPLETE, menu, rocket on the pad | `BuildStep_5_Cap.png`: the finished rocket |
+
+`BlueprintDisplay` swaps the picture with a material property block on the screen's `_BaseMap`; its **Image Screen** and **Step Images** fields hold the screen and the five pictures. `GameFlowTests` checks the picture follows the build.
+
+**To remake the pictures** (for example after the rocket's look changes): run **VR Rocket > Capture Build Step Images**. It renders `Prefabs/Rocket/AssembledRocket_Static.prefab` lying on its side, nose to the right, against the menu's dark background, adding the parts step by step, at 768 x 512. **To rebuild the monitor** in `VRRocket_Main`: **VR Rocket > Set Up Build Step Monitor**, then save the scene (it copies the blueprint panel's frame and screen, and wires `BlueprintDisplay`). To use other pictures (a slideshow, Richard's art), drop them into Step Images in the same order.
+
 ## 6. The help board (`HelpWall`)
 
 A white board (`Mat_Whiteboard`) on the wall to the left as you face the desk, at (−3.88, 1.65, 0.80). `HelpText` is a fixed TextMeshPro text (LiberationSans, auto-size):

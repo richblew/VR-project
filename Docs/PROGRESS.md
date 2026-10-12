@@ -311,3 +311,9 @@ Work moves to sessions started in this repository, and the teammates need to fol
 - **Submission mini game (Yi-Xuan):** state and `MiniGameSolved()` written but commented out, with `TODO(Yi-Xuan)` in `GameFlowController.cs` and `SubmissionBin.cs`.
 - **Action items** from the build-guidance discussion: `Docs/ACTION_ITEMS.md`.
 - **Verified:** edit mode 36/36, play mode 26/26.
+
+## 2026-10-12: Build-step monitor beside the blueprint panel (done)
+
+As planned with Richard: the blueprint panel gives the step in text, and a new monitor beside it (`BuildStepMonitor`) shows the rocket as it should look after that step. Five pictures of `AssembledRocket_Static` at each stage are rendered by VR Rocket > Capture Build Step Images into `Assets/Texture/BuildSteps`; VR Rocket > Set Up Build Step Monitor builds and wires the monitor. `BlueprintDisplay` swaps the picture with the build state.
+
+**Verified:** edit mode 36/36, play mode 26/26 (`GameFlowTests` now checks the picture follows the build). **Not verified in the headset:** legibility of the pictures from the desk.
