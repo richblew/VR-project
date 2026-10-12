@@ -323,3 +323,12 @@ As planned with Richard: the blueprint panel gives the step in text, and a new m
 - **Height:** in the headset the player stood far too tall and had to bend to the desks. The room's rig asks for tracking origin "Not Specified", which on Quest can become Device mode, where the rig's 1.36 m camera offset is added on top of the real head height. `XRRigAdapter` now sets Floor tracking and a zero camera offset at runtime (`room.unity` untouched). `Rig_Is_Adapted` checks it.
 - **Build-step monitor:** new edit-mode `BlueprintDisplayTests` walk every build stage, including taking a part off, and check the text and the picture really on the screen.
 - **Verified:** edit mode 38/38 and play mode 26/26, twice in a row. **Headset check:** the player's height on Quest 3.
+
+## 2026-10-12: Headset feedback: posters, player height, locomotion (done)
+
+From Praise's first headset session on the merged room:
+- **Posters:** Richard's three portraits on the back wall sat behind the blueprint panel and the picture monitor. Both are now small monitors standing on the back of the desk, between the portraits' name plaques (VR Rocket > Place Build Screens On Desk).
+- **Locomotion was off:** the room's `Player` was saved with its `Locomotion` object inactive. `XRRigAdapter` switches it back on (move, turn, teleport, gravity).
+- **Player too high:** the room set the rig's character controller to 3 m around a 0.76 m centre, so the capsule reached 0.74 m under the feet. `XRRigAdapter` resets such a capsule to 1.36 m on the feet, snaps the rig to the floor again once tracking has started, keeps floor tracking, and logs the rig's height and tracking mode to the device log 3 s after start.
+- `room.unity` was not edited; Richard may want to undo the locomotion and capsule changes in his scene too.
+- **Verified:** edit mode 38/38, play mode 26/26 (`Rig_Is_Adapted` checks locomotion on, the capsule, and the rig still on the floor after 90 frames of gravity). **Headset:** height and locomotion to confirm.

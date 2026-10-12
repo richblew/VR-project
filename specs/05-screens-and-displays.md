@@ -124,7 +124,7 @@ It has no script of its own: `ClockText` is the Clock field of `LaunchScreenCont
 
 ## 5. The blueprint panel (`BlueprintPanel`)
 
-On the back wall above the assembly desk, at (0.85, 1.75, 3.885), 0.9 × 0.6 m. Children: `BlueprintFrame`, `BlueprintScreen` (`Mat_Black`) and `BlueprintText` (Share Tech Mono, auto-size).
+A monitor on the back of the assembly desk, at (0.66, 1.36, 3.70) (see the build-step monitor below for the layout). Children: `BlueprintFrame`, `BlueprintScreen` (`Mat_Black`) and `BlueprintText` (Share Tech Mono, auto-size).
 
 `BlueprintDisplay` (on `GameFlow`) writes the text:
 
@@ -143,7 +143,7 @@ The steps are worked out from the attached counts, in this order, whatever order
 
 ### The build-step monitor (`BuildStepMonitor`)
 
-Beside the blueprint panel, 1.1 m to its left as you face the desk, hangs a second screen of the same size: `BuildStepMonitor` (`MonitorFrame`, `MonitorScreen` with `Assets/Materials/Screens/Mat_BuildStep.mat`). It shows a picture of the rocket as it should look **after** the current step, so the step text and its picture sit side by side (planned with Richard, 12 October 2026).
+The blueprint panel and a second screen stand on the back of the assembly desk as two small monitors (0.54 x 0.36 m screens, leaned back 12°, on dark stands), between the name plaques of Richard's three portraits on the wall behind, so they never cover them: the picture monitor right behind the kit (x -0.525), the text monitor to its right (x 0.66). **VR Rocket > Place Build Screens On Desk** puts them there again. The second screen is `BuildStepMonitor` (`MonitorFrame`, `MonitorScreen` with `Assets/Materials/Screens/Mat_BuildStep.mat`). It shows a picture of the rocket as it should look **after** the current step, so the step text and its picture sit side by side (planned with Richard, 12 October 2026).
 
 | Step on the blueprint | Picture (`Assets/Texture/BuildSteps/`) |
 |---|---|

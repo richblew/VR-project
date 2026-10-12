@@ -35,6 +35,9 @@ On `RoomLink`. When the room has loaded, it finds the first `XROrigin` and appli
 | Floor Mask | Everything | layers the floor ray can hit | |
 | Enable Teleport | on | switches on every `TeleportationProvider` in the rig | |
 | Force Floor Tracking | on | sets the rig's tracking origin to Floor and its camera Y offset to 0 | the room's rig asks for "Not Specified", which on Quest can become Device mode, where the rig adds its 1.36 m camera offset on top of the real head height: the player stood far too tall and had to bend to reach the desks (fixed 12 October 2026) |
+| Enable Locomotion | on | switches the rig's `Locomotion` object back on if the room saved it off | the room's `Player` was saved with locomotion off (move, turn, teleport and gravity all stopped) |
+| Fix Character Controller | on | resets a body capsule taller than 2.2 m, or one reaching below the feet, to 1.36 m standing on the feet | the room set the capsule to 3 m around a 0.76 m centre, so it reached 0.74 m under the floor and could lift the player |
+| Log Rig State | on | 3 s after start, logs the rig's height, tracking mode, eye height and capsule (`adb logcat -s Unity` on Quest) | to diagnose height problems from a headset session |
 | Disable Jump | on | switches off every `JumpProvider` | Jump is on the primary button (A on Quest). Vive wands do not have it, and it is easy to press by accident while building. |
 
 Calling `Apply()` again is safe. `isApplied` tells you it ran. The test `Rig_Is_Adapted` checks every row of this table.
