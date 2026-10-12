@@ -102,6 +102,7 @@ The room's scripts (for example `TransmissionController`) have no asmdef, so the
 | Menu bar | **VR Rocket > Generate Attach Points On Selected BodyTube** | (re)creates the 12 attach points from `attach_points.json` under the selected body tube | [03](03-rocket-assembly.md) |
 | Menu bar | **VR Rocket > Capture Build Step Images** | renders the five build-step pictures into `Assets/Texture/BuildSteps` | [05](05-screens-and-displays.md) |
 | Menu bar | **VR Rocket > Set Up Build Step Monitor** | adds the picture monitor beside the blueprint panel and wires it | [05](05-screens-and-displays.md) |
+| Menu bar | **VR Rocket > Place Build Screens On Desk** | stands the blueprint panel and the picture monitor on the desk between the portraits' plaques | [05](05-screens-and-displays.md) |
 | Menu bar | **VR Rocket > Rebuild Window Wall** | rebuilds `WindowWall` from `WindowOpening` and the room's wall (open `room.unity` additively first) | [01](01-scenes-and-room.md) |
 | `RoomBindings` ⋮ menu | **Snap followers to the open room** | places our add-ons on the room's objects in the Editor | [01](01-scenes-and-room.md) |
 | `RoomBindings` ⋮ menu | **Record check bounds from the open room** | accepts the desk's and floor's current place | [01](01-scenes-and-room.md) |

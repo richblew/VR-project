@@ -21,3 +21,10 @@ From Praise's message to Richard and the follow-up chat. Owner in brackets; tick
 ## Meeting
 
 - [ ] Environment review together tomorrow at 10:00.
+
+## From the headset test (12 October 2026, evening)
+
+- [x] Posters behind the build screens: screens moved onto the desk between the plaques.
+- [x] Locomotion off: switched back on at runtime.
+- [x] Player too high: rig capsule and floor fixed at runtime; confirm in the headset.
+- [ ] **(Richard)** In `room.unity`, the `Player` rig has `Locomotion` saved off and its CharacterController height at 3 m: both are corrected by `XRRigAdapter` at runtime, but worth undoing in the scene too.

@@ -161,8 +161,45 @@ namespace VRRocket.Editor
             so.ApplyModifiedProperties();
 
             AssetDatabase.SaveAssets();
-            EditorSceneManager.MarkSceneDirty(monitor.scene);
-            Debug.Log("Set Up Build Step Monitor: BuildStepMonitor added at " + monitor.transform.position + " and wired to BlueprintDisplay. Save the scene.");
+            PlaceOnDesk();
+            Debug.Log("Set Up Build Step Monitor: BuildStepMonitor added and wired to BlueprintDisplay. Save the scene.");
+        }
+
+        // Desk monitors (12 October 2026): the back wall above the desk holds Richard's three portraits (x -1.62 to 1.75,
+        // y 1.50 to 2.80) with name plaques below them (y 1.37 to 1.45), so the two screens stand on the back of the desk
+        // instead, in the gaps between the plaques, low enough to stay under the portraits.
+        const float k_DeskTopY = 1.125f;    // Environment/AssmblyArea/DeskTop
+        const float k_MonitorZ = 3.70f;     // near the desk's back edge (z 3.91)
+        const float k_MonitorScale = 0.6f;  // of the 0.98 x 0.68 m panel: a 0.54 x 0.36 m screen
+        const float k_Tilt = 12f;           // leaned back, facing up toward the eyes
+        const float k_PictureX = -0.525f;   // right behind the kit, between the BA and NA plaques
+        const float k_TextX = 0.66f;        // between the NA and MC plaques
+
+        [MenuItem("VR Rocket/Place Build Screens On Desk")]
+        public static void PlaceOnDesk()
+        {
+            var panel = GameObject.Find("BlueprintPanel");
+            var monitor = GameObject.Find("BuildStepMonitor");
+            if (panel == null || monitor == null) { Debug.LogError("Place Build Screens On Desk: open VRRocket_Main with BlueprintPanel and BuildStepMonitor."); return; }
+            var stand = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Environment/Mat_DarkMetal.mat");
+            foreach (var (go, x) in new[] { (monitor, k_PictureX), (panel, k_TextX) })
+            {
+                Undo.RecordObject(go.transform, "Place build screens");
+                var halfHeight = 0.68f * k_MonitorScale * 0.5f;
+                var centreY = k_DeskTopY + 0.03f + halfHeight * Mathf.Cos(k_Tilt * Mathf.Deg2Rad);
+                go.transform.SetPositionAndRotation(new Vector3(x, centreY, k_MonitorZ), Quaternion.Euler(k_Tilt, 0f, 0f));
+                go.transform.localScale = Vector3.one * k_MonitorScale;
+                var old = go.transform.parent != null ? go.transform.parent.Find(go.name + "Stand") : GameObject.Find(go.name + "Stand")?.transform;
+                if (old != null) Object.DestroyImmediate(old.gameObject);
+                var foot = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                foot.name = go.name + "Stand";
+                Object.DestroyImmediate(foot.GetComponent<Collider>());
+                foot.transform.SetParent(go.transform.parent, false);
+                foot.transform.position = new Vector3(x, k_DeskTopY + 0.015f, k_MonitorZ + 0.02f);
+                foot.transform.localScale = new Vector3(0.24f, 0.03f, 0.14f);
+                if (stand != null) foot.GetComponent<Renderer>().sharedMaterial = stand;
+            }
+            EditorSceneManager.MarkSceneDirty(panel.scene);
         }
     }
 }

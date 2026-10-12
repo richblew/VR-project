@@ -57,6 +57,13 @@ namespace VRRocket.Tests
             Assert.Less(origin.transform.position.y, 0.1f, "the rig stands on the floor (their spawn is in the air)");
             Assert.AreEqual(XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "floor tracking: the player is their real height, no 1.36 m device offset on top");
             Assert.AreEqual(0f, origin.CameraYOffset, "no camera offset to add height in any mode");
+            var mediator = origin.GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.LocomotionMediator>(true);
+            Assert.IsNotNull(mediator, "the rig has locomotion");
+            Assert.IsTrue(mediator.gameObject.activeInHierarchy, "locomotion (move, turn, teleport, gravity) is on");
+            var cc = origin.GetComponent<CharacterController>();
+            if (cc != null) Assert.GreaterOrEqual(cc.center.y - cc.height * 0.5f, -0.001f, "the body capsule does not reach below the feet (it would lift the player)");
+            for (var i = 0; i < 90; i++) yield return null;
+            Assert.Less(origin.transform.position.y, 0.1f, "still on the floor once locomotion and gravity run");
             Assert.Greater(origin.transform.position.y, 0.0f);
             var rocketLayer = InteractionLayerMask.GetMask("RocketPart");
             var hands = origin.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true);
