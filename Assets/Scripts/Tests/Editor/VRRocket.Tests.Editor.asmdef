@@ -4,6 +4,7 @@
     "references": [
         "VRRocket.Runtime",
         "VRRocket.Editor",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

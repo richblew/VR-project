@@ -94,7 +94,7 @@ Each change is its own commit on `interactions`.
 
 Window > General > Test Runner.
 
-- **Edit mode (36):**
+- **Edit mode (38):**
   - outcome rule, assembly state machine, cap ratchet, attach geometry, flight model;
   - static resets for Play mode without domain reload;
   - haptic tuning for Vive and Index;

@@ -34,6 +34,7 @@ On `RoomLink`. When the room has loaded, it finds the first `XROrigin` and appli
 | Snap To Floor | on | casts a ray down from 1 m above the rig (up to 5 m, ignoring the rig's own colliders) and puts the rig on what it hits | `Player` is placed 2.4 m up in the room, so the player would otherwise drop at the start |
 | Floor Mask | Everything | layers the floor ray can hit | |
 | Enable Teleport | on | switches on every `TeleportationProvider` in the rig | |
+| Force Floor Tracking | on | sets the rig's tracking origin to Floor and its camera Y offset to 0 | the room's rig asks for "Not Specified", which on Quest can become Device mode, where the rig adds its 1.36 m camera offset on top of the real head height: the player stood far too tall and had to bend to reach the desks (fixed 12 October 2026) |
 | Disable Jump | on | switches off every `JumpProvider` | Jump is on the primary button (A on Quest). Vive wands do not have it, and it is easy to press by accident while building. |
 
 Calling `Apply()` again is safe. `isApplied` tells you it ran. The test `Rig_Is_Adapted` checks every row of this table.
@@ -128,6 +129,7 @@ A controller without a matching profile binds nothing, so add its profile here b
 | Symptom | Check |
 |---|---|
 | The player falls at the start | `XRRigAdapter` Snap To Floor is on and the floor has a collider. |
+| The player is far too tall or too short | Force Floor Tracking must be on; in the headset, reset the floor height in the Quest's boundary settings if it is still off. |
 | The hands cannot grab parts | Do the `NearFarInteractor`s have the RocketPart layer at runtime? Select a hand in Play mode (`Player/Camera Offset/Left Controller/...`) and look at Interaction Layer Mask. |
 | The ray cannot click START | One `EventSystem` with `XRUIInputModule`; `TrackedDeviceGraphicRaycaster` on the canvas. |
 | Every hover buzzes | Silence Generic Haptics must be on. |

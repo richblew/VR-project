@@ -16,7 +16,8 @@ namespace VRRocket
     /// designed haptics for every part event (SPEC 6);</item>
     /// <item>adds the RocketPart interaction layer to the near-far interactors so rocket parts can be grabbed;</item>
     /// <item>lowers the rig onto the floor under it, so the user does not drop at start;</item>
-    /// <item>makes sure teleportation is enabled.</item>
+    /// <item>makes sure teleportation is enabled;</item>
+    /// <item>tracks from the real floor (Floor tracking origin), so the player is their own height.</item>
     /// </list>
     /// </summary>
     public sealed class XRRigAdapter : MonoBehaviour
@@ -29,6 +30,8 @@ namespace VRRocket
         [SerializeField] bool m_EnableTeleport = true;
         [SerializeField, Tooltip("Jump is bound to the primary button, which Vive wands do not have and which is easy to hit by accident while building")]
         bool m_DisableJump = true;
+        [SerializeField, Tooltip("Track the head from the real floor, so the player is their own height. The room's rig asks for 'Not Specified', which on Quest can become Device mode, where the rig's 1.36 m camera offset is added on top of the real head height and the player stands far too tall.")]
+        bool m_ForceFloorTracking = true;
 
         public XROrigin origin { get; private set; }
         public bool isApplied { get; private set; }
@@ -64,6 +67,12 @@ namespace VRRocket
             var required = InteractionLayerMask.GetMask(m_RequiredInteractionLayers);
             foreach (var nf in origin.GetComponentsInChildren<NearFarInteractor>(true))
                 nf.interactionLayers = nf.interactionLayers | required;
+
+            if (m_ForceFloorTracking)
+            {
+                origin.RequestedTrackingOriginMode = XROrigin.TrackingOriginMode.Floor;
+                origin.CameraYOffset = 0f;   // only used in Device mode; zero so a fallback never adds height
+            }
 
             if (m_SnapToFloor) SnapToFloor();
 

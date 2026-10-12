@@ -5,7 +5,7 @@ How to run the automated tests, what each one checks, how they work, and a playb
 | | |
 |---|---|
 | **Test code** | `Assets/Scripts/Tests/Editor/` (edit mode, assembly `VRRocket.Tests.Editor`) and `Assets/Scripts/Tests/PlayMode/` (play mode, assembly `VRRocket.Tests.PlayMode`) |
-| **Totals** | 36 edit-mode tests, 26 play-mode tests. All passed twice in a row on 12 October 2026. |
+| **Totals** | 38 edit-mode tests, 26 play-mode tests. All passed twice in a row on 12 October 2026. |
 | **Run them** | Window > General > **Test Runner** |
 
 ## 1. Running the tests
@@ -27,7 +27,7 @@ Use `-testPlatform PlayMode` for the play-mode suite. The results are NUnit XML.
 
 ## 2. What the tests check
 
-### Edit mode (36)
+### Edit mode (38)
 
 | Class | Tests | Checks |
 |---|---|---|
@@ -39,6 +39,7 @@ Use `-testPlatform PlayMode` for the play-mode suite. The results are NUnit XML.
 | `RocketFlightModelTests` | 4 | success lifts off and climbs, the mass falls during the burn, unstable flight tilts, tumbles and explodes, retention loss never leaves the pad |
 | `StaticResetsTests` | 2 | `AssemblyEvents` and our singletons are cleared when Play mode starts (the project enters Play mode without a domain reload) |
 | `FeedbackDeviceTuningTests` | 2 | Vive gets strength and duration floors and the runtime frequency; Index keeps the frequency; Touch Plus is untouched |
+| `BlueprintDisplayTests` | 2 | every build stage shows its step text and the matching picture on the build-step monitor; without a screen only the text changes |
 | `ScreenTextTests` | 1 | the big screen's "first sentence" cut at ". " and " \| " |
 
 ### Play mode (26)
