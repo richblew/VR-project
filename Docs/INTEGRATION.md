@@ -4,7 +4,7 @@ For Yi-Xuan and Richard: how the rocket connects to the rest of the experience, 
 
 ## 1. Where the rocket lives
 
-- `Assets/VRRocket/Prefabs/RocketWorkstation.prefab`, placed in `VRRocket_Main` on your assembly desk at (−0.30, 1.125, 2.76). Its origin is the desk top. It needs about 1.6 × 0.9 m of clear desk around the origin: the parts lie to the left (−x) and the respawn pad to the right (+x).
+- `Assets/Prefabs/Rocket/RocketWorkstation.prefab`, placed in `VRRocket_Main` on your assembly desk at (−0.30, 1.125, 2.76). Its origin is the desk top. It needs about 1.6 × 0.9 m of clear desk around the origin: the parts lie to the left (−x) and the respawn pad to the right (+x).
 - **Rig.** The rocket works with your `Player` rig (XRI Starter Assets, `NearFarInteractor` hands). `XRRigAdapter` makes the changes it needs at runtime, so neither the rig prefab nor `room.unity` is edited:
   - generic hover/select buzz off on all its `SimpleHapticFeedback`;
   - the `RocketPart` interaction layer on the hands;
@@ -12,8 +12,8 @@ For Yi-Xuan and Richard: how the rocket connects to the rest of the experience, 
   - the rig onto the floor.
 
   Rocket parts are near-grab only: a far ray cannot pick them up.
-- **No dependency on the room.** Nothing in `Assets/VRRocket/Scripts` outside `Runtime/Room` references the environment.
-- **Tuning.** `rocketScale` in `Assets/VRRocket/Settings/AssemblyTuning.asset` scales the whole rocket (1.0 = real size, 34 mm parts), and every other tunable of SPEC 10.4 is in that asset too. Every sound and vibration value is in `Settings/FeedbackLibrary.asset`. Swap your final clips in there; no code changes are needed.
+- **No dependency on the room.** Nothing in `Assets/Scripts` outside `Runtime/Room` references the environment.
+- **Tuning.** `rocketScale` in `Assets/Settings/Rocket/AssemblyTuning.asset` scales the whole rocket (1.0 = real size, 34 mm parts), and every other tunable of SPEC 10.4 is in that asset too. Every sound and vibration value is in `Settings/FeedbackLibrary.asset`. Swap your final clips in there; no code changes are needed.
 - **Haptics per controller.** `FeedbackLibrary.deviceTunings` lifts the soft pulses for HTC Vive wands and Valve Index controllers; Touch Plus plays the table as designed.
 
 ## 2. The interface: `RocketAssembly` on the workstation root
@@ -82,8 +82,8 @@ The whole loop is playable on your room today. Each piece is a separate root, li
 - **Attach mechanic.** All parts share one guided-attach mechanic (`GuideGrabTransformer`).
   - Rocket parts never collide with each other.
   - Attached parts are re-pinned to their seats every frame (`AttachedPartSync`), so a carried rocket moves as one piece.
-  - The attach points are generated from `Assets/VRRocket/Models/attach_points.json` by the menu item VR Rocket > Generate Attach Points On Selected BodyTube; do not hand-edit them.
-- **Static rocket prefabs.** `Prefabs/AssembledRocket_Static.prefab` is a plain assembled rocket for animations. `Prefabs/Launch/LaunchVehicle.prefab` is its 36× copy used on the pad.
-- **Tests.** Run Window > General > Test Runner after changing anything under `Assets/VRRocket`. See `Docs/PORTING.md` section 4 for what they cover.
-- **Stubs.** `Prefabs/Stubs/MissionControlStubs.prefab` is only in `Dev_Interactions.unity`. It holds a bin and readout stub from before the working versions existed; delete it with the dev scene when you no longer need either.
+  - The attach points are generated from `Assets/Models/Rocket/attach_points.json` by the menu item VR Rocket > Generate Attach Points On Selected BodyTube; do not hand-edit them.
+- **Static rocket prefabs.** `Assets/Prefabs/Rocket/AssembledRocket_Static.prefab` is a plain assembled rocket for animations. `Assets/Prefabs/Launch/LaunchVehicle.prefab` is its 36× copy used on the pad.
+- **Tests.** Run Window > General > Test Runner after changing any of VR Rocket's scripts, prefabs, scenes or settings. See `Docs/PORTING.md` section 4 for what they cover.
+- **Stubs.** `Assets/Prefabs/Stubs/MissionControlStubs.prefab` is only in `Dev_Interactions.unity`. It holds a bin and readout stub from before the working versions existed; delete it with the dev scene when you no longer need either.
 - **Headset checks.** Feel, haptics and frame rate are listed in SPEC 12.2 and `Docs/PORTING.md` section 5, and are Praise's to tick.

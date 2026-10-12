@@ -4,8 +4,8 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 
 - CC0: https://creativecommons.org/publicdomain/zero/1.0/
 - BSD 2-Clause: as noted.
-- SIL OFL 1.1: `Assets/VRRocket/UI/Fonts/OFL-*.txt`.
-- Unity Companion License: `Assets/VRRocket/ThirdParty/XRI_Examples/LICENSE.md`.
+- SIL OFL 1.1: `Assets/UI/Fonts/OFL-*.txt`.
+- Unity Companion License: `Assets/ThirdParty/XRI_Examples/LICENSE.md`.
 
 ## Rocket
 
@@ -17,10 +17,10 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 
 | Asset | Author | Source | Licence | Downloaded | Used for |
 |---|---|---|---|---|---|
-| Particle Pack 1.1 | Kenney (kenney.nl) | https://kenney.nl/assets/particle-pack | CC0 | 2026-10-09 | engine flame, smoke, sparks and explosion sprites (`Assets/VRRocket/Textures/Particles`, 7 sprites) |
-| UI Pack - Sci-Fi (space expansion) | Kenney | https://kenney.nl/assets/ui-pack-sci-fi | CC0 | 2026-10-09 | START button graphic (`Assets/VRRocket/UI/Sprites/button_green.png`) |
-| Sci-Fi Sounds | Kenney | https://kenney.nl/assets/sci-fi-sounds | CC0 | 2026-10-09 | engine loop, ignition, explosions, bin doors (`Assets/VRRocket/Audio/Kenney`) |
-| Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 | 2026-10-09 | part impacts on the desk and on each other (`Assets/VRRocket/Audio/Kenney`) |
+| Particle Pack 1.1 | Kenney (kenney.nl) | https://kenney.nl/assets/particle-pack | CC0 | 2026-10-09 | engine flame, smoke, sparks and explosion sprites (`Assets/Texture/Particles`, 7 sprites) |
+| UI Pack - Sci-Fi (space expansion) | Kenney | https://kenney.nl/assets/ui-pack-sci-fi | CC0 | 2026-10-09 | START button graphic (`Assets/UI/Sprites/button_green.png`) |
+| Sci-Fi Sounds | Kenney | https://kenney.nl/assets/sci-fi-sounds | CC0 | 2026-10-09 | engine loop, ignition, explosions, bin doors (`Assets/Audio/Kenney`) |
+| Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 | 2026-10-09 | part impacts on the desk and on each other (`Assets/Audio/Kenney`) |
 | Orbitron (variable) | Matt McInerney | https://github.com/google/fonts/tree/main/ofl/orbitron | SIL Open Font License 1.1 | 2026-10-09 | menu and screen titles |
 | Share Tech Mono | Carrois Apostrophe | https://github.com/google/fonts/tree/main/ofl/sharetechmono | SIL Open Font License 1.1 | 2026-10-09 | telemetry, status and body text |
 
@@ -30,7 +30,7 @@ Beeps, chimes and buzzes in the flow are generated in code (`ProceduralAudio`).
 
 | Asset | Author | Source | Licence | Used for |
 |---|---|---|---|---|
-| XR Interaction Toolkit Examples 3.4.0 (subset) | Unity Technologies | https://github.com/Unity-Technologies/XR-Interaction-Toolkit-Examples | Unity Companion License | the console push buttons: `XRPushButton.cs`, `PushButton.fbx`, four materials, two affordance themes, three button sounds (`Assets/VRRocket/ThirdParty/XRI_Examples`) |
+| XR Interaction Toolkit Examples 3.4.0 (subset) | Unity Technologies | https://github.com/Unity-Technologies/XR-Interaction-Toolkit-Examples | Unity Companion License | the console push buttons: `XRPushButton.cs`, `PushButton.fbx`, four materials, two affordance themes, three button sounds (`Assets/ThirdParty/XRI_Examples`) |
 | TextMesh Pro (LiberationSans SDF) | Unity Technologies / Red Hat (font) | Unity package | Unity Companion License / SIL OFL (font) | console and help-board labels |
 
 ## Not carried over from the VR Rocket test project
