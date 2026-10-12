@@ -181,7 +181,10 @@ namespace VRRocket.Tests
             yield return FindFlow();
             flow.StartGame();
             yield return null;
+            var blueprint = Object.FindAnyObjectByType<BlueprintDisplay>();
+            Assert.AreEqual(0, blueprint.shownImage, "the build-step monitor shows step 1 (fins) at the start");
             yield return BuildPrototype();
+            Assert.AreEqual(4, blueprint.shownImage, "and the finished rocket once it is complete");
             yield return LockCap();
             Assert.AreEqual(LaunchOutcome.Success, assembly.GetReport().outcome, "a locked cap and correct flaps make a sound rocket");
             var tube = Tube;
