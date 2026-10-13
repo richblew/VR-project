@@ -202,12 +202,73 @@ namespace VRRocket.Tests
             StringAssert.Contains("STBY", screens.pollText, "standby on the menu");
             Assert.AreEqual("RANGE STATUS", screens.dataTitle);
             Flow.StartWithoutIntro();
+            Flow.MiniGameSolved();   // the wiring done: the poll is about the build (Console_Is_Offline_... covers the wiring)
             yield return null;
             screens.Refresh();
             StringAssert.Contains("NO-GO", screens.pollText, "an empty bench is not ready");
             StringAssert.Contains("HOLD", screens.pollVerdict);
             StringAssert.Contains("FLIGHTS    0", screens.dataText);
             StringAssert.DoesNotContain("LOCK", screens.pollText, "the poll never gives away whether the cap is locked");
+        }
+
+        [UnityTest]
+        public IEnumerator Hatch_Slides_Open_By_Its_Grip_And_Unlocks_The_Wiring()
+        {
+            yield return null;
+            var hatch = Object.FindAnyObjectByType<SlidingPanel>();
+            Assert.IsNotNull(hatch, "the wiring hatch on the console");
+            var wiring = GameObject.Find("PuzzleBox").GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>(true);
+            Assert.AreEqual(10, wiring.Length, "five plugs and five receptacles");
+            foreach (var g in wiring) Assert.IsFalse(g.enabled, g.name + " cannot be grabbed through the closed hatch");
+            // take the grip and pull it along the slot
+            controller.rotation = Quaternion.identity;
+            yield return MoveHand(hatch.transform.position + Vector3.up * 0.015f);
+            Assert.IsTrue(manager.IsSelectPossible(hand, hatch), "the hand can take the grip");
+            manager.SelectEnter((UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor)hand, hatch);
+            yield return null;
+            var start = controller.position;
+            for (var i = 1; i <= 30; i++) { controller.position = start + hatch.axisWorld * (hatch.travel * 1.2f * i / 30f); yield return null; }
+            Assert.Greater(hatch.openAmount, 0.98f, "pulled fully open");
+            Assert.LessOrEqual(hatch.openAmount, 1f, "and no further");
+            foreach (var g in wiring) Assert.IsTrue(g.enabled, g.name + " can be grabbed with the hatch open");
+            for (var i = 29; i >= 0; i--) { controller.position = start + hatch.axisWorld * (hatch.travel * 1.2f * i / 30f); yield return null; }
+            Assert.Less(hatch.openAmount, 0.02f, "pushed shut again");
+            foreach (var g in wiring) Assert.IsFalse(g.enabled, g.name + " locked again");
+            manager.SelectExit((UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor)hand, hatch);
+        }
+
+        [UnityTest]
+        public IEnumerator Console_Is_Offline_Until_The_Wiring_Is_Connected()
+        {
+            yield return null;
+            var flow = Flow;
+            Assert.IsTrue(flow.requireMiniGame, "the final scene needs the wiring puzzle");
+            flow.StartWithoutIntro();
+            yield return null;
+            Assert.IsFalse(flow.consoleOnline, "offline at the start of a play");
+            var screens = Object.FindAnyObjectByType<ConsoleStatusScreens>();
+            screens.Refresh();
+            StringAssert.Contains("WIRING", screens.pollText);
+            StringAssert.Contains("CONSOLE OFFLINE", screens.pollVerdict);
+            // SUBMIT refuses while offline, even before anything else is checked
+            var bin = Object.FindAnyObjectByType<SubmissionBin>();
+            var refused = 0;
+            UnityAction onRefused = () => refused++;
+            bin.onRefused.AddListener(onRefused);
+            bin.Submit();
+            bin.onRefused.RemoveListener(onRefused);
+            Assert.AreEqual(1, refused);
+            Assert.AreEqual(GamePhase.Assembly, flow.phase);
+            // the puzzle's "all connected" event is wired to the flow: raise it as the puzzle would
+            MonoBehaviour pairManager = null;
+            foreach (var mb in Object.FindObjectsByType<MonoBehaviour>()) if (mb.GetType().Name == "CablePairManager") pairManager = mb;
+            Assert.IsNotNull(pairManager, "Yi-Xuan's CablePairManager");
+            var allConnected = (UnityEvent)pairManager.GetType().GetField("onAllConnected").GetValue(pairManager);
+            AssertCalls(allConnected, flow, "MiniGameSolved");
+            allConnected.Invoke();
+            Assert.IsTrue(flow.miniGameSolved && flow.consoleOnline, "connecting every pair brings the console online");
+            screens.Refresh();
+            StringAssert.DoesNotContain("CONSOLE OFFLINE", screens.pollVerdict);
         }
 
         [UnityTest]
