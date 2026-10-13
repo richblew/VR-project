@@ -68,12 +68,28 @@ Pressing ABORT during pre-launch or the countdown:
 
 Pressing ABORT outside pre-launch and the countdown only buzzes, as before.
 
-## 6. Troubleshooting
+## 6. The console's wiring (Yi-Xuan's cable puzzle)
+
+Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the console is not operational until its wiring is connected. Her scripts are in `Assets/CablePuzzle` (`CablePairManager`, `PairSocket`, `CableConnector`, `VerletCable`).
+
+**Where it is:** `PuzzleBox` sits in a well cut into the console's control panel between SUBMIT and LAUNCH. The panel's top is split into `PanelBody_Left`, `_Right`, `_Back`, `_Front` and `_UnderWell` around the opening (the original `PanelBody` is kept, switched off). The box walls are dark metal, so it reads as the inside of the console.
+
+**The hatch:** `ConsoleAddOn/ControlPanel/WiringHatch`, a tread-plate cover (ambientCG DiamondPlate008D) with a bar grip (RuslanOz's Handles). `SlidingPanel` on `HatchGrip`: grab the grip and pull it toward LAUNCH; the cover slides into a slot under the panel surface (0.33 m of travel), the grip stays at the slot's mouth. Click and a controller pulse at each end. While the hatch is less than half open, every grabbable in `PuzzleBox` is switched off, except ones held or plugged in, so nothing is grabbed through the lid.
+
+**The puzzle:** five pairs. Each pair has a plug (icvetlan's Schuko plug) on one cable and a socket (Artik's Plug Socket) on another, both in the pair's colour; `PairSocket` accepts only its own plug. The cables are round rubber tubes (`CableTube`, ambientCG Rubber004 tinted per pair) drawn along her Verlet points; her `LineRenderer` ribbons are switched off.
+
+**The rule:** `GameFlowController` has **Require Mini Game** on in this scene. Until `MiniGameSolved()` is called, the console is offline: SUBMIT refuses the rocket (so LAUNCH and ABORT have nothing to act on), and the GO / NO-GO monitor shows WIRING NO-GO and CONSOLE OFFLINE · RESTORE WIRING. `CablePairManager.onAllConnected` calls `MiniGameSolved()` (wired in the scene). Once solved it stays solved; resetting it for a new play needs the puzzle to unplug itself first (TODO for Yi-Xuan in `GameFlowController`).
+
+**Yi-Xuan's rig:** her hand-model rig (`RoomAnchor/Player`) and her physical-room calibration (`RoomLink_Calibration`: `RoomCalibrator`, `WalkableZone`) are in the scene, switched off. With them on, the player floated a metre up, part grabs failed and locomotion was off. Our `Player` and `RoomLink` run the game until her rig grabs parts and stands on the floor; then switch hers on and ours off.
+
+## 7. Troubleshooting
 
 | Problem | Cause and fix |
 |---|---|
 | The intro plays by itself under the menu | `TransmissionController.playOnStart` is on. Switch it off in this scene. |
 | START WITH INTRO goes straight to building | `GameFlowController` has no Intro (should be `RoomLink`'s `TransmissionBridge`), or the room has no intro |
 | The curtain never closes | `AlcoveCurtain`'s Intro is empty, or the intro does not dim the room (`currentDim` stays 0) |
+| SUBMIT always refuses | the wiring is not connected yet (GO / NO-GO says CONSOLE OFFLINE), or `CablePairManager.onAllConnected` lost its call to `GameFlowController.MiniGameSolved` |
+| The hatch does not move | grab `HatchGrip` itself (the bar), not the plate; check `SlidingPanel` has its Cover and Contents set |
 | ABORT works but nothing flashes | `GameFlowController`'s Abort Alarm is empty, or `AbortAlarm` has no panels |
 | The ABORT panels float off the TVs | a side TV moved: move the matching `AbortPanel_*` with it, or rebuild the scene |

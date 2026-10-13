@@ -359,3 +359,12 @@ From Praise's headset session on `VRRocket_Final`:
 - **Side monitors:** two monitors in the console monitor's style over the console's angled side screens. Left, GO / NO-GO: a readiness poll of fitted parts and the pad with a verdict line (never revealing flap orientation or the cap lock). Right, FLIGHT DATA: range status and mission log, the countdown, live altitude and speed, then the flight result (`ConsoleStatusScreens`). The console's own five screens are switched off, all covered by our monitors.
 - **Posters:** the rocket-launch poster moved to the front room's right wall between the corner TVs and the angled wall; the moon-landing poster is centred on the alcove wall beside the console.
 - **Verified:** edit mode 39/39 and play mode 32/32 (new `Side_Monitors_Poll_The_Build_And_Show_Range_Status`; the full games check FLIGHT DATA in flight and the result after a failure).
+
+## 2026-10-13: Yi-Xuan's cable puzzle merged and built into the console (done)
+
+Merged `test-hand-models` (Yi-Xuan, up to be9eb60) into `interactions`. Details in [spec 13](../specs/13-final-scene.md), section 6.
+- **In the console:** her `PuzzleBox` sits in a well cut into the control panel between SUBMIT and LAUNCH, under a tread-plate hatch that slides into a slot when pulled by its grip (`SlidingPanel`; click and controller pulse at each end; the puzzle cannot be touched through the closed hatch).
+- **Looks like wiring:** Schuko plugs (icvetlan) and sockets (Artik) in each pair's colour, round rubber cables (`CableTube` over her Verlet cables), dark console walls. Assets downloaded from Sketchfab (CC BY) and ambientCG (CC0), reduced in Blender; credited in ASSET_CREDITS.
+- **Console offline until wired:** `GameFlowController` Require Mini Game is on in `VRRocket_Final`; SUBMIT refuses until her `CablePairManager.onAllConnected` calls `MiniGameSolved()`; the GO / NO-GO monitor shows WIRING and CONSOLE OFFLINE.
+- **Her rig:** her hand-model rig and physical-room calibration stay in the scene, switched off; with them on the player floated a metre up and could not grab parts. Her be9eb60 had also deleted our `RoomLink` (intro bridge) and `Player`; both were restored and rewired.
+- **Tests:** the play-mode tests now drive the hand of the rig in use (they had picked her switched-off rig's hand). New: hatch opened and closed by the hand and locking the puzzle, console offline until the wiring is connected. Edit mode 39/39, play mode 34/34.

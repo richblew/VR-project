@@ -23,8 +23,12 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 | 2026-10-09 | part impacts on the desk and on each other (`Assets/Audio/Kenney`) |
 | Orbitron (variable) | Matt McInerney | https://github.com/google/fonts/tree/main/ofl/orbitron | SIL Open Font License 1.1 | 2026-10-09 | menu and screen titles |
 | Share Tech Mono | Carrois Apostrophe | https://github.com/google/fonts/tree/main/ofl/sharetechmono | SIL Open Font License 1.1 | 2026-10-09 | telemetry, status and body text |
-
 | Rough Linen | colormass (Poly Haven) | https://polyhaven.com/a/rough_linen | CC0 | 2026-10-13 | the window curtain in `VRRocket_Final` (`Assets/Texture/Curtain`, diffuse and normal maps at 1k) |
+| Plug Socket | Artik (@artikdev, Sketchfab) | https://sketchfab.com/3d-models/plug-socket-7141f3defd2f4796b956136e8ae710bf | CC BY 4.0 | 2026-10-13 | the wiring puzzle's sockets (`Assets/Models/Console/Console_Socket.fbx`, turned face up and normalised in Blender) |
+| Power cable (high poly) | icvetlan (Sketchfab) | https://sketchfab.com/3d-models/power-cable-hight-poly-9b7fe4759a694c978a11c1ccbd64356f | CC BY 4.0 | 2026-10-13 | the wiring puzzle's plugs: the Schuko plug head only, reduced from 8.3k to 1.5k triangles (`Assets/Models/Console/Console_Plug.fbx`) |
+| Handles | RuslanOz (@KarinaOz, Sketchfab) | https://sketchfab.com/3d-models/handles-ddd1c24620814c2eb022b97c90c7df2f | CC BY 4.0 | 2026-10-13 | the wiring hatch's grip: the bar pull only, reduced to 1.2k triangles (`Assets/Models/Console/Console_Grip.fbx`) |
+| DiamondPlate008D | ambientCG | https://ambientcg.com/view?id=DiamondPlate008D | CC0 | 2026-10-13 | the wiring hatch's tread plate (`Assets/Texture/Console`) |
+| Rubber004 | ambientCG | https://ambientcg.com/view?id=Rubber004 | CC0 | 2026-10-13 | the puzzle cables' rubber, tinted per pair (`Assets/Texture/Console`) |
 
 Beeps, chimes, buzzes and the abort siren are generated in code (`ProceduralAudio`).
 

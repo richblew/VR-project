@@ -16,8 +16,15 @@ namespace VRRocket.Tests
 
         protected override string scenePath => FinalSceneTests.Path;
 
-        /// <summary>Starts a play from the menu with SKIP INTRO (FinalSceneTests covers START WITH INTRO).</summary>
-        void BeginPlay() => flow.StartWithoutIntro();
+        /// <summary>
+        /// Starts a play from the menu with SKIP INTRO (FinalSceneTests covers START WITH INTRO) and solves the wiring puzzle that
+        /// brings the console online (FinalSceneTests covers the puzzle and the offline console).
+        /// </summary>
+        void BeginPlay()
+        {
+            flow.StartWithoutIntro();
+            flow.MiniGameSolved();
+        }
 
         GameFlowController flow;
         SubmissionBin bin;

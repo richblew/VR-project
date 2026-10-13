@@ -49,15 +49,19 @@ namespace VRRocket.Tests
             workstation = Object.FindAnyObjectByType<RocketWorkstation>();
             assembly = Object.FindAnyObjectByType<RocketAssembly>();
             manager = Object.FindAnyObjectByType<XRInteractionManager>();   // replaced below by the hand's own manager
+            // the right hand of the rig in use: a scene may also hold a switched-off rig (Yi-Xuan's hand-model rig in VRRocket_Final)
+            Transform rig = null;
+            foreach (var origin in Object.FindObjectsByType<Unity.XR.CoreUtils.XROrigin>()) rig = origin.transform;
+            NearFarInteractor[] Hands() => rig != null ? rig.GetComponentsInChildren<NearFarInteractor>(true) : Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include);
             for (var frame = 0; frame < 120 && hand == null; frame++)
             {
-                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include))
+                foreach (var nf in Hands())
                     if (nf.transform.parent != null && nf.transform.parent.name.StartsWith("Right") && nf.gameObject.activeInHierarchy) hand = nf;
                 if (hand == null) yield return null;
             }
             if (hand == null)
             {
-                foreach (var nf in Object.FindObjectsByType<NearFarInteractor>(FindObjectsInactive.Include))
+                foreach (var nf in Hands())
                     if (nf.transform.parent != null && nf.transform.parent.name.StartsWith("Right")) hand = nf;
             }
             Assert.IsNotNull(workstation, "RocketWorkstation in the dev scene");
@@ -191,6 +195,17 @@ namespace VRRocket.Tests
         }
 
         /// <summary>Grabs the part from grabOffset above its origin and remembers the hand-to-part relation.</summary>
+        /// <summary>Why a select may have been refused: managers, enabled states, what the hand already holds.</summary>
+        string SelectDiagnosis(UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable target)
+        {
+            var held = hand.interactablesSelected.Count > 0 ? hand.interactablesSelected[0].transform.name : "nothing";
+            return " [hand manager " + (hand.interactionManager != null ? hand.interactionManager.GetHashCode().ToString() : "none") +
+                   ", part manager " + (target.interactionManager != null ? target.interactionManager.GetHashCode().ToString() : "none") +
+                   ", managers " + Object.FindObjectsByType<XRInteractionManager>().Length +
+                   ", part enabled " + target.enabled + ", hand enabled " + hand.enabled + " active " + hand.gameObject.activeInHierarchy +
+                   ", hand holds " + held + ", part held by " + target.interactorsSelecting.Count + "]";
+        }
+
         protected IEnumerator Grab(RocketPart part)
         {
             controller.rotation = Quaternion.identity;
@@ -204,7 +219,7 @@ namespace VRRocket.Tests
             }
             Assert.IsTrue(manager.IsSelectPossible(hand, part.grabInteractable), "near grab of " + part.name + " must be possible (state " + part.state + ", pos " + part.transform.position.ToString("F2") + ")");
             manager.SelectEnter((IXRSelectInteractor)hand, part.grabInteractable);
-            Assert.IsTrue(part.grabInteractable.isSelected, part.name + " selected");
+            Assert.IsTrue(part.grabInteractable.isSelected, part.name + " selected" + SelectDiagnosis(part.grabInteractable));
             yield return null;
             m_Held = part;
             var inv = Quaternion.Inverse(part.transform.rotation);

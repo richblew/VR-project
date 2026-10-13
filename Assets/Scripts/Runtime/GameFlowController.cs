@@ -48,26 +48,39 @@ namespace VRRocket
         public float submitToPadSeconds { get => m_SubmitToPadSeconds; set => m_SubmitToPadSeconds = value; }
         public string assemblyHint { get => m_AssemblyHint; set => m_AssemblyHint = value; }
 
-        // TODO(Yi-Xuan): submission mini game. Uncomment this block and the two marked lines (EnterMenu here, Submit in
-        // SubmissionBin.cs) when the mini game exists, and call MiniGameSolved() from it when the player solves it.
-        // Rules agreed with Praise:
+        // The wiring mini game (Yi-Xuan's cable puzzle inside the console, VRRocket_Final). Rules agreed with Praise:
         // - it can be solved at any time in a play, even before the rocket is built;
-        // - without it solved, SUBMIT refuses the rocket (so there is no launch);
-        // - once solved it stays solved for the rest of the play: after a failed launch and a new kit, no need to solve it again;
-        // - a new play (back to the menu after a successful flight) needs it solved again.
-        //
-        // bool m_MiniGameSolved;
-        //
-        // /// <summary>True once the submission mini game is solved in this play. The bin's SUBMIT is refused until then.</summary>
-        // public bool miniGameSolved => m_MiniGameSolved;
-        //
-        // /// <summary>Called by the mini game when the player solves it.</summary>
-        // public void MiniGameSolved()
-        // {
-        //     if (m_MiniGameSolved) return;
-        //     m_MiniGameSolved = true;
-        //     if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
-        // }
+        // - until it is solved the console is offline: SUBMIT refuses the rocket, so there is no launch or abort either;
+        // - once solved it stays solved: after a failed launch and a new kit, no need to solve it again.
+        // TODO(Yi-Xuan): a new play (back to the menu after a successful flight) should need it solved again. That needs the
+        // puzzle to unplug its cables and put the plugs back; then call ResetMiniGame() from EnterMenu's marked line.
+        [SerializeField, Tooltip("The console stays offline until MiniGameSolved() is called (VRRocket_Final's wiring puzzle)")]
+        bool m_RequireMiniGame;
+        bool m_MiniGameSolved;
+
+        /// <summary>True once the wiring puzzle is solved.</summary>
+        public bool miniGameSolved => m_MiniGameSolved;
+        /// <summary>The console's buttons work: no puzzle is required, or it is solved.</summary>
+        public bool consoleOnline => !m_RequireMiniGame || m_MiniGameSolved;
+        public bool requireMiniGame { get => m_RequireMiniGame; set => m_RequireMiniGame = value; }
+        public event Action MiniGameChanged;
+
+        /// <summary>Called when the player solves the wiring puzzle (CablePairManager.onAllConnected in VRRocket_Final).</summary>
+        public void MiniGameSolved()
+        {
+            if (m_MiniGameSolved) return;
+            m_MiniGameSolved = true;
+            if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
+            MiniGameChanged?.Invoke();
+        }
+
+        /// <summary>Takes the console offline again until the puzzle is solved anew.</summary>
+        public void ResetMiniGame()
+        {
+            if (!m_MiniGameSolved) return;
+            m_MiniGameSolved = false;
+            MiniGameChanged?.Invoke();
+        }
 
         AudioClip m_Beep, m_BeepHigh, m_Chime, m_Buzz;
         Coroutine m_Routine;
@@ -123,7 +136,7 @@ namespace VRRocket
             if (m_Routine != null) { StopCoroutine(m_Routine); m_Routine = null; }
             SetPhase(GamePhase.Menu);
             m_PadReady = false;
-            // m_MiniGameSolved = false;   // TODO(Yi-Xuan): a new play solves the mini game again (see the mini game block above)
+            // if (afterSuccess) ResetMiniGame();   // TODO(Yi-Xuan): once the puzzle can reset itself (see the mini game block above)
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Launch != null) m_Launch.ResetPad();
             if (m_Screen != null) m_Screen.ShowTitle(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Flight " + attempts + " reached orbit insertion. Press START to build another." : "Build it. Submit it. Launch it.");

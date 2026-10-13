@@ -45,12 +45,16 @@ namespace VRRocket
 
         void OnEnable()
         {
-            if (m_Flow != null) m_Flow.PhaseChanged += OnPhaseChanged;
+            if (m_Flow == null) return;
+            m_Flow.PhaseChanged += OnPhaseChanged;
+            m_Flow.MiniGameChanged += Refresh;
         }
 
         void OnDisable()
         {
-            if (m_Flow != null) m_Flow.PhaseChanged -= OnPhaseChanged;
+            if (m_Flow == null) return;
+            m_Flow.PhaseChanged -= OnPhaseChanged;
+            m_Flow.MiniGameChanged -= Refresh;
         }
 
         void OnPhaseChanged(GamePhase phase)
@@ -87,6 +91,8 @@ namespace VRRocket
             var onPad = phase == GamePhase.Countdown || phase == GamePhase.Launch || (phase == GamePhase.PreLaunch && m_Launch != null && !m_Launch.isGrowing);
 
             m_Sb.Clear();
+            var wiringRequired = m_Flow != null && m_Flow.requireMiniGame;
+            if (wiringRequired) Row("WIRING", m_Flow.miniGameSolved ? k_Go : idle ? k_Standby : k_NoGo);
             Row("FINS " + fins + "/3", idle ? k_Standby : fins >= 3 ? k_Go : k_NoGo);
             Row("FLAPS " + flaps + "/3", idle ? k_Standby : flaps >= 3 ? k_Go : k_NoGo);
             Row("NOSE CONE", idle ? k_Standby : nose ? k_Go : k_NoGo);
@@ -99,7 +105,10 @@ namespace VRRocket
             string verdict;
             switch (phase)
             {
-                case GamePhase.Assembly: verdict = complete ? "<color=#FFC14C>READY TO SUBMIT</color>" : "<color=#FF5A4C>HOLD</color>  BUILD IN PROGRESS"; break;
+                case GamePhase.Assembly:
+                    verdict = m_Flow != null && !m_Flow.consoleOnline ? "<color=#FF5A4C>CONSOLE OFFLINE</color>  RESTORE WIRING"
+                        : complete ? "<color=#FFC14C>READY TO SUBMIT</color>" : "<color=#FF5A4C>HOLD</color>  BUILD IN PROGRESS";
+                    break;
                 case GamePhase.PreLaunch: verdict = onPad ? "<color=#4CFF7A>ALL STATIONS GO</color>" : "<color=#FFC14C>HOLD</color>  VEHICLE TO PAD"; break;
                 case GamePhase.Countdown: verdict = "<color=#4CFF7A>GO FOR LAUNCH</color>"; break;
                 case GamePhase.Launch: verdict = "<color=#4CFF7A>LIFTOFF</color>"; break;
