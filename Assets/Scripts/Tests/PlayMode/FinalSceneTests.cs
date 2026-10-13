@@ -219,6 +219,12 @@ namespace VRRocket.Tests
             var display = Object.FindAnyObjectByType<BlueprintDisplay>();
             AssertCalls(Button("NextButton").onPress, display, "ShowNextStep");
             AssertCalls(Button("BackButton").onPress, display, "ShowPreviousStep");
+            var deskFront = GameObject.Find("Environment/AssmblyArea/DeskTop").GetComponent<Renderer>().bounds.min.z;
+            foreach (var n in new[] { "BackButton", "NextButton" })
+                Assert.Less(Button(n).transform.position.z - deskFront, 0.3f, n + " within easy reach at the player's edge of the desk");
+            var nameplate = GameObject.Find("ConsoleNameplateLabel/LabelText");
+            Assert.IsNotNull(nameplate, "the console's nameplate is a label screen");
+            Assert.AreEqual("LAUNCH STATION", nameplate.GetComponent<TMPro.TextMeshPro>().text);
             var addOn = GameObject.Find("ConsoleAddOn");
             Assert.IsNotNull(addOn.transform.Find("ConsoleMirror"), "the second screen on the console (hidden while the menu is up)");
         }

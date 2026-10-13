@@ -20,6 +20,7 @@ The scene we ship: our game inside Richard's updated room, as one scene. Back to
 - **Kept from our room:** the populated console (SUBMIT, LAUNCH, ABORT, the bin, and the console mirror that repeats the big TV), the blueprint panel and build-step monitor on the desk, the three back-wall portraits with plaques, the big TV and its side TVs.
 - **Console monitor:** `ConsoleAddOn/ConsoleMonitor`, one wide monitor (0.94 x 0.30 m screen, dark housing) over the console's three centre screens; the two angled side screens stay as they are. The console mirror is laid out across it: the pad view on the left, title and clock on top right, the full status text under them. While the mirror is hidden (menu, intro) the monitor shows a black screen. The builder measures the three screens from the console's `Monitors` mesh.
 - **Countdown clock:** `CountdownClock` covers the whole face of the top-left side TV, so none of the TV's own picture shows around it.
+- **Console nameplate:** the small A-frame plate on top of Richard's console was plain black. `ConsoleAddOn/ConsoleNameplateLabel` lays a label screen on its player side reading LAUNCH STATION (Orbitron, the console monitor's title colour). Change the words in `LabelText`.
 - **Teleport floor:** six areas that follow the new room (front, between the angled walls, both sides of the console, the alcove aisle).
 
 ## 2. The menu and the intro
@@ -48,7 +49,7 @@ How it works: the room's `TransmissionController` has `playOnStart` off in this 
 
 ## 4. BACK and NEXT on the desk
 
-Two push buttons in front of the blueprint panel. They call `BlueprintDisplay.ShowPreviousStep` and `ShowNextStep`: the panel and the build-step monitor show "VIEWING STEP n / 5" with that step's text and picture, stopping at step 1 and step 5. The next change to the build (a part attached or removed) returns both screens to the live step.
+Two push buttons at the player's edge of the assembly desk (z 2.65, 24 cm from the front edge, right of the kit, under the step text screen), so they are pressed without reaching across the desk. They call `BlueprintDisplay.ShowPreviousStep` and `ShowNextStep`: the panel and the build-step monitor show "VIEWING STEP n / 5" with that step's text and picture, stopping at step 1 and step 5. The next change to the build (a part attached or removed) returns both screens to the live step.
 
 ## 5. The abort alarm
 
