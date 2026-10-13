@@ -368,3 +368,11 @@ Merged `test-hand-models` (Yi-Xuan, up to be9eb60) into `interactions`. Details 
 - **Console offline until wired:** `GameFlowController` Require Mini Game is on in `VRRocket_Final`; SUBMIT refuses until her `CablePairManager.onAllConnected` calls `MiniGameSolved()`; the GO / NO-GO monitor shows WIRING and CONSOLE OFFLINE.
 - **Her rig:** her hand-model rig and physical-room calibration stay in the scene, switched off; with them on the player floated a metre up and could not grab parts. Her be9eb60 had also deleted our `RoomLink` (intro bridge) and `Player`; both were restored and rewired.
 - **Tests:** the play-mode tests now drive the hand of the rig in use (they had picked her switched-off rig's hand). New: hatch opened and closed by the hand and locking the puzzle, console offline until the wiring is connected. Edit mode 39/39, play mode 34/34.
+
+## 2026-10-13: The wiring puzzle finished; console fault and online states; abort screens inside a bezel (done)
+
+- **Puzzle finished** (`CablePuzzle.ConsoleWiring`, next to Yi-Xuan's scripts, hers unchanged): a click and a controller pulse for every plug in or out; a row of five status lamps on the console surface (in each wire's colour, green when connected, visible with the hatch shut); a lock click and locked wiring when all pairs connect; a reset for a new play that unplugs, puts the ends back and shuffles the sockets' rows.
+- **Insulation colours** (red, blue, yellow, black, white) instead of the prototype's rainbow; the cables keep the rubber's surface relief.
+- **Broken and fixed:** SUBMIT on a broken console buzzes and shows CONSOLE FAULT with what to do on the big TV and the console monitor; fixing it shows CONSOLE ONLINE and brings the three NO SIGNAL side TVs alive (NASA logo, SYSTEMS ONLINE, the rocket on its pad; `ConsoleLiveScreens`).
+- **Abort screens** now show inside a gloss-black bezel on each TV instead of covering the whole TV.
+- **Verified:** edit mode 39/39, play mode 35/35 (new: the wiring loop with lamps, lock and reset; the fault and online messages with the live TVs; the abort picture inside the bezel).

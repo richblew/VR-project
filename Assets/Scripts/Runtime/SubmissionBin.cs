@@ -61,7 +61,7 @@ namespace VRRocket
             if (a == null) return;
             // the console is offline until the wiring puzzle is solved (VRRocket_Final; see the mini game block in GameFlowController.cs)
             var flow = FindAnyObjectByType<GameFlowController>();
-            if (flow != null && !flow.consoleOnline) { onRefused.Invoke(); return; }
+            if (flow != null && !flow.consoleOnline) { onRefused.Invoke(); flow.ReportConsoleOffline(); return; }
             if (!rocketInside || a.State != AssemblyState.PrototypeComplete)
             {
                 onRefused.Invoke();

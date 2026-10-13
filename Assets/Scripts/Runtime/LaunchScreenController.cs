@@ -128,6 +128,24 @@ namespace VRRocket
             Set(m_Clock, "T-00:00:00");
         }
 
+        /// <summary>SUBMIT was pressed while the console's wiring is still disconnected (VRRocket_Final's wiring puzzle).</summary>
+        public void ShowConsoleFault()
+        {
+            Surface(false); Diagram(false);
+            Set(m_Title, "CONSOLE FAULT");
+            Set(m_Big, "OFFLINE");
+            Set(m_Status, "Console wiring disconnected. Slide open the hatch between SUBMIT and LAUNCH and reconnect every cable to its socket.");
+        }
+
+        /// <summary>The wiring has just been reconnected: the console works again.</summary>
+        public void ShowConsoleOnline()
+        {
+            Surface(false); Diagram(false);
+            Set(m_Title, "CONSOLE ONLINE");
+            Set(m_Big, "ONLINE");
+            Set(m_Status, "Wiring restored. All console systems online: finish the rocket and submit it at the bin.");
+        }
+
         public void ShowPreLaunch()
         {
             Surface(true); Diagram(false);

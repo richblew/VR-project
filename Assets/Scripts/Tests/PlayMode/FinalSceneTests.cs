@@ -168,7 +168,14 @@ namespace VRRocket.Tests
                 var local = tv.InverseTransformPoint(panels[i].transform.position);
                 Assert.Less(Mathf.Abs(local.x), 0.01f, panels[i].name + " centred on " + tv.name);
                 Assert.Less(Quaternion.Angle(tv.rotation, panels[i].transform.rotation), 0.5f, panels[i].name + " faces the room like the TV");
-                Assert.AreEqual(screens[i].bounds.size.y, panels[i].transform.lossyScale.y, 0.03f, panels[i].name + " covers the TV's height");
+                // a picture on the TV's screen, inside a bezel, not a sheet over the whole TV
+                var faceHeight = screens[i].bounds.size.y;
+                Assert.Less(panels[i].transform.lossyScale.y, faceHeight - 0.1f, panels[i].name + " is inset inside the TV's frame");
+                Assert.Greater(panels[i].transform.lossyScale.y, faceHeight * 0.75f, panels[i].name + " still fills most of the screen");
+                var bezel = panels[i].transform.Find("Bezel");
+                Assert.IsNotNull(bezel, panels[i].name + " has a bezel");
+                Assert.AreEqual(faceHeight, bezel.lossyScale.y, 0.03f, "the bezel covers the TV's face");
+                Assert.Greater(tv.InverseTransformPoint(bezel.position).z, tv.InverseTransformPoint(panels[i].transform.position).z, "the bezel sits behind the picture");
             }
             alarm.Play();
             yield return null;
@@ -255,10 +262,16 @@ namespace VRRocket.Tests
             var refused = 0;
             UnityAction onRefused = () => refused++;
             bin.onRefused.AddListener(onRefused);
+            var live = Object.FindAnyObjectByType<ConsoleLiveScreens>();
+            Assert.IsNotNull(live, "the side TVs' live panels");
+            Assert.IsFalse(live.isLive, "the side TVs show NO SIGNAL while the console is broken");
+            foreach (var p in live.panels) Assert.IsFalse(p.gameObject.activeInHierarchy, p.name + " off");
             bin.Submit();
             bin.onRefused.RemoveListener(onRefused);
             Assert.AreEqual(1, refused);
             Assert.AreEqual(GamePhase.Assembly, flow.phase);
+            var title = GameObject.Find("ScreenTitle").GetComponent<TMPro.TextMeshPro>();
+            Assert.AreEqual("CONSOLE FAULT", title.text, "pressing SUBMIT on a broken console says why on the screens");
             // the puzzle's "all connected" event is wired to the flow: raise it as the puzzle would
             MonoBehaviour pairManager = null;
             foreach (var mb in Object.FindObjectsByType<MonoBehaviour>()) if (mb.GetType().Name == "CablePairManager") pairManager = mb;
@@ -267,8 +280,71 @@ namespace VRRocket.Tests
             AssertCalls(allConnected, flow, "MiniGameSolved");
             allConnected.Invoke();
             Assert.IsTrue(flow.miniGameSolved && flow.consoleOnline, "connecting every pair brings the console online");
+            Assert.AreEqual("CONSOLE ONLINE", title.text, "the screens say it is fixed");
+            Assert.IsTrue(live.isLive, "the side TVs come alive");
+            Assert.AreEqual(3, live.panels.Length, "three side TVs (the fourth carries the countdown clock)");
+            foreach (var p in live.panels) Assert.IsTrue(p.gameObject.activeInHierarchy, p.name + " on");
             screens.Refresh();
             StringAssert.DoesNotContain("CONSOLE OFFLINE", screens.pollVerdict);
+        }
+
+        [UnityTest]
+        public IEnumerator Wiring_Lights_Each_Pair_Locks_When_Done_And_Resets_For_A_New_Play()
+        {
+            yield return null;
+            var flow = Flow;
+            flow.StartWithoutIntro();
+            Object.FindAnyObjectByType<SlidingPanel>().SetOpenAmount(1f);
+            yield return null;
+            var box = GameObject.Find("PuzzleBox");
+            MonoBehaviour wiring = null;
+            foreach (var mb in box.GetComponents<MonoBehaviour>()) if (mb.GetType().Name == "ConsoleWiring") wiring = mb;
+            Assert.IsNotNull(wiring, "ConsoleWiring on the PuzzleBox");
+            var lights = (Renderer[])wiring.GetType().GetField("lights").GetValue(wiring);
+            var lightOn = (Material)wiring.GetType().GetField("lightOn").GetValue(wiring);
+            bool Locked() => (bool)wiring.GetType().GetProperty("locked").GetValue(wiring);
+            int Id(Component c) => (int)c.GetType().GetField("pairId").GetValue(c);
+            var sockets = box.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor>();
+            Assert.AreEqual(5, sockets.Length);
+            Assert.AreEqual(5, lights.Length, "a status light per pair");
+            foreach (var l in lights) Assert.AreNotSame(lightOn, l.sharedMaterial, "all lights off before any plug is in");
+
+            UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable PlugFor(int id)
+            {
+                foreach (var c in box.GetComponentsInChildren<MonoBehaviour>())
+                    if (c.GetType().Name == "CableConnector" && (bool)c.GetType().GetField("isPlug").GetValue(c) && Id(c) == id)
+                        return c.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+                return null;
+            }
+            var lit = 0; var done = 0;
+            foreach (var socket in sockets)
+            {
+                var id = Id(socket);
+                var plug = PlugFor(id);
+                plug.transform.position = socket.attachTransform.position;
+                manager.SelectEnter(socket, (UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)plug);
+                yield return null;
+                Assert.IsTrue(socket.hasSelection, "pair " + id + " plugged in");
+                lit = 0;
+                foreach (var l in lights) if (l.sharedMaterial == lightOn) lit++;
+                done++;
+                Assert.AreEqual(done, lit, "one more light on with pair " + id);
+            }
+            Assert.AreEqual(5, lit, "every pair's light is on");
+            Assert.IsTrue(flow.miniGameSolved && flow.consoleOnline, "all pairs connected: the console comes online");
+            Assert.IsTrue(Locked(), "the wiring locks");
+            var filter = (UnityEngine.XR.Interaction.Toolkit.Filtering.IXRSelectFilter)wiring;
+            Assert.IsFalse(filter.Process(hand, (UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)PlugFor(1)), "a hand cannot pull a plug out once the wiring is done");
+            Assert.IsTrue(filter.Process(sockets[0], (UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)PlugFor(1)), "the sockets keep their plugs");
+
+            flow.ResetMiniGame();   // what a new play does after a successful flight
+            for (var i = 0; i < 6; i++) yield return new WaitForFixedUpdate();
+            yield return null;
+            foreach (var socket in sockets) Assert.IsFalse(socket.hasSelection, "pair " + Id(socket) + " unplugged for the new play");
+            foreach (var l in lights) Assert.AreNotSame(lightOn, l.sharedMaterial, "lights off again");
+            Assert.IsFalse(Locked());
+            Assert.IsFalse(flow.consoleOnline, "the console is offline until the wiring is done again");
+            foreach (var p in Object.FindAnyObjectByType<ConsoleLiveScreens>().panels) Assert.IsFalse(p.gameObject.activeInHierarchy, p.name + " back to NO SIGNAL");
         }
 
         [UnityTest]
