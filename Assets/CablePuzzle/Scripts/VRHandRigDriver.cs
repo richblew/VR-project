@@ -16,6 +16,19 @@ namespace CablePuzzle
     public class VRHandRigDriver : MonoBehaviour
     {
         /// <summary>
+        /// An extra rotation applied to the hand after "Rotation Offset". Add as many as you like; they are
+        /// applied top to bottom. 'In Hand Space' rotates about the hand's own (already turned) axes,
+        /// otherwise about the controller's axes.
+        /// </summary>
+        [System.Serializable]
+        public class RotationStep
+        {
+            public Vector3 axis = new Vector3(0, 1, 0);
+            public float angle = 0f;
+            public bool inHandSpace = true;
+        }
+
+        /// <summary>
         /// One thumb joint. At full grip it is rotated by angleA about axisA, then by angleB about axisB
         /// (both axes are in the joint's own local space). Two rotations let the base joint swing the
         /// thumb in two directions at once (e.g. across the palm AND around the side of an object).
@@ -41,6 +54,13 @@ namespace CablePuzzle
             public Transform anchor;                  // auto-found: J_Left / J_Right
             public Vector3 positionOffset;            // in controller space (metres)
             public Vector3 rotationOffset;            // in controller space (degrees)
+            [Tooltip("Extra rotations applied after Rotation Offset, in order. Each has its own axis and angle, and can be in hand space or controller space.")]
+            public RotationStep[] rotationSteps = new RotationStep[3]
+            {
+                new RotationStep { axis = new Vector3(1, 0, 0), inHandSpace = true },
+                new RotationStep { axis = new Vector3(0, 1, 0), inHandSpace = true },
+                new RotationStep { axis = new Vector3(0, 0, 1), inHandSpace = true },
+            };
             public InputActionReference grip;         // float action, e.g. "XRI Left Interaction/Select Value" (enabled by XRI's Input Action Manager)
             public float curlSign = 1f;               // flip to -1 if this hand's FINGERS curl backwards (does not affect the thumb)
 
@@ -142,9 +162,21 @@ namespace CablePuzzle
             // 1. follow the controller
             if (h.controller != null)
             {
+                // start with the Euler rotation offset, then apply each extra rotation step in order
+                Quaternion offset = Quaternion.Euler(h.rotationOffset);
+                if (h.rotationSteps != null)
+                {
+                    foreach (var s in h.rotationSteps)
+                    {
+                        if (s == null || s.axis.sqrMagnitude < 1e-6f || Mathf.Approximately(s.angle, 0f)) continue;
+                        var q = Quaternion.AngleAxis(s.angle, s.axis.normalized);
+                        offset = s.inHandSpace ? offset * q      // about the hand's own (already rotated) axes
+                                               : q * offset;     // about the controller's axes
+                    }
+                }
                 h.anchor.SetPositionAndRotation(
                     h.controller.TransformPoint(h.positionOffset),
-                    h.controller.rotation * Quaternion.Euler(h.rotationOffset));
+                    h.controller.rotation * offset);
             }
 
             // 2. work out how closed the hand should be
