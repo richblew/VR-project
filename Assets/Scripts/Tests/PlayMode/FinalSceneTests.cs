@@ -189,6 +189,28 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator Side_Monitors_Poll_The_Build_And_Show_Range_Status()
+        {
+            yield return null;
+            var screens = Object.FindAnyObjectByType<ConsoleStatusScreens>();
+            Assert.IsNotNull(screens, "the console's side monitors");
+            Assert.IsFalse(GameObject.Find("Environment/Mission Control Desk/hq/jscmiscon2/Monitors").GetComponent<Renderer>().enabled, "the console's own screens are hidden under our monitors");
+            var left = GameObject.Find("ConsoleAddOn/ConsoleMonitorLeft").transform;
+            var right = GameObject.Find("ConsoleAddOn/ConsoleMonitorRight").transform;
+            Assert.Greater(left.position.x, right.position.x, "facing the console (-Z), GO / NO-GO is on the player's left");
+            screens.Refresh();
+            StringAssert.Contains("STBY", screens.pollText, "standby on the menu");
+            Assert.AreEqual("RANGE STATUS", screens.dataTitle);
+            Flow.StartWithoutIntro();
+            yield return null;
+            screens.Refresh();
+            StringAssert.Contains("NO-GO", screens.pollText, "an empty bench is not ready");
+            StringAssert.Contains("HOLD", screens.pollVerdict);
+            StringAssert.Contains("FLIGHTS    0", screens.dataText);
+            StringAssert.DoesNotContain("LOCK", screens.pollText, "the poll never gives away whether the cap is locked");
+        }
+
+        [UnityTest]
         public IEnumerator Countdown_Clock_Covers_Its_Whole_TV()
         {
             yield return null;
