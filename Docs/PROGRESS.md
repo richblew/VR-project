@@ -346,3 +346,10 @@ Our game and Richard's updated room in one scene, `Assets/Scenes/VRRocket_Final.
 - **Tests retired with `VRRocket_Main`:** `RoomIntegrationTests` is gone (its rig and display checks moved to `FinalSceneTests`); `GameFlowTests` now plays its games in `VRRocket_Final`. All tests and work are based on `VRRocket_Final` from here on.
 - **Verified:** edit mode 39/39 and play mode 31/31, full suites (13 October 2026).
 - **Built and installed** on the Quest 3 (`VRRocket_Quest` profile, final scene only).
+
+## 2026-10-13: Desk buttons in reach, console nameplate (done)
+
+From Praise's headset session on `VRRocket_Final`:
+- **BACK and NEXT** moved to the player's edge of the desk (24 cm from the front edge, right of the kit); before, they sat a metre in and were hard to reach.
+- **Console nameplate:** the small black plate on top of the console is now a LAUNCH STATION label screen.
+- **Verified:** edit mode 39/39 and play mode 31/31 (`FinalSceneTests` now also checks the buttons are within 30 cm of the desk edge and the nameplate text). Built and installed on the Quest 3.

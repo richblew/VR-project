@@ -24,7 +24,7 @@ MonoBehaviour:
   m_Scenes:
   - m_enabled: 1
     m_path: Assets/Scenes/VRRocket_Final.unity
-    m_guid: d24fce7455f8dbc4ab58185e8396f2cc
+    m_guid: a449d498250920643a480adb687320b0
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
