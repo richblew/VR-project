@@ -332,3 +332,17 @@ From Praise's first headset session on the merged room:
 - **Player too high:** the room set the rig's character controller to 3 m around a 0.76 m centre, so the capsule reached 0.74 m under the feet. `XRRigAdapter` resets such a capsule to 1.36 m on the feet, snaps the rig to the floor again once tracking has started, keeps floor tracking, and logs the rig's height and tracking mode to the device log 3 s after start.
 - `room.unity` was not edited; Richard may want to undo the locomotion and capsule changes in his scene too.
 - **Verified:** edit mode 38/38, play mode 26/26 (`Rig_Is_Adapted` checks locomotion on, the capsule, and the rig still on the floor after 90 frames of gravity). **Headset:** height and locomotion to confirm.
+
+## 2026-10-13: VRRocket_Final, the combined scene (done)
+
+Our game and Richard's updated room in one scene, `Assets/Scenes/VRRocket_Final.unity`, now the only scene in both build profiles. `VRRocket_Main` and `room.unity` are kept as they were. Details in [spec 13](../specs/13-final-scene.md).
+- **Room:** Richard's new layout; the help board and the old front window are gone; one large window on the alcove's left wall with the pad straight out from it; the rocket poster moved beside the moon poster; teleport areas fitted to the new room.
+- **Menu:** START WITH INTRO plays Richard's intro on demand, then building starts; SKIP INTRO goes straight to building. A curtain closes over the window while the intro dims the room and opens again with the lights.
+- **Desk:** BACK and NEXT buttons browse the five build steps on the blueprint panel and the picture monitor; any change to the build returns them to the live step.
+- **Console:** a wide monitor over the three centre screens carries the console mirror (pad view, title, clock, full status text).
+- **Abort:** ABORT during pre-launch or the countdown stops the engine, clears the pad and returns the same rocket editable; red ABORT panels flash over the four side TVs with a siren for 4 s and the big TV says LAUNCH ABORTED.
+- **Countdown clock:** now covers its whole TV.
+- **Fixed on the way:** the intro bridge looked for the intro while the scene was still loading and found nothing (so the intro, curtain and abort screens did not work in play); the test runner had silently not been running (the Editor had stopped answering after a restart).
+- **Tests retired with `VRRocket_Main`:** `RoomIntegrationTests` is gone (its rig and display checks moved to `FinalSceneTests`); `GameFlowTests` now plays its games in `VRRocket_Final`. All tests and work are based on `VRRocket_Final` from here on.
+- **Verified:** edit mode 39/39 and play mode 31/31, full suites (13 October 2026).
+- **Built and installed** on the Quest 3 (`VRRocket_Quest` profile, final scene only).

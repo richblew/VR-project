@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 namespace VRRocket.Tests
 {
     /// <summary>
-    /// The menu, game flow and launch sequence wired into VRRocket_Main on the teammates' room: parts locked until START, build, carry to the bin,
+    /// The menu, game flow and launch sequence in VRRocket_Final, started with SKIP INTRO: parts locked until START, build, carry to the bin,
     /// submit at the console, countdown, launch outside, result, and the returns of SPEC 8.4 (inspect-only after a failure,
     /// editable after an abort, new kit after a success). Timings are shortened; the flight itself runs at full length.
     /// </summary>
@@ -14,7 +14,10 @@ namespace VRRocket.Tests
     {
         const float k_Orbit = 0.06f;
 
-        protected override string scenePath => "Assets/Scenes/VRRocket_Main.unity";
+        protected override string scenePath => FinalSceneTests.Path;
+
+        /// <summary>Starts a play from the menu with SKIP INTRO (FinalSceneTests covers START WITH INTRO).</summary>
+        void BeginPlay() => flow.StartWithoutIntro();
 
         GameFlowController flow;
         SubmissionBin bin;
@@ -28,10 +31,10 @@ namespace VRRocket.Tests
             bin = Object.FindAnyObjectByType<SubmissionBin>();
             launch = Object.FindAnyObjectByType<LaunchSequence>();
             menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
-            Assert.IsNotNull(flow, "GameFlowController in VRRocket_Main");
-            Assert.IsNotNull(bin, "SubmissionBin in VRRocket_Main");
-            Assert.IsNotNull(launch, "LaunchSequence in VRRocket_Main");
-            Assert.IsNotNull(menu, "MenuPanel in VRRocket_Main");
+            Assert.IsNotNull(flow, "GameFlowController in the scene");
+            Assert.IsNotNull(bin, "SubmissionBin in the scene");
+            Assert.IsNotNull(launch, "LaunchSequence in the scene");
+            Assert.IsNotNull(menu, "MenuPanel in the scene");
             vehicle = launch.transform.Find("LaunchVehicle").gameObject;
             flow.countdownSeconds = 1f;
             flow.resultSeconds = 1f;
@@ -103,7 +106,7 @@ namespace VRRocket.Tests
             yield return CanGrabFromNear(fin, r => can = r);
             Assert.IsFalse(can, "parts are locked while the menu is up");
 
-            flow.StartGame();
+            BeginPlay();
             yield return null;
             Assert.AreEqual(GamePhase.Assembly, flow.phase);
             yield return new WaitForSeconds(0.5f);
@@ -179,7 +182,7 @@ namespace VRRocket.Tests
         public IEnumerator Menu_Start_Build_LockCap_Submit_Launch_Success_BackToMenuWithNewKit()
         {
             yield return FindFlow();
-            flow.StartGame();
+            BeginPlay();
             yield return null;
             var blueprint = Object.FindAnyObjectByType<BlueprintDisplay>();
             Assert.AreEqual(0, blueprint.shownImage, "the build-step monitor shows step 1 (fins) at the start");
@@ -212,6 +215,47 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator Abort_During_The_Countdown_Stops_The_Launch_And_Returns_The_Rocket()
+        {
+            yield return FindFlow();
+            flow.countdownSeconds = 5f;   // ignition 3 s before liftoff, so the engine is lit for a while before T-0
+            BeginPlay();
+            yield return null;
+            yield return BuildPrototype();
+            var tube = Tube;
+            yield return CarryToBin();
+            yield return new WaitForSeconds(0.6f);
+            bin.Submit();
+            yield return new WaitForSeconds(1.8f);
+            flow.Launch();
+            Assert.AreEqual(GamePhase.Countdown, flow.phase);
+            var t0 = Time.time;
+            while (!launch.isIgnited && Time.time - t0 < 5f) yield return null;
+            Assert.IsTrue(launch.isIgnited, "the engine lights before liftoff");
+            Assert.AreEqual(GamePhase.Countdown, flow.phase, "still counting down");
+
+            flow.Abort();
+            Assert.AreEqual(GamePhase.Assembly, flow.phase, "ABORT stops the countdown and goes back to building");
+            Assert.IsFalse(launch.isIgnited, "engine out");
+            Assert.IsFalse(launch.isRunning, "no flight");
+            Assert.IsFalse(vehicle.activeInHierarchy, "pad cleared");
+            Assert.AreSame(tube, assembly.tube, "the same rocket comes back to the bench");
+            Assert.IsTrue(tube.gameObject.activeInHierarchy);
+            Assert.AreEqual(AssemblyState.PrototypeComplete, assembly.State);
+            Assert.IsFalse(assembly.isFrozen, "editable");
+            var alarm = Object.FindAnyObjectByType<AbortAlarm>();
+            if (alarm != null)
+            {
+                Assert.IsTrue(alarm.isPlaying && alarm.sirenPlaying, "the abort alarm flashes and sounds");
+                Assert.AreEqual("LAUNCH ABORTED", GameObject.Find("ScreenTitle").GetComponent<TMPro.TextMeshPro>().text);
+            }
+            yield return new WaitForSeconds(3f);   // past where liftoff would have been
+            Assert.AreEqual(GamePhase.Assembly, flow.phase, "the countdown does not resume");
+            Assert.AreEqual(0, flow.attempts, "an aborted launch is not a flight");
+            Assert.IsFalse(vehicle.activeInHierarchy);
+        }
+
+        [UnityTest]
         public IEnumerator ButtonsOutOfPhase_DoNothing()
         {
             yield return FindFlow();
@@ -220,7 +264,7 @@ namespace VRRocket.Tests
             Assert.AreEqual(GamePhase.Menu, flow.phase, "launch and abort are ignored in the menu");
             bin.Submit();
             Assert.AreEqual(GamePhase.Menu, flow.phase, "submit with an empty bin is refused");
-            flow.StartGame();
+            BeginPlay();
             yield return null;
             flow.StartGame();
             flow.Launch();

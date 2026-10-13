@@ -24,7 +24,9 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 | Orbitron (variable) | Matt McInerney | https://github.com/google/fonts/tree/main/ofl/orbitron | SIL Open Font License 1.1 | 2026-10-09 | menu and screen titles |
 | Share Tech Mono | Carrois Apostrophe | https://github.com/google/fonts/tree/main/ofl/sharetechmono | SIL Open Font License 1.1 | 2026-10-09 | telemetry, status and body text |
 
-Beeps, chimes and buzzes in the flow are generated in code (`ProceduralAudio`).
+| Rough Linen | colormass (Poly Haven) | https://polyhaven.com/a/rough_linen | CC0 | 2026-10-13 | the window curtain in `VRRocket_Final` (`Assets/Texture/Curtain`, diffuse and normal maps at 1k) |
+
+Beeps, chimes, buzzes and the abort siren are generated in code (`ProceduralAudio`).
 
 ## Unity
 

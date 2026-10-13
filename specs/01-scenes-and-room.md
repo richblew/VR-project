@@ -1,5 +1,7 @@
 # 01 Scenes and the room
 
+> **Retired, 13 October 2026.** This page describes `VRRocket_Main`, which loaded `room.unity` at runtime. The game now lives in `VRRocket_Final`, which holds the room itself: no loader, no bindings. See [spec 13](13-final-scene.md). The intro bridge (section 5) and the rig adapter are still used there.
+
 How our scene (`VRRocket_Main`) and the room team's scene (`room.unity`) run together, how our systems find the room's objects, and what to do when the room changes. Back to the [main spec](README.md).
 
 | | |

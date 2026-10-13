@@ -5,7 +5,7 @@ namespace VRRocket
 {
     /// <summary>
     /// Switches the mission displays (the overlay on the big screen, the countdown clock, the console mirror) off while the start
-    /// menu is up and on for the game, so the room's own screens and its intro show until the player presses START.
+    /// menu is up (and during the intro) and on for the game, so the room's own screens and its intro show until building starts.
     /// </summary>
     public sealed class PhaseDisplays : MonoBehaviour
     {
@@ -35,7 +35,7 @@ namespace VRRocket
 
         void Apply(GamePhase phase)
         {
-            var show = phase != GamePhase.Menu;
+            var show = phase != GamePhase.Menu && phase != GamePhase.Intro;   // the room's own screens show the intro
             foreach (var go in m_GameDisplays)
                 if (go != null && go.activeSelf != show) go.SetActive(show);
         }

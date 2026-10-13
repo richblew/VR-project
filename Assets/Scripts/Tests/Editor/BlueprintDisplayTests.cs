@@ -83,6 +83,26 @@ namespace VRRocket.Tests
         }
 
         [Test]
+        public void Back_And_Next_Browse_The_Steps_Until_The_Build_Changes()
+        {
+            var m = new AssemblyStateMachine { enforceOrder = false };
+            for (var i = 0; i < 3; i++) m.Apply(PartType.TailFin, true);
+            m_Display.ShowState(m);
+            Expect(1, "STEP 2 / 5", "live: the flaps step");
+            m_Display.ShowNextStep();
+            Expect(2, "VIEWING STEP 3 / 5", "NEXT shows the nose step");
+            Assert.AreEqual(2, m_Display.browsedStep);
+            for (var i = 0; i < 5; i++) m_Display.ShowNextStep();
+            Expect(4, "VIEWING STEP 5 / 5", "NEXT stops at the last step");
+            for (var i = 0; i < 9; i++) m_Display.ShowPreviousStep();
+            Expect(0, "VIEWING STEP 1 / 5", "BACK stops at the first step");
+            m.Apply(PartType.WingFlap, true);
+            m_Display.ShowState(m);
+            Expect(1, "STEP 2 / 5   WING FLAPS  1/3", "a part attached: back to the live step");
+            Assert.AreEqual(-1, m_Display.browsedStep);
+        }
+
+        [Test]
         public void Without_A_Screen_Or_Pictures_Only_The_Text_Changes()
         {
             m_Display.ConfigureImages(null, null);

@@ -15,10 +15,10 @@ Unity 6 uses **build profiles**: each one is an asset with its own platform, set
 
 | Profile | Platform | Scenes, in order |
 |---|---|---|
-| `VRRocket_Windows` | Windows (Standalone) | `Assets/Scenes/VRRocket_Main.unity`, `Assets/Scenes/room.unity` |
-| `VRRocket_Quest` | Android | the same two |
+| `VRRocket_Windows` | Windows (Standalone) | `Assets/Scenes/VRRocket_Final.unity` |
+| `VRRocket_Quest` | Android | the same |
 
-Both override the global scene list, which is left as the room team had it. The first scene is the one the game starts with. `room.unity` must be in the list because a build can only load scenes it contains ([spec 01](01-scenes-and-room.md)).
+Both override the global scene list, which is left as the room team had it. Since 13 October 2026 they build only `VRRocket_Final`, which holds the room itself ([spec 13](13-final-scene.md)). To build the older `VRRocket_Main` instead, list it first and `room.unity` second: that scene loads the room at runtime, and a build can only load scenes it contains ([spec 01](01-scenes-and-room.md)).
 
 ## 2. Building for PC VR (Windows)
 
@@ -29,7 +29,7 @@ Both override the global scene list, which is left as the room team had it. The 
    - **HTC Vive or Valve Index:** start SteamVR, and make it the OpenXR runtime (SteamVR > Settings > OpenXR > Set SteamVR as OpenXR Runtime).
    - **Meta Quest over Link or Air Link:** start the Meta Quest Link app and set it as the active OpenXR runtime (in its Settings > General). Virtual Desktop also works.
 
-**Play in the Editor with a PC headset:** the same runtime choice applies. With the Windows profile active and the headset connected, press Play in `VRRocket_Main`.
+**Play in the Editor with a PC headset:** the same runtime choice applies. With the Windows profile active and the headset connected, press Play in `VRRocket_Final`.
 
 ## 3. Building for Quest 3 (Android)
 

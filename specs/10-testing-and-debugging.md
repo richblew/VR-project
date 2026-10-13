@@ -5,7 +5,7 @@ How to run the automated tests, what each one checks, how they work, and a playb
 | | |
 |---|---|
 | **Test code** | `Assets/Scripts/Tests/Editor/` (edit mode, assembly `VRRocket.Tests.Editor`) and `Assets/Scripts/Tests/PlayMode/` (play mode, assembly `VRRocket.Tests.PlayMode`) |
-| **Totals** | 38 edit-mode tests, 26 play-mode tests. All passed twice in a row on 12 October 2026. |
+| **Totals** | 39 edit-mode tests, 31 play-mode tests. All passed on 13 October 2026. |
 | **Run them** | Window > General > **Test Runner** |
 
 ## 1. Running the tests
@@ -15,7 +15,7 @@ How to run the automated tests, what each one checks, how they work, and a playb
 3. **PlayMode** tab: click **Run All**. These load real scenes and take a few minutes. Do not click in the Editor while they run.
 4. Green tick = passed, red cross = failed. Click a failed test to see its message at the bottom. Right-click a test (or a class) > **Run** to run just that one.
 
-Run both tabs before you push any change to VR Rocket's scripts, prefabs, scenes or settings, and after any change to `VRRocket_Main` or the room that our scene depends on.
+Run both tabs before you push any change to VR Rocket's scripts, prefabs, scenes or settings, and after any change to `VRRocket_Final`.
 
 **From the command line** (with the Editor closed), Unity's standard test runner works:
 
@@ -27,7 +27,7 @@ Use `-testPlatform PlayMode` for the play-mode suite. The results are NUnit XML.
 
 ## 2. What the tests check
 
-### Edit mode (38)
+### Edit mode (39)
 
 | Class | Tests | Checks |
 |---|---|---|
@@ -39,12 +39,12 @@ Use `-testPlatform PlayMode` for the play-mode suite. The results are NUnit XML.
 | `RocketFlightModelTests` | 4 | success lifts off and climbs, the mass falls during the burn, unstable flight tilts, tumbles and explodes, retention loss never leaves the pad |
 | `StaticResetsTests` | 2 | `AssemblyEvents` and our singletons are cleared when Play mode starts (the project enters Play mode without a domain reload) |
 | `FeedbackDeviceTuningTests` | 2 | Vive gets strength and duration floors and the runtime frequency; Index keeps the frequency; Touch Plus is untouched |
-| `BlueprintDisplayTests` | 2 | every build stage shows its step text and the matching picture on the build-step monitor; without a screen only the text changes |
+| `BlueprintDisplayTests` | 3 | every build stage shows its step text and the matching picture on the build-step monitor; BACK and NEXT browse the steps (stopping at 1 and 5) until the build changes; without a screen only the text changes |
 | `ScreenTextTests` | 1 | the big screen's "first sentence" cut at ". " and " \| " |
 
-### Play mode (26)
+### Play mode (31)
 
-Most use `Dev_Interactions.unity` (a grey room with only the kit); the last three classes use `VRRocket_Main` with the real room.
+Most use `Dev_Interactions.unity` (a grey test bench with only the kit and a rig); the last two classes use `VRRocket_Final`, the scene we ship. `VRRocket_Main` has no tests since it was retired on 13 October 2026.
 
 | Class | Tests | Checks |
 |---|---|---|
@@ -54,14 +54,14 @@ Most use `Dev_Interactions.unity` (a grey room with only the kit); the last thre
 | `FullFlowTests` | 5 | build, carry, submit, failed launch and new kit; submit then abort returns it editable; attached parts follow the carried rocket and dropped parts respawn; parts do not lag behind the rocket frame by frame; a dropped rocket returns to the desk |
 | `NearOnlyGrabTests` | 1 | parts refuse a far hand and accept a near one |
 | `RespawnSafeZoneTests` | 1 | a part resting in a safe zone below the floor line stays put |
-| `GameFlowTests` | 3 | two complete games in `VRRocket_Main`: an unlocked cap fails, comes back for inspection and a new kit appears; a locked cap flies past orbit altitude and returns to the menu with a new kit; buttons pressed in the wrong phase do nothing |
-| `RoomIntegrationTests` | 8 | the room loads once with one rig, EventSystem, manager and AudioListener, and our scene stays active; the rig is adapted; the bindings match the room with no warnings; teleport areas cover the floor but not the furniture; the console buttons and START are wired; the console buttons press with a hand; a swap whose room object is missing leaves the room alone; START ends the intro and switches our screens on |
+| `GameFlowTests` | 4 | complete games in `VRRocket_Final`, started with SKIP INTRO: an unlocked cap fails, comes back for inspection and a new kit appears; a locked cap flies past orbit altitude and returns to the menu with a new kit; ABORT during the countdown puts the engine out, clears the pad and returns the same rocket editable (with the alarm); buttons pressed in the wrong phase do nothing |
+| `FinalSceneTests` | 12 | one scene with one rig, EventSystem, manager and AudioListener, no loader, help board or old window, a curtain; the rig is adapted (generic buzz off, Jump off, floor tracking, capsule, locomotion, hands that grab parts); the menu offers START WITH INTRO and SKIP INTRO; SKIP goes straight to building and switches the game displays on; START WITH INTRO plays the intro, the curtain closes and reopens, building starts when it ends; SKIP during the intro; the ABORT panels sit on the four side TVs, flash with the siren and hide again; the countdown clock covers its whole TV; console and step buttons wired and pressed by a hand; only the window glass between the player and the rocket; teleport areas cover the floor but not the furniture |
 
 ## 3. How the play-mode tests work
 
 All play-mode tests share `DevSceneTestBase`:
 
-1. It loads the test's scene (`Dev_Interactions` unless the class overrides `scenePath`) and, for `VRRocket_Main`, waits up to 900 frames for the room to load.
+1. It loads the test's scene (`Dev_Interactions` unless the class overrides `scenePath`). A scene with a `RoomSceneLoader` would also be waited for; none has one now.
 2. It takes over the rig's **right controller**: it switches off the controller's tracking (`TrackedPoseDriver`) and XRI's input modality manager, and makes the hand's attach point follow rigidly.
 3. Tests then **move the controller by setting its position** and grab and release through the interaction manager, exactly as a real hand would trigger XRI.
 4. Instead of a second hand, the body tube is parked **upright above its tray slot and frozen**, which counts as "held in the other hand".
@@ -69,7 +69,7 @@ All play-mode tests share `DevSceneTestBase`:
 
 Haptics and how things feel can only be checked in a headset.
 
-**Tests that depend on the room** (`VRRocket_Main` tests): they use room names and positions. If the room team renames `Environment/Floorplan/Right wall`, the TVs, the console, or the intro objects `Incoming_Transmission`, `Transmission_Video` and `stand_by`, or moves the floor, desk or spawn, these tests tell you. Fix the binding or the test, not the room.
+**Tests that depend on the room** (`VRRocket_Final` tests): they use the room's objects in that scene: the side TVs and the intro (`TransmissionController`, `Incoming_Transmission`, `Transmission_Video`, `stand_by`), the console's `Monitors` mesh, the window, the floor and desk. Changes Richard makes to `room.unity` no longer reach `VRRocket_Final`; room changes are made in `VRRocket_Final` itself, then run these tests.
 
 ## 4. Debugging playbook
 
