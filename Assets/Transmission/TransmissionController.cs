@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Video;
 
 public class TransmissionController : MonoBehaviour
@@ -10,11 +11,18 @@ public class TransmissionController : MonoBehaviour
         FullSequence,
         PreviewTransmissionScreen,
         PreviewStandbyScreen,
-        PreviewLogoScreen
+        PreviewLogoScreen,
+        PreviewDimmedRoom
     }
 
-    [Header("Mode (use a Preview mode to line up the screen)")]
+    [Header("Mode (use a Preview mode to test one part)")]
     public Mode mode = Mode.FullSequence;
+
+    [Tooltip("Play the full sequence as soon as the scene starts. Off in VRRocket_Final, where the game starts it from the menu (START WITH INTRO).")]
+    public bool playOnStart = true;
+
+    // Set when the full sequence has run to its end (read by VR Rocket's TransmissionBridge).
+    [HideInInspector] public bool sequenceFinished;
 
     [Header("Main Screen")]
     public Renderer mainScreen;
@@ -22,6 +30,12 @@ public class TransmissionController : MonoBehaviour
     public Material nasaLogoMaterial;
     public Material standbyMaterial;
     public Material videoMaterial;
+
+    [Header("Side Screens (blank during announcement + video)")]
+    public Renderer[] sideScreens;
+    public int sideScreenMaterialIndex = 0;
+    public Material blankMaterial;
+    public GameObject[] disableDuringBlank;   // e.g. the two "No singal" objects (optional)
 
     [Header("Videos")]
     public VideoPlayer standbyPlayer;
@@ -38,18 +52,28 @@ public class TransmissionController : MonoBehaviour
     public float standbyAfterAudio = 4f;
 
     [Header("Red Alert Lights")]
-    public GameObject lightsParent;          // e.g. Environment/Lights (these turn red)
-    public GameObject[] extraAlertLights;    // optional red lights switched on/off
+    public GameObject lightsParent;
+    public GameObject[] extraAlertLights;
     public Color alertColor = Color.red;
     public float flashInterval = 0.4f;
-    public bool flashDuringLogo = false;     // tick to flash from the very start
+    public bool flashDuringLogo = false;
 
     [Header("Room Dimming")]
-    [Range(0f, 1f)] public float dimmedLevel = 0.05f;  // 0 = pitch black, 1 = no dimming
-    public float fadeTime = 2f;
+    [Range(0f, 1f)] public float dimmedLevel = 0.05f;   // 0 = pitch black, 1 = no dimming
+    [Tooltip("0 = dim slowly over the whole standby period (audio + extra seconds)")]
+    public float standbyDimTime = 0f;
+    public float fadeUpTime = 2f;                       // brightening at the end
 
-    [Header("Glowing Meshes (ceiling panels, lamps). NOT the TV screen")]
+    [Header("Cube / Mesh Lights (white material)")]
+    public GameObject glowParent;
     public Renderer[] glowRenderers;
+
+    private class GlowMat
+    {
+        public Material mat;
+        public List<string> props = new List<string>();
+        public List<Color> cols = new List<Color>();
+    }
 
     private Light[] alertLights = new Light[0];
     private Color[] alertOriginalColors = new Color[0];
@@ -58,10 +82,11 @@ public class TransmissionController : MonoBehaviour
     private float ambientOriginal;
     private float reflectionOriginal;
     private Coroutine flashRoutine;
+    private Coroutine dimRoutine;
+    private List<GlowMat> glowMats = new List<GlowMat>();
 
-    private List<Material> glowMaterials = new List<Material>();
-    private List<Color> glowEmission = new List<Color>();
-    private List<Color> glowBase = new List<Color>();
+    private Material[][] sideOriginalMats;
+    private bool sideBlanked = false;
 
     private void Start()
     {
@@ -73,7 +98,6 @@ public class TransmissionController : MonoBehaviour
                 alertOriginalColors[i] = alertLights[i].color;
         }
 
-        // Every light in the scene (except the extra red ones) gets dimmed for the video
         Light[] all = FindObjectsByType<Light>(FindObjectsSortMode.None);
         var list = new List<Light>();
         foreach (Light l in all)
@@ -91,23 +115,19 @@ public class TransmissionController : MonoBehaviour
         ambientOriginal = RenderSettings.ambientIntensity;
         reflectionOriginal = RenderSettings.reflectionIntensity;
 
-        foreach (Renderer r in glowRenderers)
-        {
-            if (r == null) continue;
-            foreach (Material m in r.materials) // instances, so your original assets aren't changed
-            {
-                glowMaterials.Add(m);
-                glowEmission.Add(m.HasProperty("_EmissionColor") ? m.GetColor("_EmissionColor") : Color.black);
-                glowBase.Add(m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor") : Color.white);
-            }
-        }
+        // Remember the side screens' normal materials
+        sideOriginalMats = new Material[sideScreens.Length][];
+        for (int i = 0; i < sideScreens.Length; i++)
+            if (sideScreens[i] != null)
+                sideOriginalMats[i] = sideScreens[i].sharedMaterials;
 
+        CollectGlowMaterials();
         SetAlert(false);
 
         switch (mode)
         {
             case Mode.FullSequence:
-                StartCoroutine(PlaySequence());
+                if (playOnStart) StartCoroutine(PlaySequence());
                 break;
             case Mode.PreviewTransmissionScreen:
                 StartCoroutine(PreviewVideo(videoMaterial, videoPlayer, transmissionTexture));
@@ -118,16 +138,60 @@ public class TransmissionController : MonoBehaviour
             case Mode.PreviewLogoScreen:
                 ShowMaterial(nasaLogoMaterial);
                 break;
+            case Mode.PreviewDimmedRoom:
+                StartCoroutine(PreviewDim());
+                break;
         }
     }
 
     private void OnDisable()
     {
+        if (flashRoutine != null)
+        {
+            StopCoroutine(flashRoutine);
+            flashRoutine = null;
+        }
         SetAlert(false);
         SetDim(0f);
+        if (sideBlanked) SetSideScreensBlank(false);
     }
 
-    // ---------- preview (no lights, no timing, video loops) ----------
+    // ---------- finding the cube lights ----------
+    private void CollectGlowMaterials()
+    {
+        var rends = new HashSet<Renderer>();
+        foreach (Renderer r in glowRenderers)
+            if (r != null) rends.Add(r);
+        if (glowParent != null)
+            foreach (Renderer r in glowParent.GetComponentsInChildren<Renderer>(true))
+                rends.Add(r);
+        if (mainScreen != null) rends.Remove(mainScreen); // never dim the TV
+        foreach (Renderer s in sideScreens) rends.Remove(s);
+
+        foreach (Renderer r in rends)
+        {
+            foreach (Material m in r.materials)
+            {
+                var g = new GlowMat { mat = m };
+                Shader s = m.shader;
+                for (int i = 0; i < s.GetPropertyCount(); i++)
+                {
+                    if (s.GetPropertyType(i) != ShaderPropertyType.Color) continue;
+                    string n = s.GetPropertyName(i);
+                    g.props.Add(n);
+                    g.cols.Add(m.GetColor(n));
+                }
+                if (g.props.Count == 0)
+                    Debug.LogWarning($"[Transmission] '{m.name}' has no colour properties, so it can't be dimmed. Shader: {s.name}");
+                glowMats.Add(g);
+            }
+        }
+
+        if (glowMats.Count == 0)
+            Debug.LogWarning("[Transmission] No cube lights found. Fill in Glow Parent or Glow Renderers.");
+    }
+
+    // ---------- previews ----------
     private IEnumerator PreviewVideo(Material mat, VideoPlayer vp, RenderTexture rt)
     {
         SetupPlayer(vp, rt, true);
@@ -138,12 +202,27 @@ public class TransmissionController : MonoBehaviour
         vp.Play();
     }
 
+    private IEnumerator PreviewDim()
+    {
+        yield return new WaitForSeconds(1f);
+        SetSideScreensBlank(true);
+        yield return FadeRoom(0f, 1f, 6f);
+    }
+
     // ---------- full sequence ----------
+    /// <summary>Plays the full sequence from the start (used by the game when playOnStart is off).</summary>
+    public void PlaySequenceNow()
+    {
+        StopAllCoroutines();
+        sequenceFinished = false;
+        StartCoroutine(PlaySequence());
+    }
+
     private IEnumerator PlaySequence()
     {
         float startTime = Time.time;
 
-        // 1. NASA logo
+        // 1. NASA logo (side screens show their normal picture)
         ShowMaterial(nasaLogoMaterial);
         if (flashDuringLogo) StartFlashing();
 
@@ -158,20 +237,24 @@ public class TransmissionController : MonoBehaviour
         if (remaining > 0f)
             yield return new WaitForSeconds(remaining);
 
-        // 2. Standby video + announcement + red flashing, all together
+        // 2. Standby + announcement + red flashing + side screens blank + slow dim
+        float standbyTotal = announcementClip.length + standbyAfterAudio;
+        float dimDuration = standbyDimTime > 0f ? standbyDimTime : standbyTotal;
+
         ShowMaterial(standbyMaterial);
+        SetSideScreensBlank(true);
         standbyPlayer.Play();
         announcementAudio.clip = announcementClip;
         announcementAudio.Play();
         StartFlashing();
+        dimRoutine = StartCoroutine(FadeRoom(0f, 1f, dimDuration));
 
-        // 3. Keep going for the audio length + extra standby time
-        yield return new WaitForSeconds(announcementClip.length + standbyAfterAudio);
+        // 3. Audio length + extra standby time
+        yield return new WaitForSeconds(standbyTotal);
         StopFlashing();
         standbyPlayer.Stop();
 
-        // 4. Dim the room and play the transmission
-        StartCoroutine(FadeRoom(0f, 1f));
+        // 4. Transmission video in the dark
         bool finished = false;
         videoPlayer.loopPointReached += _ => finished = true;
         ShowMaterial(videoMaterial);
@@ -179,9 +262,32 @@ public class TransmissionController : MonoBehaviour
         while (!finished)
             yield return null;
 
-        // 5. Back to the NASA logo, lights back up
+        // 5. Back to the NASA logo, side screens and lights return
         ShowMaterial(nasaLogoMaterial);
-        yield return FadeRoom(1f, 0f);
+        SetSideScreensBlank(false);
+        if (dimRoutine != null) StopCoroutine(dimRoutine);
+        yield return FadeRoom(1f, 0f, fadeUpTime);
+        sequenceFinished = true;
+    }
+
+    // ---------- side screens ----------
+    private void SetSideScreensBlank(bool blank)
+    {
+        sideBlanked = blank;
+
+        foreach (GameObject g in disableDuringBlank)
+            if (g != null) g.SetActive(!blank);
+
+        for (int i = 0; i < sideScreens.Length; i++)
+        {
+            Renderer r = sideScreens[i];
+            if (r == null || sideOriginalMats[i] == null) continue;
+
+            Material[] mats = (Material[])sideOriginalMats[i].Clone();
+            if (blank && sideScreenMaterialIndex < mats.Length)
+                mats[sideScreenMaterialIndex] = blankMaterial;
+            r.sharedMaterials = mats;
+        }
     }
 
     // ---------- flashing ----------
@@ -215,28 +321,35 @@ public class TransmissionController : MonoBehaviour
     private void SetAlert(bool on)
     {
         for (int i = 0; i < alertLights.Length; i++)
+        {
+            if (alertLights[i] == null) continue;
             alertLights[i].color = on ? alertColor : alertOriginalColors[i];
+        }
 
         foreach (GameObject g in extraAlertLights)
             if (g != null) g.SetActive(on);
     }
 
     // ---------- dimming ----------
-    private IEnumerator FadeRoom(float from, float to)
+    private IEnumerator FadeRoom(float from, float to, float duration)
     {
         float t = 0f;
-        while (t < fadeTime)
+        while (t < duration)
         {
             t += Time.deltaTime;
-            SetDim(Mathf.Lerp(from, to, t / fadeTime));
+            SetDim(Mathf.Lerp(from, to, t / duration));
             yield return null;
         }
         SetDim(to);
     }
 
     // amount: 0 = normal, 1 = fully dimmed
+    // How dimmed the room is right now, 0 (normal) to 1 (dimmed). Read by VR Rocket's window curtain.
+    [HideInInspector] public float currentDim;
+
     private void SetDim(float amount)
     {
+        currentDim = amount;
         float factor = Mathf.Lerp(1f, dimmedLevel, amount);
 
         for (int i = 0; i < roomLights.Length; i++)
@@ -246,19 +359,13 @@ public class TransmissionController : MonoBehaviour
         RenderSettings.ambientIntensity = ambientOriginal * factor;
         RenderSettings.reflectionIntensity = reflectionOriginal * factor;
 
-        for (int i = 0; i < glowMaterials.Count; i++)
+        foreach (GlowMat g in glowMats)
         {
-            Material m = glowMaterials[i];
-            if (m == null) continue;
-            if (m.HasProperty("_EmissionColor"))
+            if (g.mat == null) continue;
+            for (int i = 0; i < g.props.Count; i++)
             {
-                Color e = glowEmission[i];
-                m.SetColor("_EmissionColor", new Color(e.r * factor, e.g * factor, e.b * factor, e.a));
-            }
-            if (m.HasProperty("_BaseColor"))
-            {
-                Color b = glowBase[i];
-                m.SetColor("_BaseColor", new Color(b.r * factor, b.g * factor, b.b * factor, b.a));
+                Color c = g.cols[i];
+                g.mat.SetColor(g.props[i], new Color(c.r * factor, c.g * factor, c.b * factor, c.a));
             }
         }
     }

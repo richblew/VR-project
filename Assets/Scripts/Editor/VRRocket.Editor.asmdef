@@ -1,0 +1,19 @@
+{
+    "name": "VRRocket.Editor",
+    "rootNamespace": "VRRocket.Editor",
+    "references": [
+        "VRRocket.Runtime",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
