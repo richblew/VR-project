@@ -9856,19 +9856,19 @@ MonoBehaviour:
     anchor: {fileID: 1917833284}
     positionOffset: {x: 0, y: 0.01, z: -0.12}
     rotationOffset: {x: 110.43, y: 16.8, z: 0}
-    grip: {fileID: 6558622148059887818, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+    grip: {fileID: -4289430672226363583, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     curlSign: -1
     thumb:
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 40
-      axisB: {x: 0, y: 1, z: 0}
+    - axisA: {x: 0, y: 0, z: -0.94}
+      angleA: 36.6
+      axisB: {x: 0.14, y: -5.52, z: 0.37}
       angleB: 25
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 15
+    - axisA: {x: 15.58, y: -18.09, z: -7.44}
+      angleA: 41.5
       axisB: {x: 0, y: 1, z: 0}
-      angleB: 0
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 20
+      angleB: -3.87
+    - axisA: {x: 13.8, y: -18.46, z: 1}
+      angleA: 38.1
       axisB: {x: 0, y: 1, z: 0}
       angleB: 0
   right:
@@ -9877,19 +9877,19 @@ MonoBehaviour:
     anchor: {fileID: 1917833283}
     positionOffset: {x: 0, y: 0, z: -0.09}
     rotationOffset: {x: -89.4, y: 90.1, z: -74}
-    grip: {fileID: -1758520528963094988, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+    grip: {fileID: 7904272356298805229, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     curlSign: 1
     thumb:
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 40
-      axisB: {x: 0, y: 1, z: 0}
+    - axisA: {x: 0, y: 0, z: -0.94}
+      angleA: 36.6
+      axisB: {x: 0.14, y: -5.52, z: 0.37}
       angleB: 25
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 15
+    - axisA: {x: 15.58, y: -18.09, z: -7.44}
+      angleA: 41.5
       axisB: {x: 0, y: 1, z: 0}
-      angleB: 0
-    - axisA: {x: 0, y: 0, z: 1}
-      angleA: 20
+      angleB: -3.87
+    - axisA: {x: 13.8, y: -18.46, z: 1}
+      angleA: 38.1
       axisB: {x: 0, y: 1, z: 0}
       angleB: 0
   autoFingerAxis: 1
