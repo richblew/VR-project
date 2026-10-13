@@ -29,7 +29,7 @@ namespace VRRocket.Editor
         /// <summary>Renders the picture if it is missing (or when <paramref name="force"/>), then returns the bright and dim materials.</summary>
         public static (Material on, Material off) Make(bool force = true)
         {
-            if (force || !File.Exists(ImagePath)) Render();
+            if (force || !File.Exists(ImagePath)) Render(ImagePath, k_Red, "ABORT", "LAUNCH ABORTED", Color.white, true);
             var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(ImagePath);
             return (MakeMaterial(OnMaterialPath, tex, Color.white), MakeMaterial(OffMaterialPath, tex, new Color(0.22f, 0.2f, 0.2f)));
         }
@@ -45,7 +45,17 @@ namespace VRRocket.Editor
             return mat;
         }
 
-        static void Render()
+        public const string OnlineImagePath = "Assets/Texture/Screens/Online_Screen.png";
+        public const string OnlineMaterialPath = "Assets/Materials/Screens/Mat_OnlineScreen.mat";
+
+        /// <summary>The green SYSTEMS ONLINE card the side TVs show once the console's wiring is fixed (ConsoleLiveScreens).</summary>
+        public static Material MakeOnlineCard(bool force = true)
+        {
+            if (force || !File.Exists(OnlineImagePath)) Render(OnlineImagePath, new Color(0.02f, 0.06f, 0.07f), "SYSTEMS ONLINE", "LAUNCH CONSOLE READY", new Color(0.3f, 1f, 0.5f), false);
+            return MakeMaterial(OnlineMaterialPath, AssetDatabase.LoadAssetAtPath<Texture2D>(OnlineImagePath), Color.white);
+        }
+
+        static void Render(string imagePath, Color background, string title, string subtitle, Color textColour, bool hazardStripes)
         {
             // built far below the room and never saved with the scene
             var origin = new Vector3(0f, -600f, 0f);
@@ -59,22 +69,22 @@ namespace VRRocket.Editor
             {
                 var cam = camGo.AddComponent<Camera>();
                 cam.clearFlags = CameraClearFlags.SolidColor;
-                cam.backgroundColor = k_Red;
+                cam.backgroundColor = background;
                 cam.orthographic = true;
                 cam.orthographicSize = 0.5f;
                 cam.nearClipPlane = 0.01f;
                 cam.farClipPlane = 2f;
                 cam.targetTexture = rt;
                 camGo.transform.SetPositionAndRotation(origin + Vector3.back, Quaternion.identity);
-                Text(titleGo, origin + new Vector3(0f, 0.08f, 0f), "ABORT", 2.5f, 0.4f);
-                Text(subGo, origin + new Vector3(0f, -0.17f, 0f), "LAUNCH ABORTED", 0.85f, 0.1f);
+                Text(titleGo, origin + new Vector3(0f, 0.08f, 0f), title, 2.5f, 0.4f, textColour);
+                Text(subGo, origin + new Vector3(0f, -0.17f, 0f), subtitle, 0.85f, 0.1f, textColour);
                 cam.Render();
                 var previous = RenderTexture.active;
                 RenderTexture.active = rt;
                 tex.ReadPixels(new Rect(0, 0, k_Width, k_Height), 0, 0);
                 RenderTexture.active = previous;
                 // hazard stripes along the top and bottom edges
-                var band = k_Height / 9;
+                var band = hazardStripes ? k_Height / 9 : 0;
                 for (var y = 0; y < k_Height; y++)
                 {
                     if (y >= band && y < k_Height - band) continue;
@@ -82,7 +92,7 @@ namespace VRRocket.Editor
                         tex.SetPixel(x, y, (x + y) / k_Stripe % 2 == 0 ? k_Yellow : k_Black);
                 }
                 tex.Apply();
-                File.WriteAllBytes(Path.GetFullPath(ImagePath), tex.EncodeToPNG());
+                File.WriteAllBytes(Path.GetFullPath(imagePath), tex.EncodeToPNG());
             }
             finally
             {
@@ -93,22 +103,25 @@ namespace VRRocket.Editor
                 Object.DestroyImmediate(rt);
                 Object.DestroyImmediate(tex);
             }
-            AssetDatabase.ImportAsset(ImagePath, ImportAssetOptions.ForceUpdate);
+            AssetDatabase.ImportAsset(imagePath, ImportAssetOptions.ForceUpdate);
         }
 
-        static void Text(GameObject go, Vector3 position, string text, float fontSize, float height)
+        static TMPro.TextMeshPro Text(GameObject go, Vector3 position, string text, float fontSize, float height, Color colour)
         {
             go.transform.position = position;
             var tmp = go.AddComponent<TMPro.TextMeshPro>();
             tmp.rectTransform.sizeDelta = new Vector2(1.15f, height);
             tmp.text = text;
             tmp.fontSize = fontSize;
+            tmp.enableAutoSizing = true;   // longer words shrink to fit the card's width
+            tmp.fontSizeMax = fontSize; tmp.fontSizeMin = fontSize * 0.2f;
             tmp.fontStyle = TMPro.FontStyles.Bold;
             tmp.characterSpacing = 8f;
             tmp.alignment = TMPro.TextAlignmentOptions.Center;
             tmp.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
-            tmp.color = Color.white;
+            tmp.color = colour;
             tmp.ForceMeshUpdate();
+            return tmp;
         }
     }
 }

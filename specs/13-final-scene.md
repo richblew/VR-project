@@ -60,7 +60,7 @@ Two push buttons at the player's edge of the assembly desk (z 2.65, 24 cm from t
 Pressing ABORT during pre-launch or the countdown:
 
 1. stops the countdown and the engine, clears the pad, and returns the same rocket to the bench, editable ([spec 02](02-game-engine.md));
-2. `AbortAlarm` (child of `GameFlow`) shows a red ABORT panel over each of the four side TVs around the big TV and flashes them between a bright and a dim version, 2.5 flashes a second, while a two-tone siren (620 and 880 Hz, generated in code) sounds through its own 2D AudioSource. The top-left panel covers the countdown clock;
+2. `AbortAlarm` (child of `GameFlow`) shows a red ABORT picture on each of the four side TVs' screens (inside a gloss-black bezel, so it reads as the TV showing it) around the big TV and flashes them between a bright and a dim version, 2.5 flashes a second, while a two-tone siren (620 and 880 Hz, generated in code) sounds through its own 2D AudioSource. The top-left panel covers the countdown clock;
 3. the big TV and the console mirror say LAUNCH ABORTED;
 4. after 4 seconds the panels hide again, the siren stops, and the big TV shows the build again.
 
@@ -76,9 +76,19 @@ Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the con
 
 **The hatch:** `ConsoleAddOn/ControlPanel/WiringHatch`, a tread-plate cover (ambientCG DiamondPlate008D) with a bar grip (RuslanOz's Handles). `SlidingPanel` on `HatchGrip`: grab the grip and pull it toward LAUNCH; the cover slides into a slot under the panel surface (0.33 m of travel), the grip stays at the slot's mouth. Click and a controller pulse at each end. While the hatch is less than half open, every grabbable in `PuzzleBox` is switched off, except ones held or plugged in, so nothing is grabbed through the lid.
 
-**The puzzle:** five pairs. Each pair has a plug (icvetlan's Schuko plug) on one cable and a socket (Artik's Plug Socket) on another, both in the pair's colour; `PairSocket` accepts only its own plug. The cables are round rubber tubes (`CableTube`, ambientCG Rubber004 tinted per pair) drawn along her Verlet points; her `LineRenderer` ribbons are switched off.
+**The puzzle:** five pairs. Each pair has a plug (icvetlan's Schuko plug) on one cable and a socket (Artik's Plug Socket) on another; `PairSocket` accepts only its own plug. Wires, plugs and sockets are in insulation colours (red, blue, yellow, black, white; plugs moulded in the cable's colour, sockets a lighter shade), the cables round rubber tubes (`CableTube`) drawn along her Verlet points. The sockets' rows are shuffled at the start and on every reset, so the cables cross differently each play.
 
-**The rule:** `GameFlowController` has **Require Mini Game** on in this scene. Until `MiniGameSolved()` is called, the console is offline: SUBMIT refuses the rocket (so LAUNCH and ABORT have nothing to act on), and the GO / NO-GO monitor shows WIRING NO-GO and CONSOLE OFFLINE · RESTORE WIRING. `CablePairManager.onAllConnected` calls `MiniGameSolved()` (wired in the scene). Once solved it stays solved; resetting it for a new play needs the puzzle to unplug itself first (TODO for Yi-Xuan in `GameFlowController`).
+**Finishing it (`CablePuzzle.ConsoleWiring` on `PuzzleBox`):**
+- every plug going in clicks (the kit's seat sound), pulses the hand that let go of it, and lights its lamp: a row of five lamps on the console surface along the hatch's far edge (`ControlPanel/WiringLights`), each in a bezel of its wire's colour, dark red until its pair connects, then green. The row shows with the hatch shut;
+- when the last pair connects: a firm lock click, the wiring locks (a select filter lets only the sockets hold the ends, so hands can no longer pull them out), and the console comes online;
+- a new play after a successful flight (`GameFlowController.ResetMiniGame`) unplugs everything, puts every end back, shuffles the sockets and takes the console offline again.
+
+**The rule:** `GameFlowController` has **Require Mini Game** on in this scene. Until `MiniGameSolved()` is called (by `CablePairManager.onAllConnected`), the console is offline:
+- SUBMIT refuses the rocket (so LAUNCH and ABORT have nothing to act on) with a fault buzz, and the big TV and console monitor show CONSOLE FAULT · OFFLINE with what to do, for 4 s, then the build text again;
+- the GO / NO-GO monitor shows WIRING NO-GO and CONSOLE OFFLINE · RESTORE WIRING;
+- the side TVs keep their NO SIGNAL test card.
+
+When it is fixed: the chime, CONSOLE ONLINE on the big TV and console monitor for 4 s, and the three NO SIGNAL TVs come alive (`ConsoleLiveScreens`: the NASA logo, SYSTEMS ONLINE, the rocket on its pad; the fourth TV keeps the countdown clock).
 
 **Yi-Xuan's rig:** her hand-model rig (`RoomAnchor/Player`) and her physical-room calibration (`RoomLink_Calibration`: `RoomCalibrator`, `WalkableZone`) are in the scene, switched off. With them on, the player floated a metre up, part grabs failed and locomotion was off. Our `Player` and `RoomLink` run the game until her rig grabs parts and stands on the floor; then switch hers on and ours off.
 

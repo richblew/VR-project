@@ -51,9 +51,9 @@ namespace VRRocket
         // The wiring mini game (Yi-Xuan's cable puzzle inside the console, VRRocket_Final). Rules agreed with Praise:
         // - it can be solved at any time in a play, even before the rocket is built;
         // - until it is solved the console is offline: SUBMIT refuses the rocket, so there is no launch or abort either;
-        // - once solved it stays solved: after a failed launch and a new kit, no need to solve it again.
-        // TODO(Yi-Xuan): a new play (back to the menu after a successful flight) should need it solved again. That needs the
-        // puzzle to unplug its cables and put the plugs back; then call ResetMiniGame() from EnterMenu's marked line.
+        // - once solved it stays solved: after a failed launch and a new kit, no need to solve it again;
+        // - a new play (back to the menu after a successful flight) needs it solved again: ResetMiniGame() takes the console
+        //   offline and the puzzle (CablePuzzle.ConsoleWiring) unplugs, puts the ends back and shuffles the sockets.
         [SerializeField, Tooltip("The console stays offline until MiniGameSolved() is called (VRRocket_Final's wiring puzzle)")]
         bool m_RequireMiniGame;
         bool m_MiniGameSolved;
@@ -72,6 +72,32 @@ namespace VRRocket
             m_MiniGameSolved = true;
             if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
             MiniGameChanged?.Invoke();
+            if (phase == GamePhase.Assembly && m_Screen != null) ShowMessage(m_Screen.ShowConsoleOnline);
+        }
+
+        /// <summary>SUBMIT was refused because the console is offline: the screens say why for a few seconds.</summary>
+        public void ReportConsoleOffline()
+        {
+            if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz);
+            if (phase == GamePhase.Assembly && m_Screen != null) ShowMessage(m_Screen.ShowConsoleFault);
+        }
+
+        [SerializeField, Tooltip("Seconds a console message (fault, online) stays on the screens before the build text returns")]
+        float m_MessageSeconds = 4f;
+        Coroutine m_Message;
+
+        void ShowMessage(Action show)
+        {
+            if (m_Message != null) StopCoroutine(m_Message);
+            show();
+            m_Message = StartCoroutine(BackToBuildText());
+        }
+
+        IEnumerator BackToBuildText()
+        {
+            yield return new WaitForSeconds(m_MessageSeconds);
+            m_Message = null;
+            if (m_Assembly != null) OnAssemblyState(m_Assembly.State);
         }
 
         /// <summary>Takes the console offline again until the puzzle is solved anew.</summary>
@@ -136,7 +162,7 @@ namespace VRRocket
             if (m_Routine != null) { StopCoroutine(m_Routine); m_Routine = null; }
             SetPhase(GamePhase.Menu);
             m_PadReady = false;
-            // if (afterSuccess) ResetMiniGame();   // TODO(Yi-Xuan): once the puzzle can reset itself (see the mini game block above)
+            if (afterSuccess) ResetMiniGame();   // a new play: the wiring is undone and must be connected again (ConsoleWiring)
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Launch != null) m_Launch.ResetPad();
             if (m_Screen != null) m_Screen.ShowTitle(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Flight " + attempts + " reached orbit insertion. Press START to build another." : "Build it. Submit it. Launch it.");
