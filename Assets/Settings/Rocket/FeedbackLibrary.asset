@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ce5d2b4572cc8e4c87b48622d88152d, type: 3}
+  m_Name: FeedbackLibrary
+  m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.FeedbackLibrary
+  guideEngage: {fileID: 8300000, guid: e5e88e22a2e4bc946bcecb9cb1737035, type: 3}
+  seat: {fileID: 8300000, guid: 4aa5e83ae912c46409c45fc3f4f5cfe4, type: 3}
+  noseSeat: {fileID: 8300000, guid: 1d4ffba877e11574b83dd66ffe09c3e2, type: 3}
+  capSeatUnlocked: {fileID: 8300000, guid: 1d4ffba877e11574b83dd66ffe09c3e2, type: 3}
+  capDetent: {fileID: 8300000, guid: e5e88e22a2e4bc946bcecb9cb1737035, type: 3}
+  capLock: {fileID: 8300000, guid: 4aa5e83ae912c46409c45fc3f4f5cfe4, type: 3}
+  unseat: {fileID: 8300000, guid: 1d4ffba877e11574b83dd66ffe09c3e2, type: 3}
+  standRelease: {fileID: 8300000, guid: 4aa5e83ae912c46409c45fc3f4f5cfe4, type: 3}
+  impactDesk: {fileID: 8300000, guid: 923c103acd956f64e98f4c97a5bd14d0, type: 3}
+  impactPart: {fileID: 8300000, guid: f73f149287d29cb4e9337f6ced970759, type: 3}
+  respawnPop: {fileID: 8300000, guid: 16fba6d30ed741d4a9fdd6e79ee2f3ac, type: 3}
+  volume: 1
+  hapticGuideEngage:
+    amplitude: 0.15
+    duration: 0.02
+    frequency: 220
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticSeat:
+    amplitude: 0.5
+    duration: 0.08
+    frequency: 120
+    secondAmplitude: 0.15
+    secondDuration: 0.05
+    secondGap: 0.03
+  hapticNoseSeat:
+    amplitude: 0.4
+    duration: 0.08
+    frequency: 100
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticCapSeatUnlocked:
+    amplitude: 0.2
+    duration: 0.04
+    frequency: 100
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticCapDetent:
+    amplitude: 0.2
+    duration: 0.02
+    frequency: 250
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticCapLock:
+    amplitude: 1
+    duration: 0.2
+    frequency: 80
+    secondAmplitude: 0.3
+    secondDuration: 0.1
+    secondGap: 0.05
+  hapticPartRemoved:
+    amplitude: 0.2
+    duration: 0.04
+    frequency: 150
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticPrototypeComplete:
+    amplitude: 0.3
+    duration: 0.1
+    frequency: 90
+    secondAmplitude: 0.2
+    secondDuration: 0.06
+    secondGap: 0.08
+  hapticHoverPart:
+    amplitude: 0.08
+    duration: 0.012
+    frequency: 250
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticGrabPart:
+    amplitude: 0.3
+    duration: 0.03
+    frequency: 160
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticGrabRocket:
+    amplitude: 0.55
+    duration: 0.05
+    frequency: 90
+    secondAmplitude: 0.2
+    secondDuration: 0.08
+    secondGap: 0.04
+  hapticReleasePart:
+    amplitude: 0.12
+    duration: 0.015
+    frequency: 180
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticReleaseRocket:
+    amplitude: 0.25
+    duration: 0.03
+    frequency: 110
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticSlideTick:
+    amplitude: 0.07
+    duration: 0.01
+    frequency: 220
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticTwistTexture:
+    amplitude: 0.08
+    duration: 0.012
+    frequency: 200
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticStandLiftOut:
+    amplitude: 0.35
+    duration: 0.05
+    frequency: 120
+    secondAmplitude: 0.15
+    secondDuration: 0.06
+    secondGap: 0.03
+  hapticStandCapture:
+    amplitude: 0.6
+    duration: 0.1
+    frequency: 80
+    secondAmplitude: 0.2
+    secondDuration: 0.06
+    secondGap: 0.04
+  hapticSubmitAccepted:
+    amplitude: 0.5
+    duration: 0.12
+    frequency: 100
+    secondAmplitude: 0.3
+    secondDuration: 0.15
+    secondGap: 0.1
+  hapticKitSpawned:
+    amplitude: 0.15
+    duration: 0.04
+    frequency: 200
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticButtonPress:
+    amplitude: 0.6
+    duration: 0.03
+    frequency: 200
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticButtonRelease:
+    amplitude: 0.25
+    duration: 0.02
+    frequency: 180
+    secondAmplitude: 0
+    secondDuration: 0
+    secondGap: 0
+  hapticSlideTickDistance: 0.004
+  hapticTwistTextureAngle: 6
+  hapticHoverCooldown: 0.25
