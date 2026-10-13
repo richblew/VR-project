@@ -353,3 +353,9 @@ From Praise's headset session on `VRRocket_Final`:
 - **BACK and NEXT** moved to the player's edge of the desk (24 cm from the front edge, right of the kit); before, they sat a metre in and were hard to reach.
 - **Console nameplate:** the small black plate on top of the console is now a LAUNCH STATION label screen.
 - **Verified:** edit mode 39/39 and play mode 31/31 (`FinalSceneTests` now also checks the buttons are within 30 cm of the desk edge and the nameplate text). Built and installed on the Quest 3.
+
+## 2026-10-13: Console side monitors, posters rearranged (done)
+
+- **Side monitors:** two monitors in the console monitor's style over the console's angled side screens. Left, GO / NO-GO: a readiness poll of fitted parts and the pad with a verdict line (never revealing flap orientation or the cap lock). Right, FLIGHT DATA: range status and mission log, the countdown, live altitude and speed, then the flight result (`ConsoleStatusScreens`). The console's own five screens are switched off, all covered by our monitors.
+- **Posters:** the rocket-launch poster moved to the front room's right wall between the corner TVs and the angled wall; the moon-landing poster is centred on the alcove wall beside the console.
+- **Verified:** edit mode 39/39 and play mode 32/32 (new `Side_Monitors_Poll_The_Build_And_Show_Range_Status`; the full games check FLIGHT DATA in flight and the result after a failure).

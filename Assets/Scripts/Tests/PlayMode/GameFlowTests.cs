@@ -161,6 +161,13 @@ namespace VRRocket.Tests
             Assert.AreEqual("LAUNCH FAILED", title.text);
             var diagram = title.transform.parent.Find("Diagram");
             Assert.IsTrue(diagram.gameObject.activeSelf, "failure diagram shown");
+            var sideScreens = Object.FindAnyObjectByType<ConsoleStatusScreens>();
+            if (sideScreens != null)
+            {
+                sideScreens.Refresh();
+                Assert.AreEqual("FLIGHT 1 RESULT", sideScreens.dataTitle);
+                StringAssert.Contains("MOTOR RETENTION LOSS", sideScreens.dataText);
+            }
 
             yield return WaitForPhase(GamePhase.Assembly, 5f);
             Assert.AreEqual(1, flow.attempts);
@@ -198,6 +205,14 @@ namespace VRRocket.Tests
             yield return new WaitForSeconds(1.8f);
             flow.Launch();
             yield return WaitForPhase(GamePhase.Launch, 3f);
+            var sideScreens = Object.FindAnyObjectByType<ConsoleStatusScreens>();
+            yield return new WaitForSeconds(2f);
+            if (sideScreens != null)
+            {
+                sideScreens.Refresh();
+                Assert.AreEqual("FLIGHT DATA", sideScreens.dataTitle);
+                StringAssert.Contains("ALT", sideScreens.dataText, "live altitude in flight");
+            }
             yield return WaitForPhase(GamePhase.Result, 40f);
             Assert.IsFalse(launch.model.hasExploded);
             Assert.GreaterOrEqual(launch.altitude, 1000f, "a clean flight climbs to the success altitude");

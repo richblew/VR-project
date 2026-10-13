@@ -5,7 +5,7 @@ How to run the automated tests, what each one checks, how they work, and a playb
 | | |
 |---|---|
 | **Test code** | `Assets/Scripts/Tests/Editor/` (edit mode, assembly `VRRocket.Tests.Editor`) and `Assets/Scripts/Tests/PlayMode/` (play mode, assembly `VRRocket.Tests.PlayMode`) |
-| **Totals** | 39 edit-mode tests, 31 play-mode tests. All passed on 13 October 2026. |
+| **Totals** | 39 edit-mode tests, 32 play-mode tests. All passed on 13 October 2026. |
 | **Run them** | Window > General > **Test Runner** |
 
 ## 1. Running the tests
@@ -42,7 +42,7 @@ Use `-testPlatform PlayMode` for the play-mode suite. The results are NUnit XML.
 | `BlueprintDisplayTests` | 3 | every build stage shows its step text and the matching picture on the build-step monitor; BACK and NEXT browse the steps (stopping at 1 and 5) until the build changes; without a screen only the text changes |
 | `ScreenTextTests` | 1 | the big screen's "first sentence" cut at ". " and " \| " |
 
-### Play mode (31)
+### Play mode (32)
 
 Most use `Dev_Interactions.unity` (a grey test bench with only the kit and a rig); the last two classes use `VRRocket_Final`, the scene we ship. `VRRocket_Main` has no tests since it was retired on 13 October 2026.
 
@@ -54,8 +54,8 @@ Most use `Dev_Interactions.unity` (a grey test bench with only the kit and a rig
 | `FullFlowTests` | 5 | build, carry, submit, failed launch and new kit; submit then abort returns it editable; attached parts follow the carried rocket and dropped parts respawn; parts do not lag behind the rocket frame by frame; a dropped rocket returns to the desk |
 | `NearOnlyGrabTests` | 1 | parts refuse a far hand and accept a near one |
 | `RespawnSafeZoneTests` | 1 | a part resting in a safe zone below the floor line stays put |
-| `GameFlowTests` | 4 | complete games in `VRRocket_Final`, started with SKIP INTRO: an unlocked cap fails, comes back for inspection and a new kit appears; a locked cap flies past orbit altitude and returns to the menu with a new kit; ABORT during the countdown puts the engine out, clears the pad and returns the same rocket editable (with the alarm); buttons pressed in the wrong phase do nothing |
-| `FinalSceneTests` | 12 | one scene with one rig, EventSystem, manager and AudioListener, no loader, help board or old window, a curtain; the rig is adapted (generic buzz off, Jump off, floor tracking, capsule, locomotion, hands that grab parts); the menu offers START WITH INTRO and SKIP INTRO; SKIP goes straight to building and switches the game displays on; START WITH INTRO plays the intro, the curtain closes and reopens, building starts when it ends; SKIP during the intro; the ABORT panels sit on the four side TVs, flash with the siren and hide again; the countdown clock covers its whole TV; console and step buttons wired and pressed by a hand; only the window glass between the player and the rocket; teleport areas cover the floor but not the furniture |
+| `GameFlowTests` | 4 | complete games in `VRRocket_Final`, started with SKIP INTRO: an unlocked cap fails, comes back for inspection and a new kit appears; a locked cap flies past orbit altitude (live flight data on the side monitor) and returns to the menu with a new kit; ABORT during the countdown puts the engine out, clears the pad and returns the same rocket editable (with the alarm); buttons pressed in the wrong phase do nothing |
+| `FinalSceneTests` | 13 | one scene with one rig, EventSystem, manager and AudioListener, no loader, help board or old window, a curtain; the rig is adapted (generic buzz off, Jump off, floor tracking, capsule, locomotion, hands that grab parts); the menu offers START WITH INTRO and SKIP INTRO; SKIP goes straight to building and switches the game displays on; START WITH INTRO plays the intro, the curtain closes and reopens, building starts when it ends; SKIP during the intro; the ABORT panels sit on the four side TVs, flash with the siren and hide again; the countdown clock covers its whole TV; the side monitors poll the build (GO / NO-GO, never revealing the cap lock) and show range status, with the console's own screens hidden; console and step buttons wired and pressed by a hand; only the window glass between the player and the rocket; teleport areas cover the floor but not the furniture |
 
 ## 3. How the play-mode tests work
 
