@@ -376,3 +376,9 @@ Merged `test-hand-models` (Yi-Xuan, up to be9eb60) into `interactions`. Details 
 - **Broken and fixed:** SUBMIT on a broken console buzzes and shows CONSOLE FAULT with what to do on the big TV and the console monitor; fixing it shows CONSOLE ONLINE and brings the three NO SIGNAL side TVs alive (NASA logo, SYSTEMS ONLINE, the rocket on its pad; `ConsoleLiveScreens`).
 - **Abort screens** now show inside a gloss-black bezel on each TV instead of covering the whole TV.
 - **Verified:** edit mode 39/39, play mode 35/35 (new: the wiring loop with lamps, lock and reset; the fault and online messages with the live TVs; the abort picture inside the bezel).
+
+## 2026-10-13: Side TVs aligned; the motor is a battery (done)
+
+- **Side TVs:** each top TV sits exactly over its bottom TV, all four the same size, both pairs at the same height; the countdown clock, ABORT and live screens refitted.
+- **Battery:** the kit's motor is an AA battery (MasterYogurt, CC BY), 24 x 70 mm, + end up; everything the player reads says battery (build steps, hints, GO / NO-GO, BATTERY RETENTION LOSS, "Battery cap" in failed parts). Build-step pictures re-rendered. Code names unchanged.
+- **Verified:** edit mode 40/40, play mode 37/37 (new: TVs stacked square and the same size; the kit motor shows the battery; failed parts read as the player sees them).

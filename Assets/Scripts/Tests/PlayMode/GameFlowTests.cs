@@ -173,7 +173,7 @@ namespace VRRocket.Tests
             {
                 sideScreens.Refresh();
                 Assert.AreEqual("FLIGHT 1 RESULT", sideScreens.dataTitle);
-                StringAssert.Contains("MOTOR RETENTION LOSS", sideScreens.dataText);
+                StringAssert.Contains("BATTERY RETENTION LOSS", sideScreens.dataText);
             }
 
             yield return WaitForPhase(GamePhase.Assembly, 5f);

@@ -33,7 +33,7 @@ namespace VRRocket
         [SerializeField] float m_SubmitToPadSeconds = 2.5f;
         [Header("Text")]
         [SerializeField, TextArea, Tooltip("Hint shown when assembly starts. The big screen shows its first sentence, the console mirror all of it.")]
-        string m_AssemblyHint = "Build the rocket on the bench. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, motor nozzle down, then twist the cap until it clicks.";
+        string m_AssemblyHint = "Build the rocket on the bench. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, battery + end up, then twist the cap until it clicks.";
 
         public UnityEvent<GamePhase> onPhaseChanged = new UnityEvent<GamePhase>();
         public event Action<GamePhase> PhaseChanged;
@@ -229,8 +229,8 @@ namespace VRRocket
             if (m_Screen == null) return;
             switch (state)
             {
-                case AssemblyState.AirframeComplete: m_Screen.ShowAssembly(state, "Airframe complete. Insert the motor, nozzle down."); break;
-                case AssemblyState.MotorFitted: m_Screen.ShowAssembly(state, "Motor fitted. Seat the cap and twist it clockwise until it clicks."); break;
+                case AssemblyState.AirframeComplete: m_Screen.ShowAssembly(state, "Airframe complete. Insert the battery, + end up."); break;
+                case AssemblyState.MotorFitted: m_Screen.ShowAssembly(state, "Battery fitted. Seat the cap and twist it clockwise until it clicks."); break;
                 case AssemblyState.PrototypeComplete: m_Screen.ShowAssembly(state, "Prototype complete. Carry it to the submission bin and press SUBMIT."); break;
                 default: m_Screen.ShowAssembly(state, "Keep building. Three fins, three flaps, the nose cone."); break;
             }
@@ -344,7 +344,7 @@ namespace VRRocket
                     m_Assembly.ReturnPrototype(ReturnMode.InspectOnly, m_Bin != null ? m_Bin.returnSpot : null);
                     m_Assembly.BeginNewBuild();
                 }
-                EnterAssembly("Launch failed: " + (lastReport != null ? string.Join(", ", lastReport.failedComponents) : "") + ". Examine the returned prototype, then build a new one.");
+                EnterAssembly("Launch failed: " + (lastReport != null ? string.Join(", ", BuildReport.DisplayNames(lastReport.failedComponents)) : "") + ". Examine the returned prototype, then build a new one.");
             }
             m_Routine = null;
         }

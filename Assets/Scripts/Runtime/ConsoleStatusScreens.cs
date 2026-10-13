@@ -96,8 +96,8 @@ namespace VRRocket
             Row("FINS " + fins + "/3", idle ? k_Standby : fins >= 3 ? k_Go : k_NoGo);
             Row("FLAPS " + flaps + "/3", idle ? k_Standby : flaps >= 3 ? k_Go : k_NoGo);
             Row("NOSE CONE", idle ? k_Standby : nose ? k_Go : k_NoGo);
-            Row("MOTOR", idle ? k_Standby : motor ? k_Go : k_NoGo);
-            Row("MOTOR CAP", idle ? k_Standby : cap ? k_Go : k_NoGo);
+            Row("BATTERY", idle ? k_Standby : motor ? k_Go : k_NoGo);
+            Row("BATTERY CAP", idle ? k_Standby : cap ? k_Go : k_NoGo);
             Row(onPad ? "PAD VEHICLE" : "PAD EMPTY", idle || phase == GamePhase.Result ? k_Standby : onPad ? k_Go : k_NoGo);
             m_PollText.text = m_Sb.ToString();
 
@@ -184,7 +184,7 @@ namespace VRRocket
             {
                 case LaunchOutcome.Success: return coloured ? "<color=#4CFF7A>MISSION SUCCESS</color>" : "SUCCESS";
                 case LaunchOutcome.UnstableFlight: return coloured ? "<color=#FF5A4C>UNSTABLE FLIGHT</color>" : "UNSTABLE";
-                case LaunchOutcome.MotorRetentionLoss: return coloured ? "<color=#FF5A4C>MOTOR RETENTION LOSS</color>" : "MOTOR LOSS";
+                case LaunchOutcome.MotorRetentionLoss: return coloured ? "<color=#FF5A4C>BATTERY RETENTION LOSS</color>" : "BATTERY LOSS";
                 default: return report.outcome.ToString().ToUpperInvariant();
             }
         }
