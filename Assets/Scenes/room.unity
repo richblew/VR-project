@@ -1546,6 +1546,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.2, y: 0.8, z: 0.02}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &414848976 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 202364688, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+  m_PrefabInstance: {fileID: 766360189}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &417164905
 GameObject:
   m_ObjectHideFlags: 0
@@ -9847,20 +9852,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.VRHandRigDriver
   left:
     side: Left
-    controller: {fileID: 0}
-    anchor: {fileID: 0}
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
+    controller: {fileID: 414848976}
+    anchor: {fileID: 1917833284}
+    positionOffset: {x: 0, y: 0.01, z: -0.12}
+    rotationOffset: {x: 110.43, y: 16.8, z: 0}
     grip: {fileID: 6558622148059887818, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     curlSign: 1
   right:
     side: Right
-    controller: {fileID: 0}
-    anchor: {fileID: 0}
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
+    controller: {fileID: 766360191}
+    anchor: {fileID: 1917833283}
+    positionOffset: {x: 0, y: 0, z: -0.09}
+    rotationOffset: {x: -89.4, y: 90.1, z: -74}
     grip: {fileID: -1758520528963094988, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     curlSign: -1
+  autoFingerAxis: 1
   fingerAxis: {x: 0, y: 0, z: 1}
   fingerAngles: {x: 65, y: 80, z: 55}
   thumbAxis: {x: 0, y: 0, z: 1}
@@ -9868,6 +9874,16 @@ MonoBehaviour:
   speed: 12
   useTestValue: 0
   testGrip: 0
+--- !u!4 &1917833283 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4431237209390638048, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
+  m_PrefabInstance: {fileID: 1917833279}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1917833284 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3322518430569621596, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
+  m_PrefabInstance: {fileID: 1917833279}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1965747003
 GameObject:
   m_ObjectHideFlags: 0

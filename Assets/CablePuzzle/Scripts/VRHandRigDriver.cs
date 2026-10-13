@@ -28,15 +28,18 @@ namespace CablePuzzle
 
             [System.NonSerialized] public Transform[][] bones;      // [finger][joint]
             [System.NonSerialized] public Quaternion[][] rest;
+            [System.NonSerialized] public Vector3[][] autoAxes;   // curl axis in each bone's local space
             [System.NonSerialized] public XRBaseInteractor[] interactors;
             [System.NonSerialized] public float value;
         }
 
-        public Hand left = new Hand { side = "Left", curlSign = 1f };
-        public Hand right = new Hand { side = "Right", curlSign = -1f };
+        public Hand left = new Hand { side = "Left", curlSign = -1f };
+        public Hand right = new Hand { side = "Right", curlSign = 1f };
 
         [Header("Curl (applied to joints 1-3 of every finger; joint 4 is the tip and stays still)")]
-        public Vector3 fingerAxis = new Vector3(0, 0, 1);       // local axis the finger joints bend around
+        [Tooltip("Work out the finger curl axis from the skeleton (the line across the knuckles). If on, 'Finger Axis' is ignored. Thumb always uses 'Thumb Axis'.")]
+        public bool autoFingerAxis = true;
+        public Vector3 fingerAxis = new Vector3(0, 0, 1);       // manual local axis the finger joints bend around (when Auto is off)
         public Vector3 fingerAngles = new Vector3(65, 80, 55);  // degrees at full grip, joints 1, 2, 3
         public Vector3 thumbAxis = new Vector3(0, 0, 1);
         public Vector3 thumbAngles = new Vector3(20, 35, 35);
@@ -52,6 +55,11 @@ namespace CablePuzzle
         {
             var anim = GetComponent<Animator>();
             if (anim != null) anim.enabled = false;
+
+            // The hand mesh's culling bounds are tied to the rig's Root, which never moves - only the hand bones do.
+            // Without this, the hands vanish whenever the Root's old position leaves the camera's view.
+            foreach (var smr in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                smr.updateWhenOffscreen = true;
             Setup(left);
             Setup(right);
         }
@@ -59,11 +67,7 @@ namespace CablePuzzle
         void Setup(Hand h)
         {
             if (h.anchor == null) h.anchor = FindDeep(transform, "J_" + h.side);
-            if (h.controller == null)
-            {
-                var go = GameObject.Find(h.side + " Controller");
-                if (go != null) h.controller = go.transform;
-            }
+            if (h.controller == null) h.controller = FindController(h.side + " Controller");
             if (h.anchor == null) { Debug.LogWarning($"VRHandRigDriver: bone J_{h.side} not found", this); return; }
 
             h.bones = new Transform[FingerNames.Length][];
@@ -80,10 +84,25 @@ namespace CablePuzzle
                     if (b == null) Debug.LogWarning($"VRHandRigDriver: bone J_{h.side}_Hand{FingerNames[f]}{j + 1} not found", this);
                 }
             }
+            // Auto axis: fingers curl about the line across the knuckles (index base -> pinky base),
+            // expressed in each bone's own local space (so it is right whatever the bone's orientation is).
+            h.autoAxes = new Vector3[FingerNames.Length][];
+            var idx = h.bones[1][0]; var pnk = h.bones[4][0];
+            Vector3 knuckle = (idx != null && pnk != null) ? (pnk.position - idx.position).normalized : Vector3.forward;
+            for (int f = 0; f < FingerNames.Length; f++)
+            {
+                h.autoAxes[f] = new Vector3[3];
+                for (int j = 0; j < 3; j++)
+                    h.autoAxes[f][j] = h.bones[f][j] != null ? h.bones[f][j].InverseTransformDirection(knuckle).normalized : Vector3.forward;
+            }
+
             h.interactors = h.controller != null
                 ? h.controller.GetComponentsInChildren<XRBaseInteractor>(true)
                 : new XRBaseInteractor[0];
-            if (h.controller == null) Debug.LogWarning($"VRHandRigDriver: '{h.side} Controller' not found - assign it", this);
+            if (h.controller == null)
+                Debug.LogWarning($"VRHandRigDriver: '{h.side} Controller' not found - the {h.side.ToLower()} hand will NOT follow. Drag it into the Controller field.", this);
+            else
+                Debug.Log($"VRHandRigDriver: {h.side} hand follows '{PathOf(h.controller)}'", this);
         }
 
         void LateUpdate()
@@ -123,15 +142,40 @@ namespace CablePuzzle
             for (int f = 0; f < h.bones.Length; f++)
             {
                 bool thumb = f == 0;
-                Vector3 axis = (thumb ? thumbAxis : fingerAxis).normalized;
+                Vector3 manual = (thumb ? thumbAxis : fingerAxis).normalized;
                 Vector3 ang = thumb ? thumbAngles : fingerAngles;
                 for (int j = 0; j < 3; j++)
                 {
                     var b = h.bones[f][j];
                     if (b == null) continue;
+                    Vector3 axis = (!thumb && autoFingerAxis) ? h.autoAxes[f][j] : manual;
                     b.localRotation = h.rest[f][j] * Quaternion.AngleAxis(ang[j] * h.value * h.curlSign, axis);
                 }
             }
+        }
+
+        // Finds an object by name even if it is inactive, ignoring anything inside this hand rig.
+        Transform FindController(string objectName)
+        {
+            Transform found = null;
+            foreach (var tr in FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (tr.name != objectName || tr.IsChildOf(transform)) continue;
+                if (found != null)
+                {
+                    Debug.LogWarning($"VRHandRigDriver: more than one '{objectName}' in the scene ('{PathOf(found)}' and '{PathOf(tr)}'). Using the first - assign the Controller field if that is wrong.", this);
+                    continue;
+                }
+                found = tr;
+            }
+            return found;
+        }
+
+        static string PathOf(Transform t)
+        {
+            string s = t.name;
+            while (t.parent != null) { t = t.parent; s = t.name + "/" + s; }
+            return s;
         }
 
         static Transform FindDeep(Transform root, string name)
