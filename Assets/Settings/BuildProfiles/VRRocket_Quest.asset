@@ -23,11 +23,8 @@ MonoBehaviour:
   m_OverrideGlobalSceneList: 1
   m_Scenes:
   - m_enabled: 1
-    m_path: Assets/Scenes/VRRocket_Main.unity
-    m_guid: f203265389a8d4d4596d154c99a3fea5
-  - m_enabled: 1
-    m_path: Assets/Scenes/room.unity
-    m_guid: 420c9781c7aa9485cb5b1fa3ad074102
+    m_path: Assets/Scenes/VRRocket_Final.unity
+    m_guid: d24fce7455f8dbc4ab58185e8396f2cc
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

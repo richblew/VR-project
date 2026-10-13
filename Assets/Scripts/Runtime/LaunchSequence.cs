@@ -64,6 +64,8 @@ namespace VRRocket
 
         /// <summary>True while the vehicle is still growing from prototype size to full size on the pad.</summary>
         public bool isGrowing => m_Grow != null;
+        /// <summary>The engine is lit: flame emitting or the engine sound playing.</summary>
+        public bool isIgnited => (m_Flame != null && m_Flame.isEmitting) || (m_EngineLoop != null && m_EngineLoop.isPlaying);
 
         void Awake()
         {

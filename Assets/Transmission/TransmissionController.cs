@@ -18,6 +18,12 @@ public class TransmissionController : MonoBehaviour
     [Header("Mode (use a Preview mode to test one part)")]
     public Mode mode = Mode.FullSequence;
 
+    [Tooltip("Play the full sequence as soon as the scene starts. Off in VRRocket_Final, where the game starts it from the menu (START WITH INTRO).")]
+    public bool playOnStart = true;
+
+    // Set when the full sequence has run to its end (read by VR Rocket's TransmissionBridge).
+    [HideInInspector] public bool sequenceFinished;
+
     [Header("Main Screen")]
     public Renderer mainScreen;
     public int screenMaterialIndex = 0;
@@ -121,7 +127,7 @@ public class TransmissionController : MonoBehaviour
         switch (mode)
         {
             case Mode.FullSequence:
-                StartCoroutine(PlaySequence());
+                if (playOnStart) StartCoroutine(PlaySequence());
                 break;
             case Mode.PreviewTransmissionScreen:
                 StartCoroutine(PreviewVideo(videoMaterial, videoPlayer, transmissionTexture));
@@ -204,6 +210,14 @@ public class TransmissionController : MonoBehaviour
     }
 
     // ---------- full sequence ----------
+    /// <summary>Plays the full sequence from the start (used by the game when playOnStart is off).</summary>
+    public void PlaySequenceNow()
+    {
+        StopAllCoroutines();
+        sequenceFinished = false;
+        StartCoroutine(PlaySequence());
+    }
+
     private IEnumerator PlaySequence()
     {
         float startTime = Time.time;
@@ -253,6 +267,7 @@ public class TransmissionController : MonoBehaviour
         SetSideScreensBlank(false);
         if (dimRoutine != null) StopCoroutine(dimRoutine);
         yield return FadeRoom(1f, 0f, fadeUpTime);
+        sequenceFinished = true;
     }
 
     // ---------- side screens ----------
@@ -329,8 +344,12 @@ public class TransmissionController : MonoBehaviour
     }
 
     // amount: 0 = normal, 1 = fully dimmed
+    // How dimmed the room is right now, 0 (normal) to 1 (dimmed). Read by VR Rocket's window curtain.
+    [HideInInspector] public float currentDim;
+
     private void SetDim(float amount)
     {
+        currentDim = amount;
         float factor = Mathf.Lerp(1f, dimmedLevel, amount);
 
         for (int i = 0; i < roomLights.Length; i++)

@@ -15,5 +15,7 @@ namespace VRRocket
         [Tooltip("World y range of the opening (sill to head)")] public Vector2 yRange = new Vector2(0.9f, 3.3f);
         [Tooltip("World z of each mullion. Keep them off the sightline from the console to the pad (about z -2.2).")]
         public float[] mullionZ = { -4.6f, -3.2f };
+        [Tooltip("Where the generated wall mesh is saved. Each window wall needs its own.")]
+        public string meshAssetPath = "Assets/Models/Environment/RightWall_Window.asset";
     }
 }

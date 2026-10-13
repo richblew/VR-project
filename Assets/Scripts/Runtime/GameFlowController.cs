@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace VRRocket
 {
-    public enum GamePhase { Menu, Assembly, PreLaunch, Countdown, Launch, Result }
+    public enum GamePhase { Menu, Assembly, PreLaunch, Countdown, Launch, Result, Intro }   // Intro added last: values stay stable
 
     /// <summary>
     /// The experience flow of SPEC section 2 as a working version: Menu, Assembly, PreLaunch (prototype submitted), Countdown, Launch,
@@ -21,6 +21,10 @@ namespace VRRocket
         [SerializeField] LaunchScreenController m_Screen;
         [SerializeField] MenuPanel m_Menu;
         [SerializeField] BlueprintDisplay m_Blueprint;
+        [SerializeField, Tooltip("Optional. The room's intro, played on demand after START (VRRocket_Final). Empty, or an intro that plays by itself, means START goes straight to building.")]
+        TransmissionBridge m_Intro;
+        [SerializeField, Tooltip("Optional. Flashes the room's side screens and sounds a siren when the launch is aborted (VRRocket_Final).")]
+        AbortAlarm m_AbortAlarm;
         [SerializeField] AudioSource m_Audio;
         [Header("Timing")]
         [SerializeField] float m_CountdownSeconds = 10f;
@@ -124,15 +128,46 @@ namespace VRRocket
             if (m_Launch != null) m_Launch.ResetPad();
             if (m_Screen != null) m_Screen.ShowTitle(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Flight " + attempts + " reached orbit insertion. Press START to build another." : "Build it. Submit it. Launch it.");
             if (m_Blueprint != null) m_Blueprint.ShowIdle();
-            if (m_Menu != null) m_Menu.Show(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Your rocket flew clean. Build another?" : "Assemble a model rocket by hand, submit it at the console, and watch the full-size launch outside.", afterSuccess ? "BUILD AGAIN" : "START");
+            if (m_Menu != null) m_Menu.Show(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Your rocket flew clean. Build another?" : "Assemble a model rocket by hand, submit it at the console, and watch the full-size launch outside.", introOnDemand ? "START WITH INTRO" : (afterSuccess ? "BUILD AGAIN" : "START"));
         }
 
-        /// <summary>Wired to the menu's START button.</summary>
+        /// <summary>True when the room's intro waits to be started from the menu (VRRocket_Final).</summary>
+        public bool introOnDemand => m_Intro != null && m_Intro.canPlayOnDemand;
+
+        /// <summary>Wired to the menu's START button (START WITH INTRO when the intro plays on demand).</summary>
         public void StartGame()
         {
             if (phase != GamePhase.Menu) return;
             if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
+            if (introOnDemand) EnterIntro();
+            else EnterAssembly(m_AssemblyHint);
+        }
+
+        /// <summary>Wired to the menu's SKIP INTRO button: straight to building.</summary>
+        public void StartWithoutIntro()
+        {
+            if (phase != GamePhase.Menu) return;
+            if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
+            if (m_Intro != null) m_Intro.Stop();
             EnterAssembly(m_AssemblyHint);
+        }
+
+        /// <summary>Ends a running intro early and starts building. Not wired today (the choice is made on the menu).</summary>
+        public void SkipIntro()
+        {
+            if (phase != GamePhase.Intro) return;
+            if (m_Intro != null) m_Intro.Stop();
+            EnterAssembly(m_AssemblyHint);
+        }
+
+        void EnterIntro()
+        {
+            SetPhase(GamePhase.Intro);
+            m_PadReady = false;
+            if (m_Menu != null) m_Menu.Hide();
+            if (m_Assembly != null) m_Assembly.interactionEnabled = false;
+            if (m_Launch != null) m_Launch.ResetPad();
+            m_Intro.Play(() => { if (phase == GamePhase.Intro) EnterAssembly(m_AssemblyHint); });
         }
 
         // ---- assembly ----
@@ -205,6 +240,20 @@ namespace VRRocket
             if (m_Bin != null) m_Bin.PlayOpen();
             if (m_Assembly != null) m_Assembly.ReturnPrototype(ReturnMode.Editable, null);
             EnterAssembly("Aborted. The prototype is back on the bench. Correct it and submit again.");
+            if (m_AbortAlarm != null)
+            {
+                m_AbortAlarm.Play();
+                if (m_Screen != null) { m_Screen.ShowAborted(); m_Routine = StartCoroutine(AfterAbortAlarm()); }
+            }
+        }
+
+        /// <summary>The big screen says LAUNCH ABORTED while the alarm runs, then shows the build again.</summary>
+        IEnumerator AfterAbortAlarm()
+        {
+            yield return new WaitForSeconds(m_AbortAlarm.seconds);
+            m_Routine = null;
+            if (phase == GamePhase.Assembly && m_Screen != null && m_Assembly != null)
+                m_Screen.ShowAssembly(m_Assembly.State, "Aborted. The prototype is back on the bench. Correct it and submit again.");
         }
 
         IEnumerator CountdownRoutine()

@@ -23,6 +23,25 @@ namespace VRRocket
             return clip;
         }
 
+        /// <summary>A two-tone alarm siren (high, low, high...) with a soft start and end, for an abort.</summary>
+        public static AudioClip Siren(float low, float high, float halfPeriod, float seconds, float gain = 0.45f)
+        {
+            var n = Mathf.Max(1, (int)(k_SampleRate * seconds));
+            var data = new float[n];
+            var phase = 0f;
+            for (var i = 0; i < n; i++)
+            {
+                var t = i / (float)k_SampleRate;
+                var f = ((int)(t / halfPeriod) % 2 == 0) ? high : low;
+                phase += 2f * Mathf.PI * f / k_SampleRate;
+                var env = Mathf.Min(1f, t / 0.05f) * Mathf.Min(1f, (seconds - t) / 0.3f);
+                data[i] = (Mathf.Sin(phase) + 0.3f * Mathf.Sin(3f * phase)) * gain * env;
+            }
+            var clip = AudioClip.Create("Siren", n, 1, k_SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
         /// <summary>Two-tone chime (rising) for confirmations.</summary>
         public static AudioClip Chime(float f1, float f2, float seconds, float gain = 0.5f)
         {

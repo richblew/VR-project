@@ -4,6 +4,8 @@ Start here. This page explains the whole project from a high level and shows how
 
 The specs describe the project as it is on branch `interactions`, last checked against the code on 12 October 2026. When the code and a spec disagree, the code wins: please fix the spec in the same commit.
 
+**All work now happens in `VRRocket_Final`** (since 13 October 2026): our game and Richard's updated room in one scene, with the intro on demand, a curtained window, BACK and NEXT on the desk, a wide console monitor and an abort alarm. [Spec 13](13-final-scene.md) covers what is different there. `VRRocket_Main` (our scene that loaded `room.unity` at runtime) is retired: it is kept for reference, no test or build uses it, and it is not refitted to Richard's new room. Where the other specs say `VRRocket_Main`, the same systems now live in `VRRocket_Final`; the parts about loading the room and `RoomBindings` no longer apply.
+
 ## Contents
 
 | Spec | Read it when you want to... |
@@ -20,6 +22,7 @@ The specs describe the project as it is on branch `interactions`, last checked a
 | [10 Testing and debugging](10-testing-and-debugging.md) | run the tests, or find out why something is broken |
 | [11 Builds and deploying](11-builds-and-deploy.md) | build for PC VR or Quest 3 and install on the headset |
 | [12 Project layout and editor tools](12-project-layout-and-tools.md) | find a file, learn the custom menus, and follow the project's conventions |
+| [13 The final scene](13-final-scene.md) | work on `VRRocket_Final`, the scene we ship: our game in Richard's updated room, intro on demand, window curtain, BACK and NEXT, abort alarm |
 
 ## 1. What the player does
 

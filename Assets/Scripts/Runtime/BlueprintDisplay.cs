@@ -4,12 +4,25 @@ using UnityEngine;
 namespace VRRocket
 {
     /// <summary>
-    /// The build guidance above the bench: the step text on the blueprint panel and, on the monitor beside it, a picture of the
-    /// rocket as it should look after that step (SPEC 9 working version, planned with Richard on 12 October 2026).
+    /// The build guidance at the bench: the step text on the blueprint panel and, on the monitor beside it, a picture of the
+    /// rocket as it should look after that step (planned with Richard on 12 October 2026). The player can browse the steps with
+    /// BACK and NEXT buttons (<see cref="ShowPreviousStep"/>, <see cref="ShowNextStep"/>); as soon as the build changes, both
+    /// screens go back to the live step.
     /// </summary>
     public sealed class BlueprintDisplay : MonoBehaviour
     {
         static readonly int k_BaseMap = Shader.PropertyToID("_BaseMap");
+
+        public const int StepCount = 5;
+        static readonly string[] k_StepTitles = { "TAIL FINS", "WING FLAPS", "NOSE CONE", "MOTOR", "MOTOR CAP" };
+        static readonly string[] k_StepHints =
+        {
+            "slide into the slots at the base, any order",
+            "midpoint slots, swept edge toward the nose",
+            "press it onto the top",
+            "insert from below, nozzle down",
+            "seat it, then twist clockwise until it clicks",
+        };
 
         [SerializeField] TextMeshPro m_Text;
         [SerializeField, Tooltip("Optional monitor beside the text that shows the picture of the current step.")] Renderer m_ImageScreen;
@@ -17,9 +30,13 @@ namespace VRRocket
         Texture[] m_StepImages = new Texture[0];
 
         MaterialPropertyBlock m_Block;
+        int m_LiveImage = StepCount - 1;
 
         /// <summary>Index into the step images of the picture on show, or -1 when there is no image screen.</summary>
         public int shownImage { get; private set; } = -1;
+
+        /// <summary>The step being browsed (0 to 4), or -1 while the screens follow the build.</summary>
+        public int browsedStep { get; private set; } = -1;
 
         public void Configure(TextMeshPro text) => m_Text = text;
 
@@ -28,30 +45,44 @@ namespace VRRocket
             m_ImageScreen = screen; m_StepImages = stepImages;
         }
 
-        public void ShowIdle()
-        {
-            Set("BLUEPRINT\nstandby");
-            ShowImage(4);   // the finished rocket: what the player is about to build
-        }
+        public void ShowIdle() => ShowLive("BLUEPRINT\nstandby", StepCount - 1);   // the finished rocket: what the player is about to build
 
-        public void ShowText(string text)
-        {
-            Set(text);
-            ShowImage(4);
-        }
+        public void ShowText(string text) => ShowLive(text, StepCount - 1);
 
         public void ShowState(AssemblyStateMachine m)
         {
             if (m == null) { ShowIdle(); return; }
-            string step;
-            int image;
-            if (m.finsAttached < 3) { step = "STEP 1 / 5   TAIL FINS  " + m.finsAttached + "/3\nslide into the slots at the base, any order"; image = 0; }
-            else if (m.flapsAttached < 3) { step = "STEP 2 / 5   WING FLAPS  " + m.flapsAttached + "/3\nmidpoint slots, swept edge toward the nose"; image = 1; }
-            else if (!m.noseAttached) { step = "STEP 3 / 5   NOSE CONE\npress it onto the top"; image = 2; }
-            else if (!m.motorAttached) { step = "STEP 4 / 5   MOTOR\ninsert from below, nozzle down"; image = 3; }
-            else if (!m.capAttached) { step = "STEP 5 / 5   MOTOR CAP\nseat it, then twist clockwise until it clicks"; image = 4; }
-            else { step = "COMPLETE\ncarry the rocket to the bin and SUBMIT"; image = 4; }
-            Set(step);
+            int step;
+            if (m.finsAttached < 3) step = 0;
+            else if (m.flapsAttached < 3) step = 1;
+            else if (!m.noseAttached) step = 2;
+            else if (!m.motorAttached) step = 3;
+            else if (!m.capAttached) step = 4;
+            else { ShowLive("COMPLETE\ncarry the rocket to the bin and SUBMIT", StepCount - 1); return; }
+            var count = step == 0 ? "  " + m.finsAttached + "/3" : step == 1 ? "  " + m.flapsAttached + "/3" : "";
+            ShowLive("STEP " + (step + 1) + " / " + StepCount + "   " + k_StepTitles[step] + count + "\n" + k_StepHints[step], step);
+        }
+
+        /// <summary>Wired to the NEXT button: shows the following step's picture and instruction.</summary>
+        public void ShowNextStep() => Browse(+1);
+
+        /// <summary>Wired to the BACK button: shows the previous step's picture and instruction.</summary>
+        public void ShowPreviousStep() => Browse(-1);
+
+        void Browse(int delta)
+        {
+            var from = browsedStep >= 0 ? browsedStep : m_LiveImage;
+            browsedStep = Mathf.Clamp(from + delta, 0, StepCount - 1);
+            Set("VIEWING STEP " + (browsedStep + 1) + " / " + StepCount + "   " + k_StepTitles[browsedStep] + "\n" + k_StepHints[browsedStep]);
+            ShowImage(browsedStep);
+        }
+
+        /// <summary>The build (or the game) moved on: show it, and stop browsing.</summary>
+        void ShowLive(string text, int image)
+        {
+            m_LiveImage = image;
+            browsedStep = -1;
+            Set(text);
             ShowImage(image);
         }
 

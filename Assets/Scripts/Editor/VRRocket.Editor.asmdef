@@ -2,7 +2,8 @@
     "name": "VRRocket.Editor",
     "rootNamespace": "VRRocket.Editor",
     "references": [
-        "VRRocket.Runtime"
+        "VRRocket.Runtime",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

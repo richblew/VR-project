@@ -168,7 +168,6 @@ namespace VRRocket.Editor
         // Desk monitors (12 October 2026): the back wall above the desk holds Richard's three portraits (x -1.62 to 1.75,
         // y 1.50 to 2.80) with name plaques below them (y 1.37 to 1.45), so the two screens stand on the back of the desk
         // instead, in the gaps between the plaques, low enough to stay under the portraits.
-        const float k_DeskTopY = 1.125f;    // Environment/AssmblyArea/DeskTop
         const float k_MonitorZ = 3.70f;     // near the desk's back edge (z 3.91)
         const float k_MonitorScale = 0.6f;  // of the 0.98 x 0.68 m panel: a 0.54 x 0.36 m screen
         const float k_Tilt = 12f;           // leaned back, facing up toward the eyes
@@ -181,6 +180,9 @@ namespace VRRocket.Editor
             var panel = GameObject.Find("BlueprintPanel");
             var monitor = GameObject.Find("BuildStepMonitor");
             if (panel == null || monitor == null) { Debug.LogError("Place Build Screens On Desk: open VRRocket_Main with BlueprintPanel and BuildStepMonitor."); return; }
+            // the RocketWorkstation's origin is the desk surface
+            var workstation = Object.FindAnyObjectByType<RocketWorkstation>(FindObjectsInactive.Include);
+            var k_DeskTopY = workstation != null ? workstation.transform.position.y : 1.125f;
             var stand = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Environment/Mat_DarkMetal.mat");
             foreach (var (go, x) in new[] { (monitor, k_PictureX), (panel, k_TextX) })
             {

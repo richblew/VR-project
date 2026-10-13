@@ -13,7 +13,6 @@ namespace VRRocket.Editor
     /// </summary>
     public static class WindowWallBuilder
     {
-        const string MeshPath = "Assets/Models/Environment/RightWall_Window.asset";
         const string GlassPath = "Assets/Materials/Environment/Mat_Glass.mat";
         const string FramePath = "Assets/Materials/Environment/Mat_DarkMetal.mat";
 
@@ -28,8 +27,12 @@ namespace VRRocket.Editor
                 var s = SceneManager.GetSceneAt(i);
                 if (s != opening.gameObject.scene) wall = RoomSceneLoader.FindByPath(s, opening.roomWallPath);
             }
+            // VRRocket_Final holds the room itself: the wall is in the same scene, and is switched off once replaced
+            var sameScene = false;
+            if (wall == null) { wall = RoomSceneLoader.FindByPath(opening.gameObject.scene, opening.roomWallPath); sameScene = wall != null; }
             if (wall == null) { EditorUtility.DisplayDialog("Rebuild Window Wall", "Open Assets/Scenes/room.unity additively next to VRRocket_Main, so the wall '" + opening.roomWallPath + "' can be read.", "OK"); return; }
             Rebuild(opening, wall);
+            if (sameScene) { Undo.RecordObject(wall, "Rebuild window wall"); wall.SetActive(false); }
             var bindings = Object.FindAnyObjectByType<RoomBindings>(FindObjectsInactive.Include);
             if (bindings != null) bindings.RecordSwapBounds();
             EditorSceneManager.MarkSceneDirty(opening.gameObject.scene);
@@ -80,9 +83,10 @@ namespace VRRocket.Editor
             ZFace(wz0, Vector3.forward, wy0, wy1);  // jamb reveals
             ZFace(wz1, Vector3.back, wy0, wy1);
 
-            var mesh = new Mesh { name = "RightWall_Window" };
+            var mesh = new Mesh { name = System.IO.Path.GetFileNameWithoutExtension(opening.meshAssetPath) };
             mesh.SetVertices(verts); mesh.SetNormals(normals); mesh.SetUVs(0, uvs); mesh.SetTriangles(tris, 0);
             mesh.RecalculateTangents(); mesh.RecalculateBounds();
+            var MeshPath = opening.meshAssetPath;
             var folder = System.IO.Path.GetDirectoryName(MeshPath).Replace('\\', '/');
             if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder(System.IO.Path.GetDirectoryName(folder).Replace('\\', '/'), System.IO.Path.GetFileName(folder));
             var existing = AssetDatabase.LoadAssetAtPath<Mesh>(MeshPath);

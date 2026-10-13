@@ -118,6 +118,16 @@ namespace VRRocket
             Set(m_Clock, "T-00:00:00");
         }
 
+        /// <summary>The launch was aborted: shown while the abort alarm runs.</summary>
+        public void ShowAborted()
+        {
+            Surface(false); Diagram(false);
+            Set(m_Title, "LAUNCH ABORTED");
+            Set(m_Big, "ABORT");
+            Set(m_Status, "Launch aborted. The prototype is back on the bench: correct it and submit again.");
+            Set(m_Clock, "T-00:00:00");
+        }
+
         public void ShowPreLaunch()
         {
             Surface(true); Diagram(false);
