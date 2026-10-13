@@ -80,7 +80,7 @@ AnimatorState:
   m_TimeParameter: 
 --- !u!1107 &-5093410114591047805
 AnimatorStateMachine:
-  serializedVersion: 6
+  serializedVersion: 7
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -98,7 +98,7 @@ AnimatorStateMachine:
     m_Position: {x: 196.5393, y: 466.67316, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7942689443060924931}
-    m_Position: {x: 206.5393, y: 476.67316, z: 0}
+    m_Position: {x: 210, y: 480, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8260219824935709876}
     m_Position: {x: 216.5393, y: 486.67316, z: 0}
@@ -215,7 +215,7 @@ AnimatorController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Free VR Hands_Controler
-  serializedVersion: 5
+  serializedVersion: 6
   m_AnimatorParameters: []
   m_AnimatorLayers:
   - serializedVersion: 5
@@ -230,6 +230,7 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
+  m_EvaluateTransitionsOnStart: 0
 --- !u!1102 &329881599421666569
 AnimatorState:
   serializedVersion: 6
