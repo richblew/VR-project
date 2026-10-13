@@ -78,7 +78,7 @@ namespace VRRocket
                 sb.AppendLine("Cap locked: " + report.capLocked + "    Flap error: " + report.FlapError);
                 foreach (var f in report.flapPlacement)
                     sb.AppendLine("Flap " + f.flapId + ": " + f.slotName + "  " + f.position + "/" + f.orientation + (f.IsCorrect ? "" : "  (wrong)"));
-                sb.AppendLine("Failed (" + report.FailedCount + "): " + string.Join(", ", report.failedComponents));
+                sb.AppendLine("Failed (" + report.FailedCount + "): " + string.Join(", ", BuildReport.DisplayNames(report.failedComponents)));
             }
             m_Text.text = sb.ToString();
         }

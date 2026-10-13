@@ -182,7 +182,7 @@ namespace VRRocket
             var sb = new StringBuilder();
             if (report != null && !success)
             {
-                sb.Append("Failed components (").Append(report.FailedCount).Append("): ").Append(string.Join(", ", report.failedComponents));
+                sb.Append("Failed components (").Append(report.FailedCount).Append("): ").Append(string.Join(", ", BuildReport.DisplayNames(report.failedComponents)));
                 sb.Append("   |   The prototype is returned for inspection. A new kit is on the bench.");
             }
             else if (success) sb.Append("Clean launch. Well built.");
@@ -216,7 +216,7 @@ namespace VRRocket
 #if UNITY_EDITOR
         // Stage previews for laying out the screen and the mirror (component context menu, or from editor tooling).
         [ContextMenu("Preview/Title")] public void PreviewTitle() => ShowTitle("VR ROCKET", "Build it. Submit it. Launch it.");
-        [ContextMenu("Preview/Assembly")] public void PreviewAssembly() => ShowAssembly(AssemblyState.BuildingAirframe, "Turn around: the kit is on the desk behind you. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, motor nozzle down, then twist the cap until it clicks.");
+        [ContextMenu("Preview/Assembly")] public void PreviewAssembly() => ShowAssembly(AssemblyState.BuildingAirframe, "Turn around: the kit is on the desk behind you. Fins at the base, flaps at the midpoint with the swept edge up, nose on top, battery + end up, then twist the cap until it clicks.");
         [ContextMenu("Preview/Received")] public void PreviewReceived() => ShowReceived();
         [ContextMenu("Preview/Pre-launch")] public void PreviewPreLaunch() => ShowPreLaunch();
         [ContextMenu("Preview/Countdown")] public void PreviewCountdown() => ShowCountdown(7);
@@ -239,7 +239,7 @@ namespace VRRocket
             {
                 case AssemblyState.BuildingAirframe: return "BUILDING AIRFRAME";
                 case AssemblyState.AirframeComplete: return "AIRFRAME COMPLETE";
-                case AssemblyState.MotorFitted: return "MOTOR FITTED";
+                case AssemblyState.MotorFitted: return "BATTERY FITTED";
                 case AssemblyState.PrototypeComplete: return "PROTOTYPE COMPLETE";
                 case AssemblyState.Submitted: return "SUBMITTED";
                 default: return s.ToString();
@@ -250,7 +250,7 @@ namespace VRRocket
         {
             switch (o)
             {
-                case LaunchOutcome.MotorRetentionLoss: return "MOTOR RETENTION LOSS";
+                case LaunchOutcome.MotorRetentionLoss: return "BATTERY RETENTION LOSS";
                 case LaunchOutcome.UnstableFlight: return "UNSTABLE FLIGHT";
                 default: return "SUCCESS";
             }

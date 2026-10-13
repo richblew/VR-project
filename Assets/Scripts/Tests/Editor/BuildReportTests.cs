@@ -67,5 +67,13 @@ namespace VRRocket.Tests
             Assert.IsFalse(Flap(1, FlapPosition.Base, FlapOrientation.Up).IsCorrect);
             Assert.IsTrue(Flap(1, FlapPosition.Midpoint, FlapOrientation.Up).IsCorrect);
         }
+
+        [Test]
+        public void Failed_Components_Read_As_The_Player_Sees_Them()
+        {
+            CollectionAssert.AreEqual(new[] { "Battery cap", "Wing flap 2" }, BuildReport.DisplayNames(new[] { "MotorCap", "WingFlap_2" }), "the kit's motor is a battery");
+            Assert.AreEqual("Battery", BuildReport.DisplayName("Motor"));
+            Assert.IsEmpty(BuildReport.DisplayNames(null));
+        }
     }
 }

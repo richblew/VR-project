@@ -29,6 +29,7 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 | Handles | RuslanOz (@KarinaOz, Sketchfab) | https://sketchfab.com/3d-models/handles-ddd1c24620814c2eb022b97c90c7df2f | CC BY 4.0 | 2026-10-13 | the wiring hatch's grip: the bar pull only, reduced to 1.2k triangles (`Assets/Models/Console/Console_Grip.fbx`) |
 | DiamondPlate008D | ambientCG | https://ambientcg.com/view?id=DiamondPlate008D | CC0 | 2026-10-13 | the wiring hatch's tread plate (`Assets/Texture/Console`) |
 | Rubber004 | ambientCG | https://ambientcg.com/view?id=Rubber004 | CC0 | 2026-10-13 | the puzzle cables' rubber, tinted per pair (`Assets/Texture/Console`) |
+| Simple AA Battery | MasterYogurt (Sketchfab) | https://sketchfab.com/3d-models/simple-aa-battery-5dcd884e27b642c8a7932a227d7c1b7a | CC BY 4.0 | 2026-10-13 | the rocket's battery (the kit part that was the motor), scaled to 24 x 70 mm, + end up (`Assets/Models/Rocket/Battery.fbx`, `Assets/Texture/Rocket/Battery_*.png`) |
 
 Beeps, chimes, buzzes and the abort siren are generated in code (`ProceduralAudio`).
 

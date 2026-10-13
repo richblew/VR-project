@@ -348,6 +348,40 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator Side_TVs_Are_Stacked_Square_And_The_Same_Size()
+        {
+            yield return null;
+            Transform Tv(string n) { foreach (var r in Bridge.sideScreens) if (r.name == n) return r.transform; return null; }
+            foreach (var side in new[] { "left", "right" })
+            {
+                var bottom = Tv("TV bottom " + side); var top = Tv("TV top " + side);
+                Assert.IsNotNull(bottom); Assert.IsNotNull(top);
+                Assert.Less(Vector2.Distance(new Vector2(top.position.x, top.position.z), new Vector2(bottom.position.x, bottom.position.z)), 0.002f, side + ": the top TV sits straight over the bottom one");
+                Assert.Less(Quaternion.Angle(top.rotation, bottom.rotation), 0.1f, side + ": both face the same way");
+                Assert.AreEqual(bottom.lossyScale.x, top.lossyScale.x, 0.001f, side + ": the same width");
+                var gap = top.position.y - (bottom.position.y + bottom.GetComponent<MeshFilter>().sharedMesh.bounds.size.y * bottom.lossyScale.y);
+                Assert.That(gap, Is.InRange(0f, 0.02f), side + ": stacked with a small gap, not overlapping");
+            }
+            Assert.AreEqual(Tv("TV bottom left").position.y, Tv("TV bottom right").position.y, 0.001f, "both pairs at the same height");
+            Assert.AreEqual(Tv("TV bottom left").lossyScale.x, Tv("TV bottom right").lossyScale.x, 0.001f, "all four the same size");
+        }
+
+        [UnityTest]
+        public IEnumerator The_Kit_Motor_Is_A_Battery()
+        {
+            yield return null;
+            var part = Part(PartType.Motor);
+            var mesh = part.GetComponentInChildren<MeshFilter>().sharedMesh;
+            Assert.AreEqual("Battery", mesh.name, "the kit's motor part shows the battery model");
+            var screens = Object.FindAnyObjectByType<ConsoleStatusScreens>();
+            Flow.StartWithoutIntro();
+            yield return null;
+            screens.Refresh();
+            StringAssert.Contains("BATTERY", screens.pollText);
+            StringAssert.DoesNotContain("MOTOR", screens.pollText);
+        }
+
+        [UnityTest]
         public IEnumerator Countdown_Clock_Covers_Its_Whole_TV()
         {
             yield return null;

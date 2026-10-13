@@ -50,5 +50,16 @@ namespace VRRocket
             report.FailedCount = report.failedComponents.Length;
             return report;
         }
+
+        /// <summary>A failed component as the player reads it: the kit's motor is a battery, so "MotorCap" is "Battery cap", "WingFlap_2" "Wing flap 2".</summary>
+        public static string DisplayName(string component)
+        {
+            if (component == "MotorCap") return "Battery cap";
+            if (component == "Motor") return "Battery";
+            if (component != null && component.StartsWith("WingFlap_")) return "Wing flap " + component.Substring("WingFlap_".Length);
+            return component;
+        }
+
+        public static string[] DisplayNames(string[] components) => Array.ConvertAll(components ?? Array.Empty<string>(), DisplayName);
     }
 }

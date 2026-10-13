@@ -14,19 +14,19 @@ namespace VRRocket
         static readonly int k_BaseMap = Shader.PropertyToID("_BaseMap");
 
         public const int StepCount = 5;
-        static readonly string[] k_StepTitles = { "TAIL FINS", "WING FLAPS", "NOSE CONE", "MOTOR", "MOTOR CAP" };
+        static readonly string[] k_StepTitles = { "TAIL FINS", "WING FLAPS", "NOSE CONE", "BATTERY", "BATTERY CAP" };
         static readonly string[] k_StepHints =
         {
             "slide into the slots at the base, any order",
             "midpoint slots, swept edge toward the nose",
             "press it onto the top",
-            "insert from below, nozzle down",
+            "insert from below, + end up",
             "seat it, then twist clockwise until it clicks",
         };
 
         [SerializeField] TextMeshPro m_Text;
         [SerializeField, Tooltip("Optional monitor beside the text that shows the picture of the current step.")] Renderer m_ImageScreen;
-        [SerializeField, Tooltip("The rocket after each step: fins, flaps, nose, motor, cap (complete). Made by VR Rocket > Capture Build Step Images.")]
+        [SerializeField, Tooltip("The rocket after each step: fins, flaps, nose, battery, cap (complete). Made by VR Rocket > Capture Build Step Images.")]
         Texture[] m_StepImages = new Texture[0];
 
         MaterialPropertyBlock m_Block;
