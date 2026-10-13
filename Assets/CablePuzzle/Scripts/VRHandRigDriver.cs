@@ -15,6 +15,24 @@ namespace CablePuzzle
     [DisallowMultipleComponent]
     public class VRHandRigDriver : MonoBehaviour
     {
+        /// <summary>
+        /// One thumb joint. At full grip it is rotated by angleA about axisA, then by angleB about axisB
+        /// (both axes are in the joint's own local space). Two rotations let the base joint swing the
+        /// thumb in two directions at once (e.g. across the palm AND around the side of an object).
+        /// </summary>
+        [System.Serializable]
+        public class ThumbJoint
+        {
+            public Vector3 axisA = new Vector3(0, 0, 1);
+            public float angleA = 30f;
+            public Vector3 axisB = new Vector3(0, 1, 0);
+            public float angleB = 0f;
+
+            public ThumbJoint() { }
+            public ThumbJoint(Vector3 axisA, float angleA, Vector3 axisB, float angleB)
+            { this.axisA = axisA; this.angleA = angleA; this.axisB = axisB; this.angleB = angleB; }
+        }
+
         [System.Serializable]
         public class Hand
         {
@@ -24,7 +42,15 @@ namespace CablePuzzle
             public Vector3 positionOffset;            // in controller space (metres)
             public Vector3 rotationOffset;            // in controller space (degrees)
             public InputActionReference grip;         // float action, e.g. "XRI Left Interaction/Select Value" (enabled by XRI's Input Action Manager)
-            public float curlSign = 1f;               // flip to -1 if this hand curls backwards
+            public float curlSign = 1f;               // flip to -1 if this hand's FINGERS curl backwards (does not affect the thumb)
+
+            [Tooltip("Thumb joints 1 (base), 2, 3. Each hand has its own settings. Joint 1 should do most of the work so the thumb swings in from its base.")]
+            public ThumbJoint[] thumb =
+            {
+                new ThumbJoint(new Vector3(0, 0, 1), 40f, new Vector3(0, 1, 0), 25f),   // 1: base joint
+                new ThumbJoint(new Vector3(0, 0, 1), 15f, new Vector3(0, 1, 0), 0f),    // 2
+                new ThumbJoint(new Vector3(0, 0, 1), 20f, new Vector3(0, 1, 0), 0f),    // 3
+            };
 
             [System.NonSerialized] public Transform[][] bones;      // [finger][joint]
             [System.NonSerialized] public Quaternion[][] rest;
@@ -37,12 +63,10 @@ namespace CablePuzzle
         public Hand right = new Hand { side = "Right", curlSign = 1f };
 
         [Header("Curl (applied to joints 1-3 of every finger; joint 4 is the tip and stays still)")]
-        [Tooltip("Work out the finger curl axis from the skeleton (the line across the knuckles). If on, 'Finger Axis' is ignored. Thumb always uses 'Thumb Axis'.")]
+        [Tooltip("Work out the finger curl axis from the skeleton (the line across the knuckles). If on, 'Finger Axis' is ignored. Thumbs are set separately, per hand, under Left / Right > Thumb.")]
         public bool autoFingerAxis = true;
         public Vector3 fingerAxis = new Vector3(0, 0, 1);       // manual local axis the finger joints bend around (when Auto is off)
         public Vector3 fingerAngles = new Vector3(65, 80, 55);  // degrees at full grip, joints 1, 2, 3
-        public Vector3 thumbAxis = new Vector3(0, 0, 1);
-        public Vector3 thumbAngles = new Vector3(20, 35, 35);
         public float speed = 12f;                               // open/close speed (units of grip per second)
 
         [Header("Testing")]
@@ -142,16 +166,32 @@ namespace CablePuzzle
             for (int f = 0; f < h.bones.Length; f++)
             {
                 bool thumb = f == 0;
-                Vector3 manual = (thumb ? thumbAxis : fingerAxis).normalized;
-                Vector3 ang = thumb ? thumbAngles : fingerAngles;
                 for (int j = 0; j < 3; j++)
                 {
                     var b = h.bones[f][j];
                     if (b == null) continue;
-                    Vector3 axis = (!thumb && autoFingerAxis) ? h.autoAxes[f][j] : manual;
-                    b.localRotation = h.rest[f][j] * Quaternion.AngleAxis(ang[j] * h.value * h.curlSign, axis);
+
+                    if (thumb)
+                    {
+                        if (h.thumb == null || j >= h.thumb.Length) continue;
+                        var tj = h.thumb[j];
+                        b.localRotation = h.rest[f][j]
+                                        * Turn(tj.axisA, tj.angleA * h.value)
+                                        * Turn(tj.axisB, tj.angleB * h.value);
+                    }
+                    else
+                    {
+                        Vector3 axis = autoFingerAxis ? h.autoAxes[f][j] : fingerAxis.normalized;
+                        b.localRotation = h.rest[f][j] * Turn(axis, fingerAngles[j] * h.value * h.curlSign);
+                    }
                 }
             }
+        }
+
+        static Quaternion Turn(Vector3 axis, float degrees)
+        {
+            if (axis.sqrMagnitude < 1e-6f || Mathf.Approximately(degrees, 0f)) return Quaternion.identity;
+            return Quaternion.AngleAxis(degrees, axis.normalized);
         }
 
         // Finds an object by name even if it is inactive, ignoring anything inside this hand rig.
