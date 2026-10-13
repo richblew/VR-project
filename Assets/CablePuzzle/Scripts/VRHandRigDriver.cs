@@ -39,10 +39,8 @@ namespace CablePuzzle
             public string side = "Left";              // "Left" or "Right" - used to find the bones
             public Transform controller;              // auto-found: "Left Controller" / "Right Controller"
             public Transform anchor;                  // auto-found: J_Left / J_Right
-            [Tooltip("Optional. Move/rotate this object (a child of the controller) with Unity's gizmos to place the hand in ANY position and orientation. When set, the two offsets below are ignored. Use the component's context menu > 'Create Hand Targets'.")]
-            public Transform target;
-            public Vector3 positionOffset;            // in controller space (metres) - used only when no Target is set
-            public Vector3 rotationOffset;            // in controller space (degrees) - used only when no Target is set
+            public Vector3 positionOffset;            // in controller space (metres)
+            public Vector3 rotationOffset;            // in controller space (degrees)
             public InputActionReference grip;         // float action, e.g. "XRI Left Interaction/Select Value" (enabled by XRI's Input Action Manager)
             public float curlSign = 1f;               // flip to -1 if this hand's FINGERS curl backwards (does not affect the thumb)
 
@@ -54,9 +52,6 @@ namespace CablePuzzle
                 new ThumbJoint(new Vector3(0, 0, 1), 20f, new Vector3(0, 1, 0), 0f),    // 3
             };
 
-            [System.NonSerialized] public Transform palm;           // J_<side>_Hand: the point the hand is positioned/rotated around
-            [System.NonSerialized] public Vector3 palmPosInAnchor;
-            [System.NonSerialized] public Quaternion palmRotInAnchor;
             [System.NonSerialized] public Transform[][] bones;      // [finger][joint]
             [System.NonSerialized] public Quaternion[][] rest;
             [System.NonSerialized] public Vector3[][] autoAxes;   // curl axis in each bone's local space
@@ -66,9 +61,6 @@ namespace CablePuzzle
 
         public Hand left = new Hand { side = "Left", curlSign = -1f };
         public Hand right = new Hand { side = "Right", curlSign = 1f };
-
-        [Tooltip("Position and rotate the hand around its palm/wrist bone (J_Left_Hand / J_Right_Hand) instead of the arm bone at the top of the rig. Turn off to get the old behaviour.")]
-        public bool pivotAtPalm = true;
 
         [Header("Curl (applied to joints 1-3 of every finger; joint 4 is the tip and stays still)")]
         [Tooltip("Work out the finger curl axis from the skeleton (the line across the knuckles). If on, 'Finger Axis' is ignored. Thumbs are set separately, per hand, under Left / Right > Thumb.")]
@@ -101,13 +93,6 @@ namespace CablePuzzle
             if (h.anchor == null) h.anchor = FindDeep(transform, "J_" + h.side);
             if (h.controller == null) h.controller = FindController(h.side + " Controller");
             if (h.anchor == null) { Debug.LogWarning($"VRHandRigDriver: bone J_{h.side} not found", this); return; }
-
-            h.palm = FindDeep(h.anchor, "J_" + h.side + "_Hand");
-            if (h.palm != null)
-            {
-                h.palmPosInAnchor = h.anchor.InverseTransformPoint(h.palm.position);
-                h.palmRotInAnchor = Quaternion.Inverse(h.anchor.rotation) * h.palm.rotation;
-            }
 
             h.bones = new Transform[FingerNames.Length][];
             h.rest = new Quaternion[FingerNames.Length][];
@@ -154,26 +139,12 @@ namespace CablePuzzle
         {
             if (h.anchor == null || h.bones == null) return;
 
-            // 1. follow the controller (or the hand Target, if there is one)
-            bool hasPose = true; Vector3 pos; Quaternion rot;
-            if (h.target != null) { pos = h.target.position; rot = h.target.rotation; }
-            else if (h.controller != null)
+            // 1. follow the controller
+            if (h.controller != null)
             {
-                pos = h.controller.TransformPoint(h.positionOffset);
-                rot = h.controller.rotation * Quaternion.Euler(h.rotationOffset);
-            }
-            else { hasPose = false; pos = default; rot = Quaternion.identity; }
-
-            if (hasPose)
-            {
-                if (pivotAtPalm && h.palm != null)
-                {
-                    // place the rig's top bone so that the PALM bone ends up exactly at pos/rot
-                    Quaternion aRot = rot * Quaternion.Inverse(h.palmRotInAnchor);
-                    Vector3 aPos = pos - aRot * Vector3.Scale(h.palmPosInAnchor, h.anchor.lossyScale);
-                    h.anchor.SetPositionAndRotation(aPos, aRot);
-                }
-                else h.anchor.SetPositionAndRotation(pos, rot);
+                h.anchor.SetPositionAndRotation(
+                    h.controller.TransformPoint(h.positionOffset),
+                    h.controller.rotation * Quaternion.Euler(h.rotationOffset));
             }
 
             // 2. work out how closed the hand should be
@@ -216,34 +187,6 @@ namespace CablePuzzle
                 }
             }
         }
-
-#if UNITY_EDITOR
-        [ContextMenu("Create Hand Targets (move/rotate with gizmos)")]
-        void CreateHandTargets()
-        {
-            CreateTarget(left);
-            CreateTarget(right);
-        }
-
-        void CreateTarget(Hand h)
-        {
-            if (h.target != null) return;
-            if (h.controller == null) h.controller = FindController(h.side + " Controller");
-            if (h.controller == null)
-            {
-                Debug.LogWarning($"VRHandRigDriver: '{h.side} Controller' not found - assign the Controller field first.", this);
-                return;
-            }
-            var go = new GameObject(h.side + " Hand Target");
-            UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Create hand target");
-            go.transform.SetParent(h.controller, false);
-            go.transform.localPosition = h.positionOffset;
-            go.transform.localRotation = Quaternion.Euler(h.rotationOffset);
-            UnityEditor.Undo.RecordObject(this, "Assign hand target");
-            h.target = go.transform;
-            UnityEditor.EditorUtility.SetDirty(this);
-        }
-#endif
 
         static Quaternion Turn(Vector3 axis, float degrees)
         {
