@@ -2254,6 +2254,7 @@ GameObject:
   - component: {fileID: 2440703380416593881}
   - component: {fileID: 7850098111545253177}
   - component: {fileID: 6300240553718019044}
+  - component: {fileID: 8251589096938133358}
   m_Layer: 0
   m_Name: Plug_1
   m_TagString: Untagged
@@ -2530,6 +2531,22 @@ MonoBehaviour:
   pairId: 1
   isPlug: 1
   partner: {fileID: 6107926396526910104}
+--- !u!114 &8251589096938133358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3324495602198966916}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 174.88}
 --- !u!1 &3350317748515479454
 GameObject:
   m_ObjectHideFlags: 0
@@ -4116,6 +4133,7 @@ GameObject:
   - component: {fileID: 8029003975502946859}
   - component: {fileID: 4254646540974799521}
   - component: {fileID: 3369992823716162903}
+  - component: {fileID: 4203047572703598}
   m_Layer: 0
   m_Name: Plug_3
   m_TagString: Untagged
@@ -4392,6 +4410,22 @@ MonoBehaviour:
   pairId: 3
   isPlug: 1
   partner: {fileID: 8620664884726192810}
+--- !u!114 &4203047572703598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5300439931000415042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 174.88}
 --- !u!1 &5346615419651614066
 GameObject:
   m_ObjectHideFlags: 0
@@ -5548,7 +5582,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6765194938511844289}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.84022796, y: -0, z: -0, w: 0.54223335}
+  m_LocalRotation: {x: 0.8402261, y: 0, z: 0, w: 0.54223627}
   m_LocalPosition: {x: 0.209, y: 1.049666, z: 1.2306763}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
@@ -5889,6 +5923,7 @@ GameObject:
   - component: {fileID: 6196639011229792500}
   - component: {fileID: 1434639222000686596}
   - component: {fileID: 6557064522694354562}
+  - component: {fileID: 2257141745540607210}
   m_Layer: 0
   m_Name: Plug_2
   m_TagString: Untagged
@@ -6165,6 +6200,22 @@ MonoBehaviour:
   pairId: 2
   isPlug: 1
   partner: {fileID: 8256300323735713124}
+--- !u!114 &2257141745540607210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6937353264894256240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 174.88}
 --- !u!1 &7151259128112998219
 GameObject:
   m_ObjectHideFlags: 0
@@ -6550,6 +6601,7 @@ GameObject:
   - component: {fileID: 934584391751386418}
   - component: {fileID: 2794036701702062347}
   - component: {fileID: 7498975423750975631}
+  - component: {fileID: 7861387076166510032}
   m_Layer: 0
   m_Name: Plug_5
   m_TagString: Untagged
@@ -6826,6 +6878,22 @@ MonoBehaviour:
   pairId: 5
   isPlug: 1
   partner: {fileID: 6539523887281063822}
+--- !u!114 &7861387076166510032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7483322356060553725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 174.88}
 --- !u!1 &7498856336756582638
 GameObject:
   m_ObjectHideFlags: 0
@@ -7870,6 +7938,7 @@ GameObject:
   - component: {fileID: 5417619766590219633}
   - component: {fileID: 2738711437586909249}
   - component: {fileID: 8806637089006600927}
+  - component: {fileID: 5585117715583334366}
   m_Layer: 0
   m_Name: Plug_4
   m_TagString: Untagged
@@ -8146,6 +8215,22 @@ MonoBehaviour:
   pairId: 4
   isPlug: 1
   partner: {fileID: 4685618494217422803}
+--- !u!114 &5585117715583334366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8789043314240838000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 174.88}
 --- !u!1 &8791004624984189287
 GameObject:
   m_ObjectHideFlags: 0

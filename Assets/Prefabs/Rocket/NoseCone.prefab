@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4556520946793845563}
   - component: {fileID: 4343370284195114384}
   - component: {fileID: 8911797930393457052}
+  - component: {fileID: 993461724574712306}
   m_Layer: 0
   m_Name: NoseCone
   m_TagString: Untagged
@@ -313,6 +314,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.ImpactAudio
   m_MinSpeed: 0.25
   m_Cooldown: 0.12
+--- !u!114 &993461724574712306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606067758277396156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &3848117986648795834
 GameObject:
   m_ObjectHideFlags: 0
