@@ -49,6 +49,7 @@ Most use `Dev_Interactions.unity` (a grey test bench with only the kit and a rig
 | Class | Tests | Checks |
 |---|---|---|
 | `FinFlapMotorTests` | 4 | fins in any order, snapped straight, removable; flaps in all six slots either way up, placements recorded, the same feedback for right and wrong; motor refused before the airframe (strict order) and nozzle up, then seated nozzle down; cap refused before the motor; free order accepts the motor early |
+| `SlotGlowTests` | 5 | a held flap or fin lights only the nearest slot that fits it (Mid and Low flap slots, fin slots), brighter as it nears and full on the track; held between two slots the light does not flicker, and moves once the other is clearly nearer; the slot strips are wider than a part's edge |
 | `NoseGuideTests` | 2 | the nose's approach, capture, slide, break-away, seat and removal; engaging and breaking away never jump |
 | `CapTwistTests` | 5 | the cap seats unlocked with its gap, ratchets clockwise and locks; letting go early keeps the seat and progress; pulling off resets |
 | `FullFlowTests` | 5 | build, carry, submit, failed launch and new kit; submit then abort returns it editable; attached parts follow the carried rocket and dropped parts respawn; parts do not lag behind the rocket frame by frame; a dropped rocket returns to the desk |

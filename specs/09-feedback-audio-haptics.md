@@ -26,7 +26,7 @@ Because all values live in one asset, the team's final sounds can be dropped in 
 
 | Moment | You see | You hear (field → clip) | You feel (field: strength, seconds, Hz; second pulse) | Which hand |
 |---|---|---|---|---|
-| A part comes near an attach point | the point glows, brighter as it gets closer; the part glows too | | | |
+| A part comes near an attach point | the nearest point that fits it glows (only that one), brighter as it gets closer; the part glows too | | | |
 | Guide engaged (the part locks onto the rail) | full glow | `guideEngage` → HoverSound.wav | `hapticGuideEngage`: 0.15, 0.02 s, 220 Hz | holding |
 | Sliding along the rail (every 4 mm) | | | `hapticSlideTick`: 0.07, 0.01 s, 220 Hz | holding |
 | Break away from the rail | glow drops | nothing, on purpose | nothing, on purpose | |
@@ -66,10 +66,12 @@ Notes:
 
 ## 4. Glow
 
-- **Attach points:** each point on the body tube has a `Glow` child (an emissive mesh with `Assets/Materials/Rocket/Glow.mat`, URP Unlit, HDR orange). While a part that the point would accept is within the glow radius (0.12 m), the point glows, brighter as the part gets closer, and at full brightness while the part is on its rail.
+- **Attach points:** each point on the body tube has a `Glow` child (an emissive mesh with `Assets/Materials/Rocket/Glow.mat`, URP Unlit, HDR orange). A held part lights **only the nearest point that fits it**, within the glow radius (0.12 m): the point it would go into. It glows brighter as the part gets closer, and at full brightness while the part is on its rail. The other points stay dark: when several lit at once, the near slot was hidden behind the part's own edge and the slots round the side of the tube looked like the one being picked.
+- **No flicker:** the light only moves to another point once that one is **Glow Switch Margin** (1 cm) closer than the lit one, so a part held between two slots keeps one lit.
+- **Slot strips** (fins and flaps) are 1.6 cm wide, so they show on the tube either side of the 2 mm edge of the part coming in.
 - **Parts:** each part has a `PartGlow` child that lights up the same way.
-- Every frame each point and part shows the brightest request it got that frame, then resets, so the glow goes off as soon as the part leaves. Several points can glow at once.
-- A point that is refused by the build rules (for example the cap seat before the motor) never glows. A motor held nozzle up makes nothing glow.
+- Every frame each point and part shows the brightest request it got that frame, then resets, so the glow goes off as soon as the part leaves.
+- A point that is refused by the build rules (for example the cap seat before the motor) never glows. A battery held the wrong way up makes nothing glow; the right way up, its seat glows as its + end nears the tube's base.
 - Glow colour: **Glow Color** on `AttachPoint` and `RocketPart` (HDR (2, 1.1, 0.2)). Brightness goes from 25% to 100% of that colour.
 
 ## 5. Haptics
