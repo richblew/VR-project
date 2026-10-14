@@ -4555,6 +4555,18 @@ PrefabInstance:
       propertyPath: 'm_SafeZones.Array.data[1]'
       value: 
       objectReference: {fileID: 1456329051}
+    - target: {fileID: 1296416838248931370, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1423471127990899496, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2199948014126332973, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 3636903935074574089, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.3
@@ -4595,14 +4607,68 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4886590355074256320, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6006069909714684691, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491726709755500319, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6637999147075092594, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 7840346150586562841, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: m_Name
       value: RocketWorkstation
       objectReference: {fileID: 0}
+    - target: {fileID: 8595246677620837558, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8801650646162546230, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: m_PermittedDisplacementAxes
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 863004764821552799, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 365613992}
+    - targetCorrespondingSourceObject: {fileID: 5541168697035272876, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 365613991}
+    - targetCorrespondingSourceObject: {fileID: 7471671686765395560, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 365613990}
+    - targetCorrespondingSourceObject: {fileID: 1044570747808222963, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 365613989}
+    - targetCorrespondingSourceObject: {fileID: 1319652170815091763, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 365613988}
+    - targetCorrespondingSourceObject: {fileID: 6595038792158670852, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 900358748}
+    - targetCorrespondingSourceObject: {fileID: 5965210225405946888, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1749426226}
+    - targetCorrespondingSourceObject: {fileID: 6869487290366323852, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1100271967}
+    - targetCorrespondingSourceObject: {fileID: 1666097675422706499, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1208274668}
+    - targetCorrespondingSourceObject: {fileID: 5026782196295039802, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1413557768}
   m_SourcePrefab: {fileID: 100100000, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
 --- !u!114 &365613977 stripped
 MonoBehaviour:
@@ -4615,6 +4681,136 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6a4b1eea71792045b377d9aa3eebdb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.RocketAssembly
+--- !u!1 &365613978 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5026782196295039802, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613979 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1666097675422706499, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613980 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6869487290366323852, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613981 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5965210225405946888, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613982 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6595038792158670852, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613983 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1319652170815091763, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613984 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1044570747808222963, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613985 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7471671686765395560, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613986 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5541168697035272876, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &365613987 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 863004764821552799, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+  m_PrefabInstance: {fileID: 365613976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &365613988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &365613989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &365613990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &365613991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &365613992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &372548446
 GameObject:
   m_ObjectHideFlags: 0
@@ -13107,6 +13303,7 @@ GameObject:
   - component: {fileID: 767789197}
   - component: {fileID: 767789196}
   - component: {fileID: 767789195}
+  - component: {fileID: 767789198}
   m_Layer: 0
   m_Name: HatchGrip
   m_TagString: Untagged
@@ -13334,6 +13531,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.132, y: 0.036000002, z: 0.06}
   m_Center: {x: 0, y: 0.015, z: 0}
+--- !u!114 &767789198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767789193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1001 &784404657
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14600,6 +14813,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 900317914}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &900358748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &906063424
 GameObject:
   m_ObjectHideFlags: 0
@@ -19054,6 +19283,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1097186508}
   m_CullTransparentMesh: 1
+--- !u!114 &1100271967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613980}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &1132437059
 GameObject:
   m_ObjectHideFlags: 0
@@ -19976,6 +20221,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1187779519}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1208274668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &1212083787 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -1509786920990512146, guid: e8d39c378ea574c4286671cf9a095700, type: 3}
@@ -21467,6 +21728,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1402544136}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1413557768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1001 &1429510057
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26098,6 +26375,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1749222456}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1749426226
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365613981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &1749569831
 GameObject:
   m_ObjectHideFlags: 0
@@ -27332,6 +27625,9 @@ MonoBehaviour:
       angleA: 38.1
       axisB: {x: 0, y: 1, z: 0}
       angleB: 0
+    useHoldPoint: 1
+    holdPointOffset: {x: 0, y: 0, z: 0}
+    holdPointRotation: {x: 0, y: 0, z: 0}
   right:
     side: Right
     controller: {fileID: 766360191}
@@ -27363,6 +27659,9 @@ MonoBehaviour:
       angleA: 38.1
       axisB: {x: 0, y: 1, z: 0}
       angleB: 0
+    useHoldPoint: 1
+    holdPointOffset: {x: 0, y: 0, z: 0}
+    holdPointRotation: {x: 0, y: 0, z: 0}
   autoFingerAxis: 1
   fingerAxis: {x: 0, y: 0, z: 1}
   fingerAngles: {x: 65, y: 80, z: 55}
@@ -35087,8 +35386,128 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3324495602198966916, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345036}
+    - targetCorrespondingSourceObject: {fileID: 6937353264894256240, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345035}
+    - targetCorrespondingSourceObject: {fileID: 5300439931000415042, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345034}
+    - targetCorrespondingSourceObject: {fileID: 8789043314240838000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345033}
+    - targetCorrespondingSourceObject: {fileID: 7483322356060553725, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345032}
   m_SourcePrefab: {fileID: 100100000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+--- !u!1 &8899078703083345027 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7483322356060553725, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345028 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8789043314240838000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345029 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5300439931000415042, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345030 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6937353264894256240, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345031 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3324495602198966916, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8899078703083345032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &8899078703083345033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &8899078703083345034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &8899078703083345035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
+--- !u!114 &8899078703083345036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!65 &8905752016034681301
 BoxCollider:
   m_ObjectHideFlags: 0
