@@ -106,7 +106,7 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 **Step by step, for a fin:**
 
 1. **Free.** The fin follows the hand.
-2. **Approach.** Every attach point that would accept the fin and is within **Glow Radius** (0.12 m) starts to glow, brighter the closer the fin gets. The fin's own glow lights up too. Several points can glow at once.
+2. **Approach.** The nearest attach point that would accept the fin, within **Glow Radius** (0.12 m), starts to glow, brighter the closer the fin gets: only that one, the slot the fin would go into. The fin's own glow lights up too. The light moves to another slot only once that one is **Glow Switch Margin** (1 cm) closer.
 3. **Capture.** When the fin is within **Capture Radius** (0.05 m) of the nearest accepting point, and roughly the right way round (within 40° for fins and flaps, 45° for the other parts), it locks onto that point's **guide**: a short straight rail. The fin turns to its seated rotation, eased over **Guide Blend Duration** (0.1 s) so nothing jumps. A soft tick and a light pulse play ("guide engaged").
 4. **Slide.** While guided, the fin can only slide along the rail, between the seat and the **guide length** (0.05 m for fins and flaps). The point glows at full brightness. A tiny haptic tick plays every 4 mm of travel, like a slot's texture.
 5. **Break away.** Moving the hand more than **Break Radius** (0.08 m) sideways, or pulling back past the end of the rail, releases the guide. No sound or vibration, on purpose.
@@ -251,7 +251,8 @@ Select `Assets/Settings/Rocket/AssemblyTuning.asset`. Distances are in metres at
 | Field | Value | What it does |
 |---|---|---|
 | Rocket Scale | 1 | size of the whole kit. Try 1.5 if parts feel fiddly in the headset. |
-| Glow Radius | 0.12 | points start glowing within this distance |
+| Glow Radius | 0.12 | the nearest fitting point starts glowing within this distance |
+| Glow Switch Margin | 0.01 | the light moves to another point only once that one is this much closer |
 | Capture Radius | 0.05 | a part locks onto a point's rail within this distance |
 | Break Radius | 0.08 | sideways drift that releases the rail |
 | Guide Length Plates / Nose / Motor / Cap | 0.05 / 0.06 / 0.08 / 0.04 | length of each rail |
