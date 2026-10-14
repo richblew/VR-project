@@ -12,7 +12,7 @@ The scene we ship: our game inside Richard's updated room, as one scene. Back to
 
 ## 1. How it differs from `VRRocket_Main`
 
-- **One scene.** The room's objects are part of this scene. There is no `RoomSceneLoader` or `RoomBindings`: everything is placed where it belongs and saved. `RoomLink` keeps only `XRRigAdapter` and `TransmissionBridge`.
+- **One scene.** The room's objects are part of this scene. There is no `RoomSceneLoader` or `RoomBindings`: everything is placed where it belongs and saved. Our intro and rig link (named `IntroController` since Yi-Xuan's 14 October update; it was `RoomLink`) keeps only `XRRigAdapter` and `TransmissionBridge`.
 - **Edit it directly.** `VRRocket_Final` is a normal scene now. Changes to `room.unity` or `VRRocket_Main` no longer reach it. One person edits it at a time.
 - **Room:** Richard's new layout. The help board and our old front-room window are gone.
 - **Posters:** the portrait rocket-launch poster hangs on the front room's right wall (x -3.9), centred between the corner TVs and the angled wall; the landscape moon-landing poster is centred on the alcove's right wall beside the console.
@@ -78,7 +78,7 @@ Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the con
 
 **The hatch:** `ConsoleAddOn/ControlPanel/WiringHatch`, a tread-plate cover (ambientCG DiamondPlate008D) with a bar grip (RuslanOz's Handles). `SlidingPanel` on `HatchGrip`: grab the grip and pull it toward LAUNCH; the cover slides into a slot under the panel surface (0.33 m of travel), the grip stays at the slot's mouth. Click and a controller pulse at each end. While the hatch is less than half open, every grabbable in `PuzzleBox` is switched off, except ones held or plugged in, so nothing is grabbed through the lid.
 
-**The puzzle:** five pairs. Each pair has a plug (icvetlan's Schuko plug) on one cable and a socket (Artik's Plug Socket) on another; `PairSocket` accepts only its own plug. Wires, plugs and sockets are in insulation colours (red, blue, yellow, black, white; plugs moulded in the cable's colour, sockets a lighter shade), the cables round rubber tubes (`CableTube`) drawn along her Verlet points. The sockets' rows are shuffled at the start and on every reset, so the cables cross differently each play.
+**The puzzle:** five pairs. Each pair has a plug (icvetlan's Schuko plug) on a cable from the well's left wall, and a socket (Artik's Plug Socket) fixed face up on the well's floor in a column on the right (Yi-Xuan's 14 October update: the sockets have no grab or rigidbody, and their own cables are switched off). Each socket stands on the floor (it used to sit 1.5 cm into it, so only its face showed). `PairSocket` accepts only its own plug. Wires, plugs and sockets are in insulation colours (red, blue, yellow, black, white; plugs moulded in the cable's colour, sockets a lighter shade), the cables round rubber tubes (`CableTube`) drawn along her Verlet points. The sockets' rows are shuffled at the start and on every reset, so the cables cross differently each play.
 
 **Finishing it (`CablePuzzle.ConsoleWiring` on `PuzzleBox`):**
 - every plug going in clicks (the kit's seat sound), pulses the hand that let go of it, and lights its lamp: a row of five lamps on the console surface along the hatch's far edge (`ControlPanel/WiringLights`), each in a bezel of its wire's colour, dark red until its pair connects, then green. The row shows with the hatch shut;
@@ -92,14 +92,14 @@ Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the con
 
 When it is fixed: the chime, CONSOLE ONLINE on the big TV and console monitor for 4 s, and the three NO SIGNAL TVs come alive (`ConsoleLiveScreens`: the NASA logo, SYSTEMS ONLINE, the rocket on its pad; the fourth TV keeps the countdown clock).
 
-**Yi-Xuan's rig:** her hand-model rig (`RoomAnchor/Player`) and her physical-room calibration (`RoomLink_Calibration`: `RoomCalibrator`, `WalkableZone`) are in the scene, switched off. With them on, the player floated a metre up, part grabs failed and locomotion was off. Our `Player` and `RoomLink` run the game until her rig grabs parts and stands on the floor; then switch hers on and ours off.
+**Yi-Xuan's rig:** her hand-model rig (`PlayerAnchor/Player`) and her physical-room calibration (`RoomLink`: `RoomCalibrator`, `WalkableZone`) are in the scene, switched off (her branch switches them on; the merge keeps them off). With them on, the player floated a metre up, part grabs failed and locomotion was off. Our `Player` and `RoomLink` run the game until her rig grabs parts and stands on the floor; then switch hers on and ours off.
 
 ## 7. Troubleshooting
 
 | Problem | Cause and fix |
 |---|---|
 | The intro plays by itself under the menu | `TransmissionController.playOnStart` is on. Switch it off in this scene. |
-| START WITH INTRO goes straight to building | `GameFlowController` has no Intro (should be `RoomLink`'s `TransmissionBridge`), or the room has no intro |
+| BRIEF ME goes straight to building | `GameFlowController` has no Intro (should be `IntroController`'s `TransmissionBridge`), or the room has no intro |
 | The curtain never closes | `AlcoveCurtain`'s Intro is empty, or the intro does not dim the room (`currentDim` stays 0) |
 | SUBMIT always refuses | the wiring is not connected yet (GO / NO-GO says CONSOLE OFFLINE), or `CablePairManager.onAllConnected` lost its call to `GameFlowController.MiniGameSolved` |
 | The hatch does not move | grab `HatchGrip` itself (the bar), not the plate; check `SlidingPanel` has its Cover and Contents set |

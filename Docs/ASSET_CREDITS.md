@@ -18,7 +18,8 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 | Asset | Author | Source | Licence | Downloaded | Used for |
 |---|---|---|---|---|---|
 | Particle Pack 1.1 | Kenney (kenney.nl) | https://kenney.nl/assets/particle-pack | CC0 | 2026-10-09 | engine flame, smoke, sparks and explosion sprites (`Assets/Texture/Particles`, 7 sprites) |
-| UI Pack - Sci-Fi (space expansion) | Kenney | https://kenney.nl/assets/ui-pack-sci-fi | CC0 | 2026-10-09 | START button graphic (`Assets/UI/Sprites/button_green.png`) |
+| UI Pack - Sci-Fi (space expansion) | Kenney | https://kenney.nl/assets/ui-pack-sci-fi | CC0 | 2026-10-09 | the old START button graphic (`Assets/UI/Sprites/button_green.png`, no longer used by the menu) |
+| NASA-style button frame | added by Richard, 2026-10-14 | source not recorded (Richard to fill in) | to be confirmed | 2026-10-14 | `Assets/UI/Sprites/nasa_button.png`; the menu buttons use `MenuButtonFrame.png`, made from it (black made transparent, cropped, halved). `MenuRule.png` and `MenuGrid.png` are drawn by our editor tooling (no third-party content) |
 | Sci-Fi Sounds | Kenney | https://kenney.nl/assets/sci-fi-sounds | CC0 | 2026-10-09 | engine loop, ignition, explosions, bin doors (`Assets/Audio/Kenney`) |
 | Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 | 2026-10-09 | part impacts on the desk and on each other (`Assets/Audio/Kenney`) |
 | Orbitron (variable) | Matt McInerney | https://github.com/google/fonts/tree/main/ofl/orbitron | SIL Open Font License 1.1 | 2026-10-09 | menu and screen titles |

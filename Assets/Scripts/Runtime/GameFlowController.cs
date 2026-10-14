@@ -165,9 +165,12 @@ namespace VRRocket
             if (afterSuccess) ResetMiniGame();   // a new play: the wiring is undone and must be connected again (ConsoleWiring)
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Launch != null) m_Launch.ResetPad();
-            if (m_Screen != null) m_Screen.ShowTitle(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Flight " + attempts + " reached orbit insertion. Press START to build another." : "Build it. Submit it. Launch it.");
+            // the menu's words are edited per state on the MenuPanel, in the Inspector; a big screen showing during the menu repeats its title
+            var state = afterSuccess ? MenuState.AfterSuccess : MenuState.FirstPlay;
+            var words = m_Menu != null ? m_Menu.Words(state) : new MenuWords();
+            if (m_Screen != null) m_Screen.ShowTitle(words.title, words.kicker);
             if (m_Blueprint != null) m_Blueprint.ShowIdle();
-            if (m_Menu != null) m_Menu.Show(afterSuccess ? "MISSION SUCCESS" : "VR ROCKET", afterSuccess ? "Your rocket flew clean. Build another?" : "Assemble a model rocket by hand, submit it at the console, and watch the full-size launch outside.", introOnDemand ? "START WITH INTRO" : (afterSuccess ? "BUILD AGAIN" : "START"));
+            if (m_Menu != null) m_Menu.Show(state, introOnDemand);
         }
 
         /// <summary>True when the room's intro waits to be started from the menu (VRRocket_Final).</summary>

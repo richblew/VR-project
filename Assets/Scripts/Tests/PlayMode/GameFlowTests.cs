@@ -227,6 +227,8 @@ namespace VRRocket.Tests
             yield return WaitForPhase(GamePhase.Menu, 5f);
             Assert.AreEqual(1, flow.successes);
             Assert.IsTrue(menu.isShown, "the menu offers another build");
+            Assert.AreEqual(MenuState.AfterSuccess, menu.shownState, "with its after-success words");
+            Assert.AreEqual(menu.afterSuccess.title, menu.transform.Find("Title").GetComponent<TMPro.TextMeshProUGUI>().text);
             Assert.IsFalse(vehicle.activeInHierarchy, "pad cleared");
             Assert.IsFalse(assembly.interactionEnabled, "parts locked again until START");
             Assert.AreEqual(AssemblyState.BuildingAirframe, assembly.State);
