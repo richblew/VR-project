@@ -28,6 +28,7 @@ namespace VRRocket
         public LaunchOutcome outcome;
         public string[] failedComponents = Array.Empty<string>();       // e.g. { "MotorCap", "WingFlap_2" }
         public int FailedCount;                 // failedComponents.Length
+        public int wrongFlapCount;              // flaps in the wrong place or upside down: one veers off course, more break up
 
         /// <summary>Applies the outcome rule of SPEC.md section 7.2 and fills the derived fields.</summary>
         public static BuildReport Build(FlapPlacement[] flaps, bool capLocked)
@@ -41,6 +42,7 @@ namespace VRRocket
             {
                 if (f.IsCorrect) continue;
                 anyFlapWrong = true;
+                report.wrongFlapCount++;
                 failed.Add("WingFlap_" + f.flapId);
             }
             report.FlapError = anyFlapWrong;
@@ -61,5 +63,19 @@ namespace VRRocket
         }
 
         public static string[] DisplayNames(string[] components) => Array.ConvertAll(components ?? Array.Empty<string>(), DisplayName);
+
+        /// <summary>What the flight did, for the result screens' second line: how an unstable flight failed, or where the battery went.</summary>
+        public string FlightDetail
+        {
+            get
+            {
+                switch (outcome)
+                {
+                    case LaunchOutcome.UnstableFlight: return wrongFlapCount <= 1 ? "VEERED OFF COURSE AND CRASHED" : "BROKE UP IN FLIGHT";
+                    case LaunchOutcome.MotorRetentionLoss: return "BATTERY BLEW OUT ON THE PAD";
+                    default: return "NOMINAL FLIGHT";
+                }
+            }
+        }
     }
 }

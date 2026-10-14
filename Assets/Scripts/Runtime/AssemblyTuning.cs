@@ -18,7 +18,8 @@ namespace VRRocket
         [Header("Guide length along the axis (metres, before rocketScale)")]
         public float guideLengthPlates = 0.05f;
         public float guideLengthNose = 0.06f;
-        public float guideLengthMotor = 0.08f;
+        [Tooltip("An attached battery's track when grabbed to take it out (it comes free once its + end leaves the tube)")]
+        public float guideLengthMotor = 0.14f;
         public float guideLengthCap = 0.04f;
         [Tooltip("How far the finished rocket is lifted before it leaves the stand's clamp.")]
         public float guideLengthTube = 0.10f;
@@ -27,6 +28,17 @@ namespace VRRocket
         public float orientationTolerancePlates = 40f;
         public float orientationToleranceOthers = 45f;
 
+        [Header("Battery (the motor part) insertion")]
+        [Tooltip("The battery is caught once its + end is past the tube's base end and within this distance of the tube's axis: the opening, plus a little give. Never before.")]
+        public float motorEntryRadius = 0.02f;
+        [Tooltip("How far off the tube's axis the battery may lean and still be caught once its + end is in (more, or the wrong way up, and it is kept out)")]
+        public float motorEntryTilt = 60f;
+        [Tooltip("Pulled back out until its + end is this far past the tube's end, the battery comes off the track")]
+        public float motorExitMargin = 0.01f;
+        [Tooltip("The battery's length (metres, before rocketScale), from its - end (its pivot) to its + end")]
+        public float motorLength = 0.07f;
+        [Tooltip("A battery the wrong way up is kept out of the tube within this distance of its axis")]
+        public float motorBlockRadius = 0.04f;
         [Header("Seating")]
         public float seatDuration = 0.12f;
         public float seatDurationMotor = 0.30f;
@@ -39,7 +51,14 @@ namespace VRRocket
         public float capLockAngle = 180f;
         public float capDetentAngle = 30f;
         public float capUnlockedGap = 0.002f;
-        public float capPullOff = 0.04f;
+        [Tooltip("An unlocked cap comes off when pulled this far, mostly along the axis, while the rocket is held or on the stand")]
+        public float capPullOff = 0.06f;
+        [Tooltip("Cap turn per degree of wrist turn, like the XRI example knob: one comfortable turn closes it")]
+        public float capTwistSensitivity = 1.5f;
+        [Range(0f, 1f), Tooltip("Letting go after this fraction of the lock angle finishes the lock")]
+        public float capAutoFinishFraction = 0.75f;
+        [Tooltip("A hand this close to an unlocked seated cap grabs the cap, not the rocket")]
+        public float capGrabPriorityRadius = 0.07f;
 
         [Header("Rules")]
         public bool enforceOrder = false;   // free build order (Praise, 11 Oct 2026); the cap still needs the motor
@@ -66,6 +85,7 @@ namespace VRRocket
 
         public float OrientationToleranceFor(PartType type)
         {
+            if (type == PartType.Motor) return motorEntryTilt;
             return type == PartType.TailFin || type == PartType.WingFlap ? orientationTolerancePlates : orientationToleranceOthers;
         }
 
