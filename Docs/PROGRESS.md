@@ -417,3 +417,9 @@ From Praise's headset session: the battery slid in on its own as it approached t
 - **Now:** caught only once its + end is in the tube's base (a little or a long way, up to 60 degrees over); it straightens on the axis without moving in or out; drifting or leaning the hand or turning the rocket never takes it off the axis; let go while in, it always slides home straight; let go outside, it drops; pulled back out, it comes free. The wrong way up it is still kept out with a buzz. The glow ring is on the + end. The straight angle is kept relative to the seat for every part (the nose cone had the same hidden fault).
 - **Tuning:** Motor Capture Radius, Motor Orientation Tolerance and Motor Release Snap Radius are replaced by Motor Entry Radius (2 cm), Motor Entry Tilt (60 degrees) and Motor Exit Margin (1 cm).
 - **Verified:** edit mode 43/43, play mode 55/55 (`BatteryInsertTests` rewritten: 9 tests). Feel in the headset still to check.
+
+## 2026-10-14: Yi-Xuan's socket holes merged (done)
+
+- **Merged** `main` (Yi-Xuan, f3d4bb9 and c1b4133): the well's floor is now pieces round a hole at each socket row, raised about 1.3 cm, so the fixed sockets sit down in the floor with their faces level with it; the puzzle's volume moved to match.
+- **Kept on:** her save had the menu canvas and the wiring hatch switched off (left over from working on the puzzle); both are switched on again, as Praise asked.
+- **Verified:** edit mode 43/43, play mode 55/55.
