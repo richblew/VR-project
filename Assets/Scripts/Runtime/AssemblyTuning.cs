@@ -14,6 +14,8 @@ namespace VRRocket
         public float glowRadius = 0.12f;
         public float captureRadius = 0.05f;
         public float breakRadius = 0.08f;
+        [Tooltip("A held part lights only the nearest point that fits it; the light moves to another point once that one is this much closer")]
+        public float glowSwitchMargin = 0.01f;
 
         [Header("Guide length along the axis (metres, before rocketScale)")]
         public float guideLengthPlates = 0.05f;

@@ -423,3 +423,10 @@ From Praise's headset session: the battery slid in on its own as it approached t
 - **Merged** `main` (Yi-Xuan, f3d4bb9 and c1b4133): the well's floor is now pieces round a hole at each socket row, raised about 1.3 cm, so the fixed sockets sit down in the floor with their faces level with it; the puzzle's volume moved to match.
 - **Kept on:** her save had the menu canvas and the wiring hatch switched off (left over from working on the puzzle); both are switched on again, as Praise asked.
 - **Verified:** edit mode 43/43, play mode 55/55.
+
+## 2026-10-14: A held fin or flap lights only the slot it would go into (done)
+
+From Praise: bringing a flap to the tube lit almost the opposite slot.
+- **Cause found** (checked with a throwaway test and pictures): every slot that fits the part within 12 cm glowed (a flap near the tube lit five or six flap slots, the nearest barely brighter: 57% against 30 to 44%), and the nearest slot's strip sits right behind the edge of the flap coming in, so what the player saw lit were the neighbouring slots round the side of the tube, the other height.
+- **Now:** only the nearest slot that fits the part glows, the one it would go into, brighter as it nears and full on its track; the light moves to another slot only once that one is 1 cm closer (Glow Switch Margin), so it does not flicker between two; the slot strips are 1.6 cm wide (were 1 cm) so they show either side of the part's edge. Fins the same.
+- **Verified:** edit mode 43/43, play mode 60/60 (new `SlotGlowTests`, 5 tests).
