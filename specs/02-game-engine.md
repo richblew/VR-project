@@ -162,7 +162,7 @@ Every second, from 10 down to 1, the engine shows `T-10` ... `T-01` and beeps. W
 
 ### Launch
 
-**Entered:** at T-0. The engine calls `LaunchSequence.Liftoff(outcome, onFinished)` with the outcome from the build report, then every frame shows the flight telemetry (time, altitude, speed) on the screens. The flight itself is [spec 04](04-launch-simulator.md).
+**Entered:** at T-0. The engine calls `LaunchSequence.Liftoff(outcome, onFinished, wrongFlaps)` with the outcome and the number of wrong flaps from the build report (one wrong flap veers off course and crashes, more break up), then every frame shows the flight telemetry (time, altitude, speed) on the screens. The flight itself is [spec 04](04-launch-simulator.md).
 
 **Left by:** `onFinished`, when the flight is over (orbit altitude reached, exploded, or the motor long gone).
 
