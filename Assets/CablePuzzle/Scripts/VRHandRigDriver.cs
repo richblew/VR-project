@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
@@ -72,7 +73,7 @@ namespace CablePuzzle
                 new ThumbJoint(new Vector3(0, 0, 1), 20f, new Vector3(0, 1, 0), 0f),    // 3
             };
 
-            [Tooltip("Create a 'Hold Point' on this hand and make the controller's Near-Far / Direct interactor use it as the point held objects attach to. Objects only follow it if 'Use Dynamic Attach' is off (GrabPose > Snap To Hold Point does that for you).")]
+            [Tooltip("Create a 'Hold Point' on this hand. It is only used for objects that have a GrabPose (with Snap To Hold Point on); every other object is grabbed exactly as before. Turn this off to disable the hold point completely.")]
             public bool useHoldPoint = true;
             [Tooltip("Where held objects sit, relative to the hand (Position Offset), in controller space, metres. Controller +Z points forward, out of the front of the hand/fist - try small positive Z first (0.05 - 0.15).")]
             public Vector3 holdPointOffset;
@@ -80,6 +81,8 @@ namespace CablePuzzle
             public Vector3 holdPointRotation;
 
             [System.NonSerialized] public Transform holdPoint;      // created at runtime, child of the controller
+            [System.NonSerialized] public bool holdActive;          // interactors currently use the hold point
+            [System.NonSerialized] public Dictionary<XRBaseInteractor, Transform> originalAttach;   // what each interactor used before
             [System.NonSerialized] public Transform[][] bones;      // [finger][joint]
             [System.NonSerialized] public Quaternion[][] rest;
             [System.NonSerialized] public Vector3[][] autoAxes;   // curl axis in each bone's local space
@@ -164,7 +167,7 @@ namespace CablePuzzle
             SetupHoldPoint(right);
         }
 
-        // Creates the hold point under the controller and points the grabbing interactors at it.
+        // Creates the hold point under the controller and remembers each interactor's original attach point.
         void SetupHoldPoint(Hand h)
         {
             if (!h.useHoldPoint || h.controller == null || h.interactors == null) return;
@@ -174,19 +177,60 @@ namespace CablePuzzle
                 h.holdPoint.SetParent(h.controller, false);
                 h.holdPoint.SetLocalPositionAndRotation(h.positionOffset + h.holdPointOffset, Quaternion.Euler(h.holdPointRotation));
             }
+            // Remember each interactor's own attach point; the hold point is only swapped in while a GrabPose object is in play.
+            h.originalAttach = new Dictionary<XRBaseInteractor, Transform>();
             foreach (var i in h.interactors)
             {
                 if (i is NearFarInteractor nf)
                 {
-                    // The Near-Far interactor's attach point is built and moved by its attach controller, which follows this transform.
                     var c = nf.interactionAttachController;
-                    if (c != null) c.transformToFollow = h.holdPoint;
+                    if (c != null) h.originalAttach[i] = c.transformToFollow;
                 }
                 else if (i is XRDirectInteractor)
                 {
-                    i.attachTransform = h.holdPoint;
+                    h.originalAttach[i] = i.attachTransform;
                 }
             }
+            h.holdActive = false;
+        }
+
+        // Swaps the interactors' attach point between their own and the hand's hold point.
+        void SetHoldActive(Hand h, bool active)
+        {
+            if (h.holdPoint == null || h.originalAttach == null || h.holdActive == active) return;
+            foreach (var kv in h.originalAttach)
+            {
+                var i = kv.Key;
+                Transform target = active ? h.holdPoint : kv.Value;
+                if (i == null || target == null) continue;
+                if (i is NearFarInteractor nf)
+                {
+                    // The Near-Far interactor's attach point is built and moved by its attach controller, which follows this transform.
+                    var c = nf.interactionAttachController;
+                    if (c != null) c.transformToFollow = target;
+                }
+                else
+                {
+                    i.attachTransform = target;
+                }
+            }
+            h.holdActive = active;
+        }
+
+        // True if something this hand is hovering wants to be held at the hold point.
+        static bool HoversHoldObject(Hand h)
+        {
+            foreach (var i in h.interactors)
+            {
+                if (i == null) continue;
+                var hovered = i.interactablesHovered;
+                for (int k = 0; k < hovered.Count; k++)
+                {
+                    var g = hovered[k] != null ? hovered[k].transform.GetComponentInParent<GrabPose>() : null;
+                    if (g != null && g.snapToHoldPoint) return true;
+                }
+            }
+            return false;
         }
 
         void LateUpdate()
@@ -224,14 +268,21 @@ namespace CablePuzzle
                          : (h.grip != null && h.grip.action != null ? h.grip.action.ReadValue<float>() : 0f);
 
             GrabPose heldPose = null;
+            bool selecting = false;
             foreach (var i in h.interactors)
             {
                 if (i == null || !i.hasSelection) continue;
+                selecting = true;
                 var held = i.firstInteractableSelected;
                 heldPose = held != null ? held.transform.GetComponentInParent<GrabPose>() : null;
                 target = heldPose != null ? heldPose.closure : 1f;
                 break;
             }
+
+            // Use the hold point only for GrabPose objects. Decided while hovering (before the grab starts) and left alone
+            // during a grab, so nothing jumps; everything else is grabbed with the interactor's original attach point.
+            if (h.holdPoint != null && !selecting)
+                SetHoldActive(h, HoversHoldObject(h));
 
             // keep the hold point where the settings say; the held object's own GrabPose can shift it a little (this hand only)
             if (h.holdPoint != null)
