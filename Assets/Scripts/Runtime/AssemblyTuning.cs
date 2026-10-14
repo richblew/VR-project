@@ -18,7 +18,7 @@ namespace VRRocket
         [Header("Guide length along the axis (metres, before rocketScale)")]
         public float guideLengthPlates = 0.05f;
         public float guideLengthNose = 0.06f;
-        [Tooltip("The battery's track: longer than its snap zone, so a battery caught at the edge of the zone is already on it")]
+        [Tooltip("An attached battery's track when grabbed to take it out (it comes free once its + end leaves the tube)")]
         public float guideLengthMotor = 0.14f;
         public float guideLengthCap = 0.04f;
         [Tooltip("How far the finished rocket is lifted before it leaves the stand's clamp.")]
@@ -29,13 +29,13 @@ namespace VRRocket
         public float orientationToleranceOthers = 45f;
 
         [Header("Battery (the motor part) insertion")]
-        [Tooltip("Snap zone under the tube's base: a battery whose base comes this close, the right way up, is caught and runs on the track")]
-        public float motorCaptureRadius = 0.11f;
-        [Tooltip("How far off the tube's axis the battery may be tilted and still be caught")]
-        public float motorOrientationTolerance = 70f;
-        [Tooltip("Letting go of the battery this close to the tube's base, the right way up, slides it home")]
-        public float motorReleaseSnapRadius = 0.15f;
-        [Tooltip("The battery's length (metres, before rocketScale): while any of it is in the tube it stays on the track")]
+        [Tooltip("The battery is caught once its + end is past the tube's base end and within this distance of the tube's axis: the opening, plus a little give. Never before.")]
+        public float motorEntryRadius = 0.02f;
+        [Tooltip("How far off the tube's axis the battery may lean and still be caught once its + end is in (more, or the wrong way up, and it is kept out)")]
+        public float motorEntryTilt = 60f;
+        [Tooltip("Pulled back out until its + end is this far past the tube's end, the battery comes off the track")]
+        public float motorExitMargin = 0.01f;
+        [Tooltip("The battery's length (metres, before rocketScale), from its - end (its pivot) to its + end")]
         public float motorLength = 0.07f;
         [Tooltip("A battery the wrong way up is kept out of the tube within this distance of its axis")]
         public float motorBlockRadius = 0.04f;
@@ -85,11 +85,9 @@ namespace VRRocket
 
         public float OrientationToleranceFor(PartType type)
         {
-            if (type == PartType.Motor) return motorOrientationTolerance;
+            if (type == PartType.Motor) return motorEntryTilt;
             return type == PartType.TailFin || type == PartType.WingFlap ? orientationTolerancePlates : orientationToleranceOthers;
         }
-
-        public float CaptureRadiusFor(PartType type) => type == PartType.Motor ? motorCaptureRadius : captureRadius;
 
         public float SeatDurationFor(PartType type)
         {

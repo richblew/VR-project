@@ -35,7 +35,7 @@ namespace VRRocket
         readonly List<Collider> m_IgnoredColliders = new List<Collider>(32);
 
         AttachPoint m_Point;
-        Quaternion m_SeatedRotation;
+        Quaternion m_SeatedLocal;   // the seated rotation relative to the point: follows the tube if it turns mid-insert
         bool m_Guided;
         bool m_FromAttached;
         bool m_HandlerActive;
@@ -107,6 +107,12 @@ namespace VRRocket
         /// <summary>Where the part rests when seated on the current point (the attach point, plus any handler offset along the axis).</summary>
         Vector3 SeatPosition => m_Point.transform.position + m_Point.GuideAxisWorld * ((m_Handler != null ? m_Handler.seatOffset : 0f) * WorldScale);
 
+        /// <summary>
+        /// The rotation the part takes on its point, worked out from the point's rotation now: a rocket turned in the other hand
+        /// while a part is on its track keeps the part straight in it, and it seats straight.
+        /// </summary>
+        Quaternion SeatedRotation => m_Point != null ? m_Point.transform.rotation * m_SeatedLocal : transform.rotation;
+
         // ---- grab lifecycle ----
 
         void OnSelectEntering(SelectEnterEventArgs args)
@@ -125,7 +131,7 @@ namespace VRRocket
             if (m_Part.state == PartState.Attached && m_Part.attachedTo != null)
             {
                 m_Point = m_Part.attachedTo;
-                m_SeatedRotation = transform.rotation;
+                m_SeatedLocal = Quaternion.Inverse(m_Point.transform.rotation) * transform.rotation;
                 m_Body.isKinematic = false;
                 m_FromAttached = true;
                 m_HandlerActive = false;
@@ -177,11 +183,11 @@ namespace VRRocket
             }
             if (!m_Guided && m_Part.partType == PartType.Motor && m_Part.state != PartState.Attached)
             {
-                // Let go near the tube's base the right way up: the battery slides home rather than dropping (it must never be
-                // left half inside the tube).
+                // Let go with its + end in the tube's base: the battery slides home (it is never left half inside the tube).
+                // Let go outside the base, it simply drops.
                 var t = tuning;
-                var near = t != null ? NearestAccepting(transform.position, t.motorReleaseSnapRadius * WorldScale) : null;
-                if (near != null && OrientationOk(near, transform.rotation, t)) Engage(near, transform.rotation);
+                var entry = t != null ? BatteryEntry(new Pose(transform.position, transform.rotation), t, WorldScale, out _, out _) : null;
+                if (entry != null) Engage(entry, transform.rotation);
             }
             if (m_Guided)
             {
@@ -240,11 +246,18 @@ namespace VRRocket
                 return;
             }
 
-            if (!m_Guided)
+            if (!m_Guided && m_Part.partType == PartType.Motor)
             {
-                var glowR = Mathf.Max(t.glowRadius, t.CaptureRadiusFor(m_Part.partType)) * s;
-                var captureR = t.CaptureRadiusFor(m_Part.partType) * s;
-                if (m_Part.partType == PartType.Motor) KeepWrongWayBatteryOut(ref targetPose, t, s);
+                // The battery is caught only once its + end is in the tube's base, never before (no snap zone outside it)
+                KeepWrongWayBatteryOut(ref targetPose, t, s);
+                var entry = BatteryEntry(targetPose, t, s, out var near, out var glow);
+                if (near != null) { near.RequestGlow(glow); m_Part.RequestGlow(glow); }
+                if (entry != null) Engage(entry, targetPose.rotation);
+            }
+            else if (!m_Guided)
+            {
+                var glowR = Mathf.Max(t.glowRadius, t.captureRadius) * s;
+                var captureR = t.captureRadius * s;
                 AttachPoint best = null;
                 var bestDist = float.MaxValue;
                 var points = AttachPoint.active;
@@ -254,8 +267,6 @@ namespace VRRocket
                     if (!p.Accepts(m_Part)) continue;
                     var d = Vector3.Distance(targetPose.position, p.transform.position);
                     if (d >= glowR) continue;
-                    // The motor presented nozzle-up is rejected completely: no glow, no snap (SPEC 5.3).
-                    if (m_Part.partType == PartType.Motor && !OrientationOk(p, targetPose.rotation, t)) continue;
                     p.RequestGlow(1f - d / glowR);
                     if (d < bestDist)
                     {
@@ -277,7 +288,20 @@ namespace VRRocket
                 var guideLength = t.GuideLengthFor(m_Part.partType) * s;
                 var breakRadius = t.breakRadius * s;
 
-                if (m_FromAttached)
+                if (m_Part.partType == PartType.Motor)
+                {
+                    // The battery runs straight on the tube's axis, its + end as far into the tube as the hand holds it; hand drift
+                    // and tilt never take it off the track or through the wall. Only pulling its + end back out of the tube frees it.
+                    var tipIn = Vector3.Dot(BatteryTip(targetPose, t, s) - TubeEnd(m_Point), -axis);
+                    if (tipIn < -t.motorExitMargin * s)
+                    {
+                        if (m_FromAttached) Detach(); else ReleaseGuide();
+                        ApplyBlend(ref targetPose, t);
+                        return;
+                    }
+                    depth = Mathf.Max(0f, SeatTipIn(m_Point, t, s) - tipIn);
+                }
+                else if (m_FromAttached)
                 {
                     // An attached part only comes off by being pulled out past the end of the guide.
                     if (depth > guideLength)
@@ -286,11 +310,6 @@ namespace VRRocket
                         ApplyBlend(ref targetPose, t);
                         return;
                     }
-                }
-                else if (m_Part.partType == PartType.Motor && depth < t.motorLength * s)
-                {
-                    // Part of the battery is in the tube: sideways drift of the hand never knocks it off the track (only pulling
-                    // it back out does), so it can never be dragged through the tube's wall.
                 }
                 else if (GuideMath.ShouldBreak(depth, sideways, guideLength, breakRadius))
                 {
@@ -303,8 +322,8 @@ namespace VRRocket
                 var fraction = 1f;
                 if (m_Part.partType == PartType.NoseCone && guideLength > 0f)
                     fraction = Mathf.Lerp(t.noseMagnetism, 1f, Mathf.Clamp01(depth / guideLength));
-                targetPose.position = GuideMath.GuidedPosition(seat, axis, depth, guideLength, fraction);
-                targetPose.rotation = m_SeatedRotation;
+                targetPose.position = GuideMath.GuidedPosition(seat, axis, depth, Mathf.Max(guideLength, depth), fraction);
+                targetPose.rotation = SeatedRotation;
                 m_Point.RequestGlow(1f);
                 m_Part.RequestGlow(1f);
 
@@ -341,13 +360,51 @@ namespace VRRocket
             return best;
         }
 
+        /// <summary>The battery's + end (its pivot is the - end; it goes into the tube + end first).</summary>
+        static Vector3 BatteryTip(Pose pose, AssemblyTuning t, float s) => pose.position + pose.rotation * Vector3.up * (t.motorLength * s);
+
+        /// <summary>How far into the tube the battery's + end is when seated.</summary>
+        static float SeatTipIn(AttachPoint motorSeat, AssemblyTuning t, float s) =>
+            t.motorLength * s + Vector3.Dot(motorSeat.transform.position - TubeEnd(motorSeat), -motorSeat.GuideAxisWorld);
+
         /// <summary>
-        /// A battery the wrong way up is refused (it goes in + end up), and it must not pass into the tube either: parts do not
+        /// The battery seat whose tube's base the battery's + end is in: past the tube's end (a little or a long way), within the
+        /// opening (Motor Entry Radius of the axis) and leaning no more than Motor Entry Tilt. Null when it is not in any.
+        /// <paramref name="glowPoint"/> and <paramref name="glow"/> give the approach glow (the + end nearing a base, the right way up).
+        /// </summary>
+        AttachPoint BatteryEntry(Pose pose, AssemblyTuning t, float s, out AttachPoint glowPoint, out float glow)
+        {
+            glowPoint = null; glow = 0f;
+            AttachPoint entry = null;
+            var bestIn = float.MaxValue;
+            var tip = BatteryTip(pose, t, s);
+            var up = pose.rotation * Vector3.up;
+            var glowR = t.glowRadius * s;
+            var points = AttachPoint.active;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var p = points[i];
+                if (!p.Accepts(m_Part)) continue;
+                var into = -p.GuideAxisWorld;
+                if (Vector3.Angle(up, into) > t.motorEntryTilt) continue;   // too far over, or the wrong way up: no glow, no catch
+                var end = TubeEnd(p);
+                var d = Vector3.Distance(tip, end);
+                if (d < glowR && 1f - d / glowR > glow) { glow = 1f - d / glowR; glowPoint = p; }
+                var tipIn = Vector3.Dot(tip - end, into);
+                var off = GuideMath.Sideways(tip, end, into);
+                if (tipIn <= 0f || tipIn > SeatTipIn(p, t, s) + t.motorLength * s || off > t.motorEntryRadius * s) continue;
+                if (tipIn < bestIn) { bestIn = tipIn; entry = p; }
+            }
+            return entry;
+        }
+
+        /// <summary>
+        /// A battery the wrong way up (or leaning too far) is refused, and it must not pass into the tube either: parts do not
         /// collide with each other, so near the base it is held out below the tube's end along the axis, with one buzz.
         /// </summary>
         void KeepWrongWayBatteryOut(ref Pose targetPose, AssemblyTuning t, float s)
         {
-            var seatPoint = NearestAccepting(targetPose.position, (t.motorLength + t.motorCaptureRadius) * s);
+            var seatPoint = NearestAccepting(targetPose.position, (2f * t.motorLength + t.motorEntryRadius) * s);
             if (seatPoint == null || OrientationOk(seatPoint, targetPose.rotation, t)) return;
             var away = seatPoint.GuideAxisWorld;
             var seat = seatPoint.transform.position;
@@ -364,16 +421,19 @@ namespace VRRocket
         }
 
         /// <summary>How far below the battery's seat the tube ends (its cap seat), along the guide axis; 0 when it has none.</summary>
-        static float TubeEndDepth(AttachPoint motorSeat)
+        static float TubeEndDepth(AttachPoint motorSeat) =>
+            Mathf.Max(0f, GuideMath.Depth(TubeEnd(motorSeat), motorSeat.transform.position, motorSeat.GuideAxisWorld));
+
+        /// <summary>The tube's base end (its cap seat) for a battery seat; the seat itself when the tube has none.</summary>
+        static Vector3 TubeEnd(AttachPoint motorSeat)
         {
             var points = AttachPoint.active;
             for (var i = 0; i < points.Count; i++)
             {
                 var p = points[i];
-                if (p.pointName == "CapSeat" && p.tube == motorSeat.tube)
-                    return Mathf.Max(0f, GuideMath.Depth(p.transform.position, motorSeat.transform.position, motorSeat.GuideAxisWorld));
+                if (p.pointName == "CapSeat" && p.tube == motorSeat.tube) return p.transform.position;
             }
-            return 0f;
+            return motorSeat.transform.position;
         }
 
         bool OrientationOk(AttachPoint point, Quaternion heldRotation, AssemblyTuning t)
@@ -410,7 +470,7 @@ namespace VRRocket
         void Engage(AttachPoint point, Quaternion heldRotation)
         {
             m_Point = point;
-            m_SeatedRotation = GuideMath.SeatedRotation(m_Part.partType, point.transform.rotation, heldRotation);
+            m_SeatedLocal = Quaternion.Inverse(point.transform.rotation) * GuideMath.SeatedRotation(m_Part.partType, point.transform.rotation, heldRotation);
             m_Guided = true;
             m_FromAttached = false;
             m_Part.SetGuided();
@@ -463,7 +523,7 @@ namespace VRRocket
             {
                 elapsed += Time.deltaTime;
                 var k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-                transform.SetPositionAndRotation(Vector3.Lerp(startPos, SeatPosition, k), Quaternion.Slerp(startRot, m_SeatedRotation, k));
+                transform.SetPositionAndRotation(Vector3.Lerp(startPos, SeatPosition, k), Quaternion.Slerp(startRot, SeatedRotation, k));
                 yield return null;
             }
             m_SeatRoutine = null;
@@ -481,7 +541,7 @@ namespace VRRocket
             }
             m_Body.isKinematic = true;
             m_Body.interpolation = RigidbodyInterpolation.None;
-            transform.SetPositionAndRotation(SeatPosition, m_HandlerActive || m_FromAttached ? transform.rotation : m_SeatedRotation);
+            transform.SetPositionAndRotation(SeatPosition, m_HandlerActive || m_FromAttached ? transform.rotation : SeatedRotation);
             transform.SetParent(m_Point.transform, true);
             m_Body.position = transform.position;
             m_Body.rotation = transform.rotation;
