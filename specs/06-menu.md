@@ -1,180 +1,145 @@
 # 06 The start menu (styling guide)
 
-Written for Richard, who is restyling the menu. It shows how the menu is built, the exact values it uses today, what code changes at runtime, and step-by-step recipes for restyling it without breaking the START button. Back to the [main spec](README.md).
+Written for Richard, who styles the menu. It shows where every word of the menu is edited, how the menu is built, the exact values it uses, and recipes for restyling it without breaking the buttons. Back to the [main spec](README.md).
 
 | | |
 |---|---|
-| **Where in the Editor** | `VRRocket_Main` → `GameFlow` → `MenuCanvas` |
-| **Script** | `MenuPanel` on `MenuCanvas` (`Assets/Scripts/Runtime/MenuPanel.cs`): shows and hides the menu, and sets three texts |
+| **Where in the Editor** | `VRRocket_Final` → `GameFlow` → `MenuCanvas` |
+| **Script** | `MenuPanel` on `MenuCanvas` (`Assets/Scripts/Runtime/MenuPanel.cs`): holds the menu's words for each state, writes them onto the canvas, shows and hides the menu |
 | **Called by** | `GameFlowController` on `GameFlow` ([spec 02](02-game-engine.md)) |
-| **Assets** | Fonts: `Assets/UI/Fonts/` (`Orbitron SDF.asset`, `ShareTechMono SDF.asset`, the `.ttf` files and their OFL licences). Button sprite: `Assets/UI/Sprites/button_green.png` (Kenney, CC0) |
-| **Tests** | `RoomIntegrationTests.Console_Buttons_And_Start_Are_Wired` (START is wired and the canvas takes XR rays), `GameFlowTests` (the menu shows, hides and comes back) |
+| **Assets** | Fonts: `Assets/UI/Fonts/` (`Orbitron SDF.asset`, `ShareTechMono SDF.asset`). Sprites: `Assets/UI/Sprites/MenuButtonFrame.png` (made from Richard's `nasa_button.png`), `MenuRule.png`, `MenuGrid.png` |
+| **Tests** | `FinalSceneTests.Menu_Offers_Start_With_Intro_And_Skip_Intro` (buttons wired, the first-play words on the canvas), `FinalSceneTests.Menu_Words_Are_Set_Per_State_On_The_Menu_Panel` (each state's words, and edits showing), `GameFlowTests` (the menu shows, hides and comes back with its after-success words) |
 
-![The start menu at the spawn point, with the room's intro behind it](../Docs/Screenshots/1_spawn_intro_menu.jpg)
+## 1. Editing the words (the important part)
 
-## 1. Before you start
+**Every word on the menu is edited in one place: select `MenuCanvas` and look at its Menu Panel component.** Do not type into the texts on the canvas (`Title`, `Body`, the button labels...): the game writes them from the Menu Panel each time the menu opens, so anything typed there is replaced.
 
-1. **Tell the team** you are editing `VRRocket_Main`. Scenes merge badly, so one person edits a scene at a time. Commit and push soon after.
-2. Open `Assets/Scenes/VRRocket_Main.unity`.
-3. Optional, to see the menu against the room: right-click `Assets/Scenes/room.unity` in the Project window > **Open Scene Additive**. Close it again **without saving** when you are done.
-4. In the Hierarchy, expand `GameFlow` and select `MenuCanvas`. Press **F** with the mouse over the Scene view to frame it.
+The menu has two states, each with its own words:
 
-**Free to change:** colours, fonts, sprites, sizes, layout, the static texts, extra decoration, the menu's position.
+| State | When | Default words |
+|---|---|---|
+| **First Play** | the game starts | VR ROCKET · ASSEMBLE · LAUNCH · BE MISSION CONTROL · "Everyone wants to be an astronaut, But only cool people build rockets. Wanna be cool?" · BRIEF ME · BUILD ROCKET |
+| **After Success** | the menu comes back after a successful flight | MISSION SUCCESS · FLIGHT COMPLETE · ALL STATIONS NOMINAL · "Your rocket flew clean. Think you can do it again?" · BRIEF ME · BUILD AGAIN |
 
-**Keep working (or re-link if you change them):**
+Each state has these fields:
 
-| Keep | Why |
+| Field | Where it shows |
 |---|---|
-| `MenuCanvas` with its `Canvas` set to **World Space** | it is a panel in the room, not a flat screen overlay (overlays do not work in VR) |
-| `TrackedDeviceGraphicRaycaster` on `MenuCanvas` | lets the controllers' rays hit the menu |
-| `CanvasGroup` on `MenuCanvas` | `MenuPanel` fades the whole menu with it |
-| `MenuPanel` on `MenuCanvas`, with its four fields filled | it sets the texts and fades the menu (section 4) |
-| `StartButton`'s **On Click ()** → `GameFlow` → `GameFlowController.StartGame` | this is what starts the game |
-| `GameFlow/EventSystem` with `XRUIInputModule` | turns ray hits into clicks |
+| Title | the big red line |
+| Kicker | the small line under the title |
+| Body | the copy in the middle (several lines: press Enter for a new line) |
+| Brief Button | the left button: plays the briefing (the room's intro), then building starts |
+| Build Button | the right button: straight to building |
+| Footer | the small line at the bottom |
 
-If you rename or replace `Title`, `Body` or `StartButton/Label`, drag the new objects into `MenuPanel`'s **Title**, **Body** and **Button Label** fields.
+Plus **No Briefing Button** ("START"): the left button's words in a room that has no intro to play. Then it starts building and the right button is hidden. (Not the case in `VRRocket_Final`.)
+
+**Preview:** the two buttons at the top of the component (First Play, After Success) pick which state the canvas shows while you edit. Every change you type shows on the canvas straight away, so what you see in the Scene view is what plays. Leave it on First Play when you save.
+
+Every text **auto-sizes**: longer words shrink to fit their box (down to a minimum size), so you can change words without re-laying-out the menu. If words get too small, make the box wider (section 5).
+
+If a big screen shows during the menu (not in `VRRocket_Final`, where the room's intro TV is up), it repeats the state's Title and Kicker.
 
 ## 2. How the menu is built
 
 ```
 GameFlow
 └─ MenuCanvas        Canvas (World Space), CanvasScaler, TrackedDeviceGraphicRaycaster, CanvasGroup, MenuPanel
-   ├─ Border         Image: the green frame (fills the whole canvas)
-   ├─ Panel          Image: the dark glass (3 units inside the border, so 3 units of Border show around it)
-   ├─ AccentBar      Image: the thin green line near the top
-   ├─ Title          TextMeshPro - Text (UI): "VR ROCKET"            set by code
-   ├─ Kicker         TextMeshPro - Text (UI): "LAUNCH PAD 01 · ..."  static
-   ├─ Body           TextMeshPro - Text (UI): the description        set by code
-   ├─ StartButton    Image (sliced sprite) + Button: On Click → GameFlowController.StartGame
-   │  └─ Label       TextMeshPro - Text (UI): "START"                set by code
-   └─ Footer         TextMeshPro - Text (UI): "UCT VR 2026 · ..."     static
+   ├─ Border         Image: the glowing blue edge (fills the whole canvas)
+   ├─ Grid           Image (tiled): the faint HUD grid
+   ├─ Panel          Image: the deep navy glass (4 units inside the border)
+   ├─ AccentBar      Image (sliced): the blue rule with red-and-white stripes at its ends
+   ├─ Title          TextMeshPro - Text (UI)    words from Menu Panel
+   ├─ Kicker         TextMeshPro - Text (UI)    words from Menu Panel
+   ├─ Body           TextMeshPro - Text (UI)    words from Menu Panel
+   ├─ StartButton    Image (sliced NASA frame) + Button: On Click → GameFlowController.StartGame (the briefing)
+   │  └─ Label       TextMeshPro - Text (UI)    words from Menu Panel (Brief Button)
+   ├─ Footer         TextMeshPro - Text (UI)    words from Menu Panel
+   └─ SkipIntroButton Image (sliced NASA frame) + Button: On Click → GameFlowController.StartWithoutIntro (build)
+      └─ Label       TextMeshPro - Text (UI)    words from Menu Panel (Build Button)
 ```
 
-UI draws in Hierarchy order: lower children draw on top of higher ones. That is why `Border` is first and `Panel` second.
+UI draws in Hierarchy order: lower children draw on top of higher ones.
 
-### Size and units
+### Size and place
 
-- `MenuCanvas` is **1000 × 650** units with scale **0.001**, so it is **1.0 m × 0.65 m** in the room.
-- **One canvas unit is one millimetre.** A font size of 31 means letters about 31 mm tall.
-- Canvas Scaler: Constant Pixel Size, Scale Factor 1, Reference Pixels Per Unit 100, Dynamic Pixels Per Unit 1.
-
-### Where it stands
-
-| Rect Transform | Value | Meaning |
-|---|---|---|
-| Pos X, Pos Y, Pos Z | −0.40, 1.22, 0.10 | about 0.7 m in front of where the player starts, below the line of sight to the big TV, so the intro video shows above it |
-| Rotation | (29.2, 180, 0) | turned to face the player (who starts facing the big TV), and tilted back so it faces up toward the eyes |
-| Width, Height | 1000, 650 | |
-| Scale | 0.001 | |
-
-The menu is fixed in the room: it does not follow the player's head.
+- `MenuCanvas` is **1000 × 650** units with scale **0.001**: **1.0 m × 0.65 m**. **One canvas unit is one millimetre**: a font size of 30 means letters about 30 mm tall.
+- Pos (0.24, 1.36, 1.23), Rotation (20, 180, 0): over the console, facing the player (who starts at about (0, floor, 1.8) facing −Z), tilted back toward the eyes. Its lower edge hangs just above the console, which is fine because the console's buttons are only used once the menu has gone.
+- It is fixed in the room; it does not follow the head.
 
 ## 3. Every element's style today
 
-Colours are given as Unity shows them in RGB 0–1 mode, with the hex value.
-
-| Element | Rect (anchor, position, size) | Style |
+| Element | Rect (centre-anchored unless stated) | Style |
 |---|---|---|
-| `Border` | stretched to the canvas edges | Image, no sprite. Colour (0.25, 0.9, 0.45), alpha 0.85: `#40E673` at 85% |
-| `Panel` | stretched, 3 units inside on each side (Right/Bottom −6) | Image, no sprite. Colour (0.02, 0.045, 0.065), alpha 0.96: `#050B11` at 96% |
-| `AccentBar` | anchored top centre, Pos Y −62, 860 × 4 | Image. Colour (0.3, 1, 0.5): `#4CFF80` |
-| `Title` | centre, Pos Y 150, 900 × 110 | Orbitron SDF, size 82, colour (0.3, 1, 0.5) `#4CFF80`, character spacing 10, centred |
-| `Kicker` | centre, Pos Y 78, 900 × 40 | Share Tech Mono SDF, size 26, colour (0.5, 0.6, 0.68) `#8099AD`, centred. Text: `LAUNCH PAD 01   ·   ASSEMBLY BAY   ·   MISSION CONTROL` |
-| `Body` | centre, Pos Y −10, 820 × 120 | Share Tech Mono SDF, size 31, colour (0.8, 0.88, 0.95) `#CCE0F2`, centred, wraps |
-| `StartButton` | centre, Pos Y −150, 440 × 120 | Image: sprite `button_green.png`, Image Type **Sliced**, colour (0.35, 0.92, 0.55) `#59EB8C` (the colour tints the sprite). Button: Transition **Color Tint**: Normal white, Highlighted (0.85, 1, 0.9) `#D9FFE6`, Pressed (0.55, 0.85, 0.65) `#8CD9A6`, Fade Duration 0.1 |
-| `StartButton/Label` | centre of the button, Pos Y −16, 440 × 70 | Orbitron SDF, size 40, colour (0.02, 0.09, 0.04) `#05170A`, character spacing 8 |
-| `Footer` | centre, Pos Y −275, 900 × 30 | Share Tech Mono SDF, size 20, colour (0.5, 0.6, 0.68) `#8099AD`. Text: `UCT VR 2026   ·   HAND-ASSEMBLED MODEL ROCKET` |
+| `Border` | stretched to the canvas edges | colour (0.22, 0.56, 1), alpha 0.95 `#388FFF` |
+| `Grid` | stretched, 12 units inside | `MenuGrid.png` tiled (Pixels Per Unit Multiplier 1.5), white at alpha 0.07 |
+| `Panel` | stretched, 4 units inside | colour (0.035, 0.045, 0.11), alpha 0.97 `#090B1C` |
+| `Title` | Pos Y 192, 900 × 110 | Orbitron SDF, auto size 44–86, **NASA red** (0.988, 0.239, 0.129) `#FC3D21`, character spacing 12 |
+| `Kicker` | Pos Y 128, 900 × 40 | Share Tech Mono SDF, auto size 14–24, (0.64, 0.73, 0.87) `#A3BADE`, spacing 6 |
+| `AccentBar` | Pos Y 92, 880 × 22 | `MenuRule.png`, Sliced (the stripes keep their size), white |
+| `Body` | Pos Y 8, 840 × 132 | Share Tech Mono SDF, auto size 18–31, (0.86, 0.91, 0.98) `#DBE8FA`, line spacing 8 |
+| `StartButton`, `SkipIntroButton` | Pos (−222, −150) and (222, −150), 404 × 112 | `MenuButtonFrame.png`, Sliced, Pixels Per Unit Multiplier 1.25. Button Color Tint: Normal (0.72, 0.8, 0.95) (dimmed), Highlighted white (full glow under the ray), Pressed (1, 0.62, 0.5) (a warm flash), Fade 0.08 s |
+| `…/Label` | stretched over the button, 35 units in left and right, 17 top and bottom | Orbitron SDF Bold, auto size 16–30, (0.93, 0.97, 1), spacing 5 |
+| `Footer` | Pos Y −272, 900 × 30 | Share Tech Mono SDF, auto size 12–18, (0.45, 0.56, 0.7) `#8FA6C9`, spacing 6 |
 
-Only `StartButton`'s Image has **Raycast Target** on. Every other image and every text has it off, so nothing can block the ray. Keep it that way for anything you add.
+Only the two buttons' Images have **Raycast Target** on; every other image and every text has it off, so nothing blocks the ray. Keep it that way for anything you add.
 
-**The fonts.** Both are TextMeshPro SDF font assets made from the `.ttf` files next to them, with a 1024 × 1024 **dynamic** atlas: characters are added when first used. Because of that, Unity may mark the two font assets as changed after you press Play. Do not commit that change unless you meant to edit the font.
+**The sprites.**
+- `MenuButtonFrame.png` (1075 × 151) is Richard's `nasa_button.png` (a glowing frame on black, 2172 × 724) with the black turned to transparency, cropped to the frame, edges feathered and halved in size. 9-slice borders 113 left and right (the stripes, rivets and chevrons keep their size), 45 top and bottom.
+- `MenuRule.png` (512 × 24): a glowing blue line with red-and-white diagonal stripes at the ends; borders 48 left and right.
+- `MenuGrid.png` (64 × 64): one line on two edges, tiled.
 
-**The button sprite.** `button_green.png` is 192 × 64 pixels, imported as a Sprite with 16-pixel borders for 9-slicing, so the corners stay sharp at any button size.
+**The fonts** are dynamic TextMeshPro font assets: Unity may mark them changed after Play. Do not commit that unless you meant to edit the font.
 
-## 4. What the code changes at runtime
+## 4. What the code does at runtime
 
-`MenuPanel` (on `MenuCanvas`) has four fields: **Group** (the `CanvasGroup`), **Title**, **Body**, **Button Label**, plus **Fade Seconds** (0.35).
-
-**Three texts are overwritten every time the menu opens.** `GameFlowController` calls `MenuPanel.Show(title, body, buttonLabel)`:
-
-| When | Title | Body | Button label |
-|---|---|---|---|
-| The game starts | VR ROCKET | Assemble a model rocket by hand, submit it at the console, and watch the full-size launch outside. | START |
-| After a successful flight | MISSION SUCCESS | Your rocket flew clean. Build another? | BUILD AGAIN |
-
-So:
-
-- Text you type into `Title`, `Body` or `Label` in the Inspector is replaced in Play mode. To change these words, edit `EnterMenu` in `Assets/Scripts/Runtime/GameFlowController.cs` (or ask whoever works on the game engine).
-- `Kicker` and `Footer` are never touched by code: edit them freely.
-- Design for both states: "MISSION SUCCESS" is longer than "VR ROCKET", and "BUILD AGAIN" is longer than "START".
-
-**Fading.** `Show` switches `MenuCanvas` on and fades the `CanvasGroup`'s alpha to 1 over 0.35 s. `Hide` (when the player presses START) fades it to 0, turns off Interactable and Blocks Raycasts so the hidden button cannot be clicked, and then switches `MenuCanvas` off. Anything you put under `MenuCanvas` fades and disappears with it.
+- `GameFlowController` calls `MenuPanel.Show(state, briefingAvailable)` when the menu opens: First Play at the start, After Success after a good flight. `Show` writes that state's words onto the canvas, then fades the `CanvasGroup` to 1 over 0.35 s.
+- `Hide` (when a button is pressed) fades it to 0, turns off Interactable and Blocks Raycasts so the hidden buttons cannot be clicked, then switches `MenuCanvas` off.
+- Nothing else in code sets menu text.
 
 ## 5. Recipes
 
+### Change the words
+Select `MenuCanvas` → Menu Panel → open First Play or After Success → type. Use Preview to see the other state.
+
 ### Change a colour
+Select the element. Image: change **Color**. Text: change **Vertex Color** in the TextMeshPro component. A button's Normal colour comes from its Button component (Color Tint), not the Image.
 
-1. Select the element (`Panel`, `Title`...).
-2. Image: change **Color**. Text: change **Vertex Color** in the TextMeshPro component (or the colour gradient, outline and glow in its material settings).
-
-For the button, remember the Image colour multiplies the sprite. Set it to white to see the sprite's own colours.
+### Make room for longer words
+Select the text and widen its Rect Transform (Width). Auto size then keeps a bigger font. To stop shrinking, lower **Font Size Min** in the TextMeshPro component's Auto Size settings.
 
 ### Change a font
+1. Copy the `.ttf` into `Assets/UI/Fonts/` with its licence.
+2. Right-click it > **Create > TextMeshPro > Font Asset** (dynamic).
+3. Drag the font asset into the text's **Font Asset**. Check the middle dot `·` renders.
 
-1. Copy the font's `.ttf` (or `.otf`) into `Assets/UI/Fonts/`, with its licence file.
-2. Select the font file, then **Window > TextMeshPro > Font Asset Creator**. Atlas Resolution 1024 × 1024, Render Mode SDFAA, then **Generate Font Atlas** and **Save** next to the font. (Or right-click the font > **Create > TextMeshPro > Font Asset** (in some Unity versions **Font Asset > SDF**), which makes a dynamic font asset straight away.)
-3. Select the text object and drag the new font asset into **Font Asset**.
-4. Check special characters render: the Kicker and Footer use the middle dot `·`.
+### Change the button graphic
+Import a PNG with transparency into `Assets/UI/Sprites/`, Texture Type **Sprite (2D and UI)**, open the **Sprite Editor** and drag the green border lines in to where the corners end, Apply. Drag it into both buttons' **Source Image**, Image Type **Sliced**. Adjust **Pixels Per Unit Multiplier** on the Image to make the corners bigger or smaller.
 
-### Change the button's look
-
-- **New graphic:** import the PNG into `Assets/UI/Sprites/`. In its import settings set Texture Type **Sprite (2D and UI)**, then open the **Sprite Editor** and drag the green border lines to the edges of the corners. Apply. Drag it into `StartButton`'s Image **Source Image**, keep Image Type **Sliced**.
-- **Hover and press colours:** `StartButton` → Button → Transition **Color Tint**: Normal, Highlighted (ray pointing at it), Pressed, Selected, Disabled. Keep Highlighted clearly different: it is the player's only hint that the ray is on the button.
-- **Sprites instead of tints:** set Transition to **Sprite Swap** and fill Highlighted Sprite and Pressed Sprite.
-
-### Change the layout
-
-- Use the **Rect Tool** (press **T**) in the Scene view, or type values into the Rect Transform.
-- Keep everything inside the 1000 × 650 canvas, or resize `MenuCanvas`'s Width and Height. `Border` and `Panel` stretch with it; `AccentBar` stays anchored to the top.
-- Keep body text at about 24 or more. At 0.7 m, smaller text gets hard to read in a headset. The Footer at 20 is the smallest we use.
-
-### Add a logo or picture
-
-1. Right-click `MenuCanvas` > **UI > Image**.
-2. Set its Source Image, and drag it in the Hierarchy below `Panel` so it draws on top of the glass.
-3. **Untick Raycast Target**, so it never blocks the START button.
+### Add a picture
+Right-click `MenuCanvas` > **UI > Image**, set its Source Image, drag it below `Panel` in the Hierarchy, and **untick Raycast Target**.
 
 ### Add another button
-
-1. Duplicate `StartButton` (Ctrl+D) and move it.
-2. In its Button's **On Click ()**, replace `GameFlowController.StartGame` with your method.
-3. Its label is static: `MenuPanel` only updates the START button's label.
+Duplicate a button, move it, and set its **On Click ()**. Its label is not managed by Menu Panel, so type its words straight into its label.
 
 ### Move the menu
-
-Select `MenuCanvas` and use the Move tool, or change Pos X, Pos Y, Pos Z in the Rect Transform. Keep it:
-
-- 0.6 to 0.9 m in front of the spawn point (`Player` stands at (−0.4, floor, 0.78) facing −Z);
-- below the line of sight from the spawn to the big TV, so the intro stays visible;
-- tilted toward the eyes, so the ray hits it at a comfortable angle.
+Change Pos X/Y/Z in `MenuCanvas`'s Rect Transform. Keep it in reach of the ray from the start position and tilted toward the eyes.
 
 ## 6. Check your work
 
-1. **Look in edit mode.** The menu is visible in the Scene and Game views without pressing Play. With `room.unity` open additively you see it against the room.
-2. **Check both states.** Type "MISSION SUCCESS" into `Title` and "BUILD AGAIN" into `Label` to check they fit, then put the old text back. (The code sets them in Play mode anyway.)
-3. **Press Play.** The menu should appear over the room's intro. Clicking START needs a headset. Without one you can use XRI's **XR Device Simulator**: Edit > Project Settings > XR Plug-in Management > XR Interaction Toolkit > **Use XR Device Simulator in scenes**. That is a shared project setting: switch it off again before you commit.
-4. **Run the tests.** Window > General > Test Runner > **PlayMode**, run `RoomIntegrationTests` and `GameFlowTests`. They fail if START is no longer wired or the canvas no longer takes XR rays.
-5. **In the headset:** is it readable at arm's length, is START easy to hit with the ray, and is the highlight visible?
-6. **Commit** only `VRRocket_Main.unity` and your new assets (sprites, fonts with `.meta` files).
+1. **Both states:** Preview First Play and After Success and check the words fit.
+2. **Press Play:** the menu appears with the First Play words; BRIEF ME plays the intro, BUILD ROCKET starts building.
+3. **Run the tests:** Window > General > Test Runner > PlayMode, run `FinalSceneTests` and `GameFlowTests`.
+4. **In the headset:** readable at arm's length, the buttons easy to hit, the highlight visible.
+5. **Commit** the scene and any new assets (with `.meta` files), not the font assets' Play-mode changes.
 
 ## 7. Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| The ray does not highlight or click START | `StartButton`'s Image must have Raycast Target on. Images on top of it must have it off. `MenuCanvas` needs `TrackedDeviceGraphicRaycaster`, and `GameFlow/EventSystem` needs `XRUIInputModule`. |
-| START clicks but nothing happens | `StartButton` → **On Click ()** must have `GameFlow` with `GameFlowController.StartGame`. |
-| My new title text is gone in Play mode | `Title`, `Body` and `Label` are set by code (section 4). |
-| The menu does not appear in Play mode | `MenuPanel`'s **Group** field must point at the `CanvasGroup`; `MenuCanvas` must stay under `GameFlow`. |
-| Squares instead of letters | The font asset has no such character. Use a font that includes it (dynamic font assets add characters automatically if the `.ttf` has them). |
-| The button looks stretched or blurry at the corners | Image Type must be **Sliced**, and the sprite needs borders set in the Sprite Editor. |
-| The menu is in the wrong place after Play | Set the position with Pos X/Y/Z in the Rect Transform (not by script on `transform.localPosition` alone). |
+| My words are replaced in Play mode | Type them in the Menu Panel component (section 1), not on the canvas texts. |
+| The ray does not highlight or click a button | The button's Image needs Raycast Target on, images over it need it off; `MenuCanvas` needs `TrackedDeviceGraphicRaycaster`, `GameFlow/EventSystem` needs `XRUIInputModule`. |
+| A button clicks but nothing happens | Its **On Click ()** must call `GameFlowController.StartGame` (left) or `StartWithoutIntro` (right) on `GameFlow`. |
+| A text is missing in Play mode | Its field in Menu Panel's Canvas section must point at it (Title, Kicker, Body, Button Label, Build Button, Build Button Label, Footer). |
+| Squares instead of letters | The font has no such character. |
+| The button frame looks stretched at the corners | Image Type must be Sliced and the sprite needs its borders. |

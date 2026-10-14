@@ -83,7 +83,41 @@ namespace VRRocket.Tests
             var menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
             AssertCalls(menu.transform.Find("StartButton").GetComponent<UnityEngine.UI.Button>().onClick, flow, "StartGame");
             AssertCalls(menu.transform.Find("SkipIntroButton").GetComponent<UnityEngine.UI.Button>().onClick, flow, "StartWithoutIntro");
-            StringAssert.Contains("INTRO", menu.transform.Find("StartButton/Label").GetComponent<TMPro.TextMeshProUGUI>().text);
+            Assert.AreEqual(MenuState.FirstPlay, menu.shownState);
+            AssertMenuShows(menu, menu.firstPlay);
+            Assert.IsTrue(menu.transform.Find("SkipIntroButton").gameObject.activeSelf, "both buttons on offer");
+        }
+
+        static string Text(MenuPanel menu, string path) => menu.transform.Find(path).GetComponent<TMPro.TextMeshProUGUI>().text;
+
+        static void AssertMenuShows(MenuPanel menu, MenuWords words)
+        {
+            Assert.AreEqual(words.title, Text(menu, "Title"));
+            Assert.AreEqual(words.kicker, Text(menu, "Kicker"));
+            Assert.AreEqual(words.body, Text(menu, "Body"));
+            Assert.AreEqual(words.briefButton, Text(menu, "StartButton/Label"));
+            Assert.AreEqual(words.buildButton, Text(menu, "SkipIntroButton/Label"));
+            Assert.AreEqual(words.footer, Text(menu, "Footer"));
+        }
+
+        [UnityTest]
+        public IEnumerator Menu_Words_Are_Set_Per_State_On_The_Menu_Panel()
+        {
+            yield return null;
+            var menu = Object.FindAnyObjectByType<MenuPanel>(FindObjectsInactive.Include);
+            Assert.AreNotEqual(menu.firstPlay.title, menu.afterSuccess.title, "each state has its own words");
+            menu.Show(MenuState.AfterSuccess, true);
+            AssertMenuShows(menu, menu.afterSuccess);
+            // whatever is typed in the Inspector is what shows: nothing in code overrides it
+            menu.afterSuccess.body = "Edited in the Inspector";
+            menu.afterSuccess.buildButton = "AGAIN!";
+            menu.Show(MenuState.AfterSuccess, true);
+            Assert.AreEqual("Edited in the Inspector", Text(menu, "Body"));
+            Assert.AreEqual("AGAIN!", Text(menu, "SkipIntroButton/Label"));
+            menu.Show(MenuState.FirstPlay, false);
+            Assert.AreEqual(menu.noBriefingButton, Text(menu, "StartButton/Label"), "a room without a briefing: the left button starts building");
+            Assert.IsFalse(menu.transform.Find("SkipIntroButton").gameObject.activeSelf, "and the right one is hidden");
+            Assert.AreEqual("VR ROCKET", new MenuWords().title);
         }
 
         [UnityTest]
@@ -225,7 +259,11 @@ namespace VRRocket.Tests
             var hatch = Object.FindAnyObjectByType<SlidingPanel>();
             Assert.IsNotNull(hatch, "the wiring hatch on the console");
             var wiring = GameObject.Find("PuzzleBox").GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>(true);
-            Assert.AreEqual(10, wiring.Length, "five plugs and five receptacles");
+            Assert.AreEqual(5, wiring.Length, "five plugs; the five sockets are fixed in the well (Yi-Xuan's 5dcb547)");
+            var sockets = 0;
+            foreach (var t in GameObject.Find("PuzzleBox").GetComponentsInChildren<Transform>(true))
+                if (t.name.StartsWith("Receptacle_")) { sockets++; Assert.IsNull(t.GetComponent<Rigidbody>(), t.name + " is fixed: no rigidbody, it cannot be pulled out"); }
+            Assert.AreEqual(5, sockets);
             foreach (var g in wiring) Assert.IsFalse(g.enabled, g.name + " cannot be grabbed through the closed hatch");
             // take the grip and pull it along the slot
             controller.rotation = Quaternion.identity;
@@ -425,6 +463,9 @@ namespace VRRocket.Tests
         [UnityTest]
         public IEnumerator Console_And_Step_Buttons_Press_With_The_Hand()
         {
+            // the buttons are used while building, with the menu (which hangs over the console) gone
+            Flow.StartWithoutIntro();
+            yield return new WaitForSeconds(0.5f);
             foreach (var name in new[] { "SubmitButton", "LaunchButton", "AbortButton", "NextButton", "BackButton" })
             {
                 var button = Button(name);
