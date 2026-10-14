@@ -5,11 +5,19 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 namespace VRRocket
 {
     /// <summary>
-    /// The motor cap twist (SPEC.md section 5.4). The cap is guided to CapSeat like any part and rests seated but unlocked,
-    /// capUnlockedGap proud of the tube. Gripping the seated cap does not move it: the cap turns about the rocket axis following
-    /// the twist of the hand (hand position orbiting the axis plus wrist roll, the XRKnob technique), clockwise only viewed from
-    /// below, as a ratchet. Every capDetentAngle of new progress ticks; at capLockAngle it locks, the gap closes and the cap can
-    /// no longer be turned or removed. An unlocked cap pulled more than capPullOff along the axis comes off and its progress resets.
+    /// The battery cap twist (SPEC.md section 5.4; the kit's motor shows as a battery). The cap is guided to CapSeat like any part
+    /// and rests seated but unlocked, capUnlockedGap proud of the tube. Gripping the seated cap does not move it: it turns about the
+    /// rocket's axis with the twist of the wrist, clockwise only viewed from below, as a ratchet. Every capDetentAngle of new
+    /// progress ticks; at capLockAngle it locks, the gap closes and it can no longer be turned or removed.
+    /// <list type="bullet">
+    /// <item>Everything is worked out in the seat's own frame, so the cap always turns about the tube's current axis, however the
+    /// rocket has been turned since the cap was seated, and it is left square to the tube when let go.</item>
+    /// <item>The turn is the twist of the hand's rotation about the axis (swing-twist decomposition), times capTwistSensitivity,
+    /// so one comfortable wrist turn closes it. Tilting the hand does not count.</item>
+    /// <item>Letting go after capAutoFinishFraction of the lock angle finishes the lock.</item>
+    /// <item>An unlocked cap comes off only when pulled more than capPullOff, mostly along the axis, while the rocket is held or
+    /// on the stand; its progress then resets.</item>
+    /// </list>
     /// </summary>
     [RequireComponent(typeof(RocketPart))]
     public sealed class MotorCapTwist : MonoBehaviour, IAttachedGrabHandler
@@ -21,22 +29,16 @@ namespace VRRocket
         [SerializeField, Tooltip("Seconds for the 2 mm gap to close when the cap locks.")]
         float m_GapCloseDuration = 0.1f;
 
-        [SerializeField, Tooltip("Hands gripping further than this from the tube axis (metres, before scale) turn the cap by orbiting; closer hands turn it by wrist roll.")]
-        float m_PositionModeRadius = 0.03f;
-
-        enum TwistMode { None, Position, Wrist }
-
         readonly CapTwistLogic m_Logic = new CapTwistLogic();
         RocketPart m_Part;
         AttachPoint m_Point;
         IXRInteractor m_Interactor;
-        Quaternion m_BaseRotation;      // world rotation of the cap at zero progress
+        Quaternion m_BaseLocalRotation = Quaternion.identity;   // the cap's rotation in the seat's frame at zero progress
+        Quaternion m_PrevHandLocal;                               // the hand's rotation in the seat's frame, last step
+        Vector3 m_StartLocal;                                     // where the grabbed pose started, in the seat's frame
+        bool m_HasStart;
         float m_GapShown;               // current rest offset from the seat, metres before scale
-        float m_StartDepth;             // depth of the grabbed pose along the pull-off axis at grab begin
-        float m_PrevPositionYaw;
-        float m_PrevWristYaw;
         float m_TextureAccum;
-        TwistMode m_Mode;
         bool m_Active;
 
         public AssemblyTuning tuning
@@ -90,8 +92,9 @@ namespace VRRocket
         {
             if (part != m_Part) return;
             m_Point = point;
-            // Zero progress is the rotation the cap seated with. Progress was reset when it last came off.
-            m_BaseRotation = Quaternion.AngleAxis(-SignedProgress(), point.transform.up) * transform.rotation;
+            // Zero progress is the rotation the cap seated with, kept in the seat's frame so it follows the rocket.
+            var local = Quaternion.Inverse(point.transform.rotation) * transform.rotation;
+            m_BaseLocalRotation = Quaternion.AngleAxis(-SignedProgress(), Vector3.up) * local;
             var t = tuning;
             m_GapShown = m_Logic.locked ? 0f : (t != null ? t.capUnlockedGap : 0.002f);
         }
@@ -108,6 +111,25 @@ namespace VRRocket
 
         float WorldScale => transform.lossyScale.x;
 
+        /// <summary>The cap's rotation in the seat's frame for the current progress: always square to the tube.</summary>
+        Quaternion IdealLocalRotation => Quaternion.AngleAxis(SignedProgress(), Vector3.up) * m_BaseLocalRotation;
+
+        Pose IdealPose()
+        {
+            var seat = m_Point.transform;
+            return new Pose(seat.position + m_Point.GuideAxisWorld * (m_GapShown * WorldScale), seat.rotation * IdealLocalRotation);
+        }
+
+        Quaternion HandLocal() => Quaternion.Inverse(m_Point.transform.rotation) * m_Interactor.transform.rotation;
+
+        /// <summary>The twist part of a rotation about the frame's +Y (swing-twist decomposition), as a signed Unity yaw in degrees.</summary>
+        public static float TwistAboutUp(Quaternion q)
+        {
+            if (q.w < 0f) { q.x = -q.x; q.y = -q.y; q.z = -q.z; q.w = -q.w; }
+            if (Mathf.Abs(q.y) < 1e-6f && Mathf.Abs(q.w) < 1e-6f) return 0f;   // a pure 180° swing: no twist to read
+            return Mathf.DeltaAngle(0f, 2f * Mathf.Atan2(q.y, q.w) * Mathf.Rad2Deg);
+        }
+
         // ---- IAttachedGrabHandler ----
 
         public bool OnAttachedGrabBegin(RocketPart part, AttachPoint point, XRGrabInteractable grab)
@@ -115,78 +137,47 @@ namespace VRRocket
             if (grab.interactorsSelecting.Count == 0) return false;
             m_Point = point;
             m_Interactor = grab.interactorsSelecting[0];
-            m_Mode = TwistMode.None;
-            m_StartDepth = GuideMath.Depth(transform.position, point.transform.position, point.GuideAxisWorld);
+            m_PrevHandLocal = HandLocal();
+            m_HasStart = false;
             m_Active = true;
             return true;
         }
 
-        float RadialDistance()
+        /// <summary>The rocket is in a hand or fixed (on the stand): only then may the cap be pulled off.</summary>
+        bool RocketSteady()
         {
-            var local = m_Point.transform.InverseTransformPoint(m_Interactor.transform.position);
-            return new Vector2(local.x, local.z).magnitude * WorldScale;
+            var tube = m_Point != null ? m_Point.tube : null;
+            return tube != null && (tube.isHeld || (tube.body != null && tube.body.isKinematic));
         }
 
         public AttachedGrabResult ProcessAttachedGrab(XRGrabInteractable grab, ref Pose targetPose)
         {
             var t = tuning;
             var point = m_Point;
-            var axisUp = point.transform.up;
-            var away = point.GuideAxisWorld;
-            var seat = point.transform.position;
+            var seatT = point.transform;
             var s = WorldScale;
 
             if (!m_Logic.locked)
             {
-                // Pull-off: the hand has drawn the cap more than capPullOff away from the tube along the axis.
-                var depth = GuideMath.Depth(targetPose.position, seat, away);
-                var pullOff = (t != null ? t.capPullOff : 0.04f) * s;
-                if (depth - m_StartDepth > pullOff)
+                // Pull-off: drawn clearly away along the axis (not drifting while twisting), with the rocket steady.
+                var local = seatT.InverseTransformPoint(targetPose.position);
+                if (!m_HasStart) { m_StartLocal = local; m_HasStart = true; }
+                var moved = (local - m_StartLocal) * s;
+                var axial = -moved.y;   // the guide axis points out of the tube, along the seat's -Y
+                var lateral = new Vector2(moved.x, moved.z).magnitude;
+                var pullOff = (t != null ? t.capPullOff : 0.06f) * s;
+                if (axial > pullOff && axial > 2f * lateral && RocketSteady())
                 {
                     m_Logic.Reset();
                     return AttachedGrabResult.Detach;
                 }
 
-                // Twist, in Unity yaw terms. Like XRKnob, read the hand's position orbiting the axis when it grips off-axis,
-                // and its wrist roll when it grips near the axis; never both, or a natural turn would count twice.
-                var yawDelta = 0f;
-                var usePosition = RadialDistance() >= m_PositionModeRadius * s;
-                if (usePosition)
-                {
-                    var yawNow = PositionYaw();
-                    if (m_Mode == TwistMode.Position) yawDelta = Mathf.DeltaAngle(m_PrevPositionYaw, yawNow);
-                    m_PrevPositionYaw = yawNow;
-                    m_Mode = TwistMode.Position;
-                }
-                else if (TryWristYaw(out var wristNow))
-                {
-                    if (m_Mode == TwistMode.Wrist) yawDelta = Mathf.DeltaAngle(m_PrevWristYaw, wristNow);
-                    m_PrevWristYaw = wristNow;
-                    m_Mode = TwistMode.Wrist;
-                }
-                else
-                {
-                    m_Mode = TwistMode.None;
-                }
+                // Twist: the hand's rotation since the last step, in the seat's frame, reduced to its twist about the axis.
+                var now = HandLocal();
+                var yawDelta = TwistAboutUp(now * Quaternion.Inverse(m_PrevHandLocal)) * (t != null ? t.capTwistSensitivity : 1.5f);
+                m_PrevHandLocal = now;
                 var clockwiseDelta = m_ClockwiseFromBelowIsNegativeYaw ? -yawDelta : yawDelta;
-                var before = m_Logic.progress;
-                var (detents, justLocked) = m_Logic.Advance(clockwiseDelta);
-                for (var i = 0; i < detents; i++) AssemblyEvents.RaiseCapDetent(m_Part);
-                if (justLocked) AssemblyEvents.RaiseCapLocked(m_Part);
-                // Thread texture between detents: one light tick per hapticTwistTextureAngle of new progress; detent and lock frames skip it.
-                var gained = m_Logic.progress - before;
-                if (detents > 0 || justLocked) m_TextureAccum = 0f;
-                else if (gained > 0f)
-                {
-                    var lib = AssemblyFeedback.instance != null ? AssemblyFeedback.instance.library : null;
-                    var step = lib != null ? lib.hapticTwistTextureAngle : 6f;
-                    m_TextureAccum += gained;
-                    if (step > 0f && m_TextureAccum >= step)
-                    {
-                        m_TextureAccum -= step;
-                        AssemblyEvents.RaiseTwistTexture(m_Part);
-                    }
-                }
+                Advance(clockwiseDelta);
             }
 
             // Gap closes once locked.
@@ -194,41 +185,49 @@ namespace VRRocket
             var closeSpeed = m_GapCloseDuration > 0f ? (t != null ? t.capUnlockedGap : 0.002f) / m_GapCloseDuration : float.MaxValue;
             m_GapShown = Mathf.MoveTowards(m_GapShown, targetGap, closeSpeed * Time.deltaTime);
 
-            targetPose.position = seat + away * (m_GapShown * s);
-            targetPose.rotation = Quaternion.AngleAxis(SignedProgress(), axisUp) * m_BaseRotation;
+            var pose = IdealPose();
+            targetPose.position = pose.position;
+            targetPose.rotation = pose.rotation;
             return AttachedGrabResult.Hold;
+        }
+
+        void Advance(float clockwiseDelta)
+        {
+            var before = m_Logic.progress;
+            var (detents, justLocked) = m_Logic.Advance(clockwiseDelta);
+            for (var i = 0; i < detents; i++) AssemblyEvents.RaiseCapDetent(m_Part);
+            if (justLocked) AssemblyEvents.RaiseCapLocked(m_Part);
+            // Thread texture between detents: one light tick per hapticTwistTextureAngle of new progress; detent and lock frames skip it.
+            var gained = m_Logic.progress - before;
+            if (detents > 0 || justLocked) m_TextureAccum = 0f;
+            else if (gained > 0f)
+            {
+                var lib = AssemblyFeedback.instance != null ? AssemblyFeedback.instance.library : null;
+                var step = lib != null ? lib.hapticTwistTextureAngle : 6f;
+                m_TextureAccum += gained;
+                if (step > 0f && m_TextureAccum >= step)
+                {
+                    m_TextureAccum -= step;
+                    AssemblyEvents.RaiseTwistTexture(m_Part);
+                }
+            }
         }
 
         public void OnAttachedGrabEnd()
         {
+            var t = tuning;
+            // Nearly there: letting go finishes the lock.
+            if (!m_Logic.locked && t != null && m_Logic.progress >= t.capAutoFinishFraction * t.capLockAngle)
+                Advance(t.capLockAngle - m_Logic.progress + 1f);
+            if (m_Logic.locked) m_GapShown = 0f;
+            // Leave it exactly square to the tube at its progress (the seat records this pose when it re-attaches).
+            if (m_Point != null)
+            {
+                var pose = IdealPose();
+                transform.SetPositionAndRotation(pose.position, pose.rotation);
+            }
             m_Active = false;
             m_Interactor = null;
-        }
-
-        /// <summary>Unity yaw (about the tube's +Y, in the attach point's frame) of the hand's position around the axis.</summary>
-        float PositionYaw()
-        {
-            var local = m_Point.transform.InverseTransformPoint(m_Interactor.transform.position);
-            // Atan2(z, x) grows from +X toward +Z, which is a negative Unity yaw, so negate.
-            return -Mathf.Atan2(local.z, local.x) * Mathf.Rad2Deg;
-        }
-
-        /// <summary>Unity yaw of the hand's own roll about the tube axis, read from whichever of its forward or up vectors lies flattest.</summary>
-        bool TryWristYaw(out float yaw)
-        {
-            var it = m_Interactor.transform;
-            var f = m_Point.transform.InverseTransformDirection(it.forward);
-            var u = m_Point.transform.InverseTransformDirection(it.up);
-            var fFlat = new Vector2(f.x, f.z).magnitude;
-            var uFlat = new Vector2(u.x, u.z).magnitude;
-            var v = fFlat >= uFlat ? f : u;
-            if (Mathf.Max(fFlat, uFlat) < 0.3f)
-            {
-                yaw = 0f;
-                return false;
-            }
-            yaw = -Mathf.Atan2(v.z, v.x) * Mathf.Rad2Deg;
-            return true;
         }
     }
 }

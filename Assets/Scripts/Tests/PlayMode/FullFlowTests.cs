@@ -136,7 +136,8 @@ namespace VRRocket.Tests
             Assert.IsFalse(tube.body.isKinematic, "back as a loose rocket");
             AssertAtHome(tube, "returned to its bench spot");
             Assert.AreSame(tube, Part(PartType.NoseCone).attachedTo.tube, "parts came back with it");
-            Assert.IsFalse(assembly.CanGrab(Part(PartType.MotorCap)), "a resting rocket is grabbed as a whole: no part can be picked off it");
+            Assert.IsFalse(assembly.CanGrab(Part(PartType.TailFin, 1)), "a resting rocket is grabbed as a whole: no part can be picked off it");
+            Assert.IsTrue(assembly.CanGrab(Part(PartType.MotorCap)), "except the unlocked cap, which can always be gripped to twist (pulling it off needs the rocket steady)");
             StandTubeUpright();   // the player picks the rocket up with the other hand
             Assert.IsTrue(assembly.CanGrab(Part(PartType.MotorCap)), "held: the cap is editable");
             Assert.IsTrue(assembly.CanGrab(Part(PartType.TailFin, 1)), "held: fins come off too in the free build order");

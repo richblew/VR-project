@@ -12,7 +12,6 @@ namespace VRRocket.Tests
     /// </summary>
     public class GameFlowTests : DevSceneTestBase
     {
-        const float k_Orbit = 0.06f;
 
         protected override string scenePath => FinalSceneTests.Path;
 
@@ -64,12 +63,6 @@ namespace VRRocket.Tests
             Assert.AreEqual(AssemblyState.PrototypeComplete, assembly.State);
         }
 
-        Vector3 Orbit(AttachPoint seat, float unityYaw)
-        {
-            var t = seat.transform;
-            return t.position + seat.GuideAxisWorld * 0.03f + Quaternion.AngleAxis(unityYaw, t.up) * t.right * k_Orbit;
-        }
-
         /// <summary>Grabs the seated cap and twists it clockwise (viewed from below) past the lock angle, as CapTwistTests does.</summary>
         IEnumerator LockCap()
         {
@@ -78,12 +71,17 @@ namespace VRRocket.Tests
             var twist = cap.GetComponent<MotorCapTwist>();
             yield return Grab(cap);
             Assert.AreEqual(PartState.Attached, cap.state, "gripping the seated cap does not unseat it");
-            yield return MoveHand(Orbit(seat, 0f));
+            yield return null;
             Assert.IsTrue(twist.isTwisting);
-            for (var a = 0f; a > -200f;)
+            // the wrist turns clockwise (viewed from below) rigidly about the tube's axis
+            var startPos = controller.position; var startRot = controller.rotation;
+            for (var a = 0f; a < 200f;)
             {
-                a -= 5f;
-                yield return MoveHand(Orbit(seat, a));
+                a += 5f;
+                var q = Quaternion.AngleAxis(-a, seat.transform.up);
+                controller.position = seat.transform.position + q * (startPos - seat.transform.position);
+                controller.rotation = q * startRot;
+                yield return null; yield return null;
                 if (twist.capLocked) break;
             }
             Assert.IsTrue(twist.capLocked, "cap locked");
@@ -140,7 +138,8 @@ namespace VRRocket.Tests
             Assert.AreEqual(AssemblyState.PrototypeComplete, assembly.State);
             Assert.IsFalse(assembly.isFrozen, "abort returns the same rocket to the bench, editable");
             Assert.IsTrue(tube.gameObject.activeInHierarchy);
-            Assert.IsFalse(assembly.CanGrab(Part(PartType.MotorCap)), "the returned rocket rests on the bench and is grabbed as a whole");
+            Assert.IsFalse(assembly.CanGrab(Part(PartType.TailFin, 1)), "the returned rocket rests on the bench and is grabbed as a whole");
+            Assert.IsTrue(assembly.CanGrab(Part(PartType.MotorCap)), "except its unlocked cap, which can always be gripped to twist it");
 
             // submit again and launch this time
             yield return CarryToBin();

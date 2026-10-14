@@ -88,7 +88,8 @@ Children: `Mesh` (the model) and `PartGlow` (an orange glow mesh, hidden until n
 | The rocket has been submitted (frozen) | nothing |
 | A loose part | yes |
 | The working rocket's body tube | yes, always. Grabbing anywhere on the rocket grabs the whole rocket. |
-| A part attached to the rocket while the rocket **rests** on the desk | no: the hand falls through to the rocket, so the whole rocket is picked up |
+| A part attached to the rocket while the rocket **rests** on the desk | no: the hand falls through to the rocket, so the whole rocket is picked up. **Except the unlocked battery cap**: it can always be gripped to twist it (pulling it off still needs the rocket held or on the stand) |
+| The rocket, with the hand within **Cap Grab Priority Radius** (7 cm) of an unlocked seated cap | no: that hand takes the cap, so a hand reaching for the cap is never given the whole rocket |
 | A part attached to the rocket while the rocket is **held in the other hand** | yes, if the build rules allow removing it (section 6). This is the **two-handed removal**: hold the rocket, pull the part off along its guide. |
 | The inspection prototype (a failed rocket returned on the console) | only as a whole; its parts can never be taken off |
 
@@ -130,25 +131,28 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 
 **Special cases:**
 
-- **Motor held nozzle up:** no glow and no capture at all.
+- **The battery (the motor part) slots in with no real chance of failure:**
+  - it is caught from a larger zone, **Motor Capture Radius** (11 cm from its base), and up to **Motor Orientation Tolerance** (70°) off the tube's axis, so its top is never inside the tube before it is caught;
+  - its rail (**Guide Length Motor**, 14 cm) is longer than that zone, and while any of the battery (**Motor Length**, 7 cm) is in the tube, sideways movement of the hand never knocks it off the rail: only pulling it back out does. It can never be dragged through the tube's wall;
+  - let go within **Motor Release Snap Radius** (15 cm) of its seat, the right way up, it slides home even if it was not caught yet;
+  - **held the wrong way up** (it goes in + end up): no glow, no capture, and within **Motor Block Radius** (4 cm) of the axis it is held out below the tube's end, with one buzz, instead of passing into the tube.
 - **Nose magnetism:** the nose is drawn toward its seat. Near the seat it is shown at **Nose Magnetism** (50%) of the hand's distance; at the rail's outer end it follows the hand exactly.
 - **A refused point** (gating says no, section 6) behaves as if it were not there: no glow, no snap.
 
-## 5. The motor cap twist
+## 5. The battery cap twist
 
 The cap is guided onto `CapSeat` like any part, but it seats **unlocked**: it rests 2 mm proud of the tube (**Cap Unlocked Gap**). An unlocked cap makes the launch fail (the motor shoots out).
 
 To lock it:
 
 1. Grip the seated cap. It does not come off; it stays on the rocket.
-2. Twist. The cap turns about the rocket's axis, following the hand. Two ways to read the twist, never both at once:
-   - gripping more than 3 cm off the axis: the hand's **position orbiting** the axis;
-   - gripping close to the axis: the **wrist roll**.
+2. Twist the wrist. The cap turns about the rocket's axis by the **twist of the hand's rotation about that axis** (swing-twist decomposition: tilting the hand does not count), times **Cap Twist Sensitivity** (1.5), so one comfortable wrist turn of 120° closes it. Like the XRI example knob, everything is worked out in the seat's own frame: the cap turns about the tube's **current** axis however the rocket has been turned since the cap went on, and it is left square to the tube when let go. While it is twisted it is placed directly every frame (Instantaneous), not through physics.
 3. It turns **clockwise only, viewed from below**. It is a ratchet: turning back does not unwind it, and progress is kept if you let go and grab again.
 4. Every **30°** of new progress (**Cap Detent Angle**): a ratchet tick (sound and pulse). Between ticks, a very light "thread" texture every 6°.
 5. At **180°** (**Cap Lock Angle**): it locks with a firm click and a strong pulse. The 2 mm gap closes over 0.1 s. A locked cap cannot be turned or removed.
+6. Let go after **Cap Auto Finish Fraction** (75%, 135°) of the turn and it finishes the lock by itself, with the click.
 
-**Taking an unlocked cap off:** pull it more than 4 cm (**Cap Pull Off**) along the axis. Its progress resets to zero.
+**Taking an unlocked cap off:** with the rocket held in the other hand or on the stand, pull it more than 6 cm (**Cap Pull Off**), mostly along the axis (sideways drift while twisting never pulls it off). Its progress resets to zero.
 
 **If the thread turns the wrong way in the headset:** untick **Clockwise From Below Is Negative Yaw** on `MotorCapTwist` in `MotorCap.prefab`.
 

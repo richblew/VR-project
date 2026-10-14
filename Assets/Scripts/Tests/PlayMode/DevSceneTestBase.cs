@@ -206,16 +206,27 @@ namespace VRRocket.Tests
                    ", hand holds " + held + ", part held by " + target.interactorsSelecting.Count + "]";
         }
 
+        /// <summary>
+        /// Where a hand takes a part: its origin, or for the rocket the middle of its tube. A hand at the rocket's base, beside an
+        /// unlocked battery cap, takes the cap instead (RocketAssembly.CanGrab), as a player reaching for the cap wants.
+        /// </summary>
+        protected static Vector3 GrabPoint(RocketPart part)
+        {
+            if (part.partType != PartType.BodyTube) return part.transform.position + grabOffset;
+            var r = part.GetComponent<Renderer>();   // the tube's own mesh, not its attached parts
+            return (r != null ? r.bounds.center : part.transform.position + part.transform.up * 0.12f) + grabOffset;
+        }
+
         protected IEnumerator Grab(RocketPart part)
         {
             controller.rotation = Quaternion.identity;
-            yield return MoveHand(part.transform.position + grabOffset);
+            yield return MoveHand(GrabPoint(part));
             if (!manager.IsSelectPossible(hand, part.grabInteractable) && part.state == PartState.Free)
             {
                 // a loose part knocked somewhere awkward by physics: put it back on the pad at rest and try again
                 workstation.respawner.Respawn(part);
                 yield return new WaitForSeconds(0.3f);
-                yield return MoveHand(part.transform.position + grabOffset);
+                yield return MoveHand(GrabPoint(part));
             }
             Assert.IsTrue(manager.IsSelectPossible(hand, part.grabInteractable), "near grab of " + part.name + " must be possible (state " + part.state + ", pos " + part.transform.position.ToString("F2") + ")");
             manager.SelectEnter((IXRSelectInteractor)hand, part.grabInteractable);

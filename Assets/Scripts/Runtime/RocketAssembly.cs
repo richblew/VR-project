@@ -286,9 +286,21 @@ namespace VRRocket
         // ---- grab permission (5.5 removal exceptions, 5.6 handling, inspect-only) ----
 
         /// <summary>May this part be grabbed right now? Asked by <see cref="AssemblyGrabGate"/> before every hover and select.</summary>
-        public bool CanGrab(RocketPart part)
+        public bool CanGrab(RocketPart part) => CanGrab(part, null);
+
+        /// <summary>
+        /// Can this hand (null: any hand) grab this part now? As <see cref="CanGrab(RocketPart)"/>, plus the battery cap: an unlocked
+        /// seated cap can always be gripped to twist it (even on a resting rocket; pulling it off still needs the rocket steady),
+        /// and a hand that close to it takes the cap rather than the rocket.
+        /// </summary>
+        public bool CanGrab(RocketPart part, UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor hand)
         {
             if (part == null) return false;
+            if (m_InteractionEnabled && !m_Frozen && part.partType == PartType.BodyTube && part == m_Tube && hand != null && HandAtUnlockedCap(hand))
+                return false;
+            if (m_InteractionEnabled && !m_Frozen && part.partType == PartType.MotorCap && part.state == PartState.Attached
+                && part.attachedTo != null && part.attachedTo.tube == m_Tube && part != m_InspectPrototype)
+                return m_CapTwist == null || !m_CapTwist.capLocked;
             if (!m_InteractionEnabled) return false;
             var isInspect = m_InspectPrototype != null && (part == m_InspectPrototype || (part.attachedTo != null && part.attachedTo.tube == m_InspectPrototype));
             if (isInspect) return part == m_InspectPrototype;   // examine the frozen rocket, never alter it
@@ -302,6 +314,15 @@ namespace VRRocket
             var rocketHeld = m_Tube.isHeld || (m_Tube.body != null && m_Tube.body.isKinematic);
             if (!rocketHeld) return false;
             return m_Machine.CanRemove(part.partType);
+        }
+
+        bool HandAtUnlockedCap(UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor hand)
+        {
+            if (m_CapTwist == null || m_CapTwist.capLocked) return false;
+            var cap = m_CapTwist.GetComponent<RocketPart>();
+            if (cap == null || cap.state != PartState.Attached || cap.attachedTo == null || cap.attachedTo.tube != m_Tube) return false;
+            var radius = (m_Tuning != null ? m_Tuning.capGrabPriorityRadius : 0.07f) * cap.transform.lossyScale.x;
+            return Vector3.Distance(hand.transform.position, cap.transform.position) <= radius;
         }
 
         // ---- interface of 8.4 ----

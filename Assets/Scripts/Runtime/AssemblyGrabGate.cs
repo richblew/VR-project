@@ -47,16 +47,16 @@ namespace VRRocket
         public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable interactable)
         {
             if (interactable.interactorsSelecting.Contains(interactor)) return true;
-            return Allowed();
+            return Allowed(interactor);
         }
 
-        public bool Process(IXRHoverInteractor interactor, IXRHoverInteractable interactable) => Allowed();
+        public bool Process(IXRHoverInteractor interactor, IXRHoverInteractable interactable) => Allowed(interactor);
 
-        bool Allowed()
+        bool Allowed(IXRInteractor hand)
         {
             var a = assembly;
             if (a == null) return true;
-            return a.CanGrab(m_Part);
+            return a.CanGrab(m_Part, hand);
         }
     }
 }
