@@ -35,6 +35,7 @@ namespace VRRocket
         readonly List<Collider> m_IgnoredColliders = new List<Collider>(32);
 
         AttachPoint m_Point;
+        AttachPoint m_Highlight;    // the one point a free held part lights: the nearest that fits it
         Quaternion m_SeatedLocal;   // the seated rotation relative to the point: follows the tube if it turns mid-insert
         bool m_Guided;
         bool m_FromAttached;
@@ -121,6 +122,7 @@ namespace VRRocket
             // or the grab interactable restores it to kinematic on release and refuses to throw it.
             if (m_Grab.interactorsSelecting.Count > 0) return; // second hand joining: keep state
             m_Grab.throwOnDetach = true;
+            m_Highlight = null;
             if (m_SeatRoutine != null)
             {
                 StopCoroutine(m_SeatRoutine);
@@ -157,6 +159,7 @@ namespace VRRocket
             if (m_Grab.interactorsSelecting.Count > 0) return; // still held by the other hand
             m_PendingAttachedGrab = false;
             m_WrongWayWarned = false;
+            m_Highlight = null;
             if (m_MovementOverridden)
             {
                 m_MovementOverridden = false;
@@ -256,27 +259,35 @@ namespace VRRocket
             }
             else if (!m_Guided)
             {
+                // Only one point lights: the nearest that fits the part, the one it would go into. The others stay dark, so the
+                // glow never points at a slot round the side of the tube. The lit point only moves to another when that one is
+                // clearly closer (Glow Switch Margin), so a part held between two slots does not flicker between them.
                 var glowR = Mathf.Max(t.glowRadius, t.captureRadius) * s;
-                var captureR = t.captureRadius * s;
-                AttachPoint best = null;
-                var bestDist = float.MaxValue;
+                AttachPoint nearest = null;
+                var nearestDist = float.MaxValue;
+                var litDist = float.MaxValue;
                 var points = AttachPoint.active;
                 for (var i = 0; i < points.Count; i++)
                 {
                     var p = points[i];
                     if (!p.Accepts(m_Part)) continue;
                     var d = Vector3.Distance(targetPose.position, p.transform.position);
-                    if (d >= glowR) continue;
-                    p.RequestGlow(1f - d / glowR);
-                    if (d < bestDist)
-                    {
-                        bestDist = d;
-                        best = p;
-                    }
+                    if (p == m_Highlight) litDist = d;
+                    if (d < nearestDist) { nearestDist = d; nearest = p; }
                 }
-                if (best != null) m_Part.RequestGlow(1f - bestDist / glowR);
-                if (best != null && bestDist <= captureR && OrientationOk(best, targetPose.rotation, t))
-                    Engage(best, targetPose.rotation);
+                if (m_Highlight == null || litDist >= glowR || nearestDist < litDist - t.glowSwitchMargin * s)
+                {
+                    m_Highlight = nearestDist < glowR ? nearest : null;
+                    litDist = nearestDist;
+                }
+                if (m_Highlight != null)
+                {
+                    var amount = 1f - litDist / glowR;
+                    m_Highlight.RequestGlow(amount);
+                    m_Part.RequestGlow(amount);
+                    if (litDist <= t.captureRadius * s && OrientationOk(m_Highlight, targetPose.rotation, t))
+                        Engage(m_Highlight, targetPose.rotation);
+                }
             }
 
             if (m_Guided)
@@ -469,6 +480,7 @@ namespace VRRocket
 
         void Engage(AttachPoint point, Quaternion heldRotation)
         {
+            m_Highlight = null;
             m_Point = point;
             m_SeatedLocal = Quaternion.Inverse(point.transform.rotation) * GuideMath.SeatedRotation(m_Part.partType, point.transform.rotation, heldRotation);
             m_Guided = true;

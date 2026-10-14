@@ -6,7 +6,7 @@ namespace VRRocket
     /// <summary>
     /// One attach point on the body tube (SPEC.md section 4.4). Generated from attach_points.json by the editor script.
     /// Knows what it accepts, which axis the guide runs along, whether it is occupied, whether gating currently allows it,
-    /// and drives its own glow mesh (section 6: brightness rising with closeness, several points can glow at once).
+    /// and drives its own glow mesh (section 6: brightness rising with closeness; a held part lights only the nearest point that fits it).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class AttachPoint : MonoBehaviour
@@ -40,6 +40,8 @@ namespace VRRocket
         public float yawDegrees => m_YawDegrees;
         public Renderer glowRenderer => m_GlowRenderer;
         public RocketPart attachedPart { get; private set; }
+        /// <summary>How brightly the point glows now, 0 (off) to 1 (a part on its track).</summary>
+        public float glowLevel => Mathf.Max(0f, m_GlowShown);
         public bool isOccupied => attachedPart != null;
 
         /// <summary>The body tube this point belongs to.</summary>

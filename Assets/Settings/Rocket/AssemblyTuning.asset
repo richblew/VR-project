@@ -16,6 +16,7 @@ MonoBehaviour:
   glowRadius: 0.12
   captureRadius: 0.05
   breakRadius: 0.08
+  glowSwitchMargin: 0.01
   guideLengthPlates: 0.05
   guideLengthNose: 0.06
   guideLengthMotor: 0.14
