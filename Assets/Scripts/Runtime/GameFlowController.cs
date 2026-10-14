@@ -313,7 +313,7 @@ namespace VRRocket
             SetPhase(GamePhase.Launch);
             var outcome = lastReport != null ? lastReport.outcome : LaunchOutcome.Success;
             var done = false;
-            if (m_Launch != null) m_Launch.Liftoff(outcome, () => done = true);
+            if (m_Launch != null) m_Launch.Liftoff(outcome, () => done = true, lastReport != null ? lastReport.wrongFlapCount : 0);
             else done = true;
             var t0 = Time.time;
             while (!done)

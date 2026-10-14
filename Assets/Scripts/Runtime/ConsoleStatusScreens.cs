@@ -155,7 +155,9 @@ namespace VRRocket
                 }
                 case GamePhase.Result:
                     title = "FLIGHT " + attempts + " RESULT";
-                    m_Sb.Append(Outcome(true)).Append("\n\n");
+                    m_Sb.Append(Outcome(true)).Append('\n');
+                    if (m_Flow != null && m_Flow.lastReport != null && m_Flow.lastReport.outcome != LaunchOutcome.Success) m_Sb.Append(m_Flow.lastReport.FlightDetail).Append('\n');
+                    m_Sb.Append('\n');
                     m_Sb.Append("MAX ALT   ").Append(m_MaxAltitude.ToString("0")).Append(" m\n");
                     m_Sb.Append("FLIGHTS   ").Append(attempts).Append('\n');
                     m_Sb.Append("SUCCESSES ").Append(successes);

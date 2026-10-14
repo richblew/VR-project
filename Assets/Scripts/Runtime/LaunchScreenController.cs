@@ -182,6 +182,7 @@ namespace VRRocket
             var sb = new StringBuilder();
             if (report != null && !success)
             {
+                sb.Append(report.FlightDetail).Append("   |   ");
                 sb.Append("Failed components (").Append(report.FailedCount).Append("): ").Append(string.Join(", ", BuildReport.DisplayNames(report.failedComponents)));
                 sb.Append("   |   The prototype is returned for inspection. A new kit is on the bench.");
             }

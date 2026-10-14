@@ -34,7 +34,7 @@ The specs describe the project as it is on branch `interactions`, last checked a
 | 4. Submit | The player carries the finished rocket to the console, drops it into the bin and presses SUBMIT. | [07](07-console-and-bin.md) |
 | 5. Pad | The rocket appears on the launch pad outside the window at model size and grows to full size (36 times). The big TV and the console monitor show the pad camera. | [04](04-launch-simulator.md), [05](05-screens-and-displays.md) |
 | 6. Launch | LAUNCH starts a 10 second countdown, the engine lights at T-3, then the rocket flies. ABORT (before liftoff) brings the rocket back to the desk to fix it. | [02](02-game-engine.md), [04](04-launch-simulator.md) |
-| 7. Result | A good rocket climbs to 1200 m and the menu returns. A bad rocket fails the way it was built: an unlocked cap shoots the motor out on the pad, wrong flaps make it corkscrew and explode. The failed rocket comes back on the console for inspection, and a fresh kit appears on the desk. | [04](04-launch-simulator.md), [03](03-rocket-assembly.md) |
+| 7. Result | A good rocket climbs to 1200 m and the menu returns. A bad rocket fails the way it was built: an unlocked cap shoots the battery out on the pad; one wrong flap makes it veer off course and crash in view of the window; two or three make it corkscrew and break up just above the pad. The failed rocket comes back on the console for inspection, and a fresh kit appears on the desk. | [04](04-launch-simulator.md), [03](03-rocket-assembly.md) |
 
 The rule that decides the outcome (in `BuildReport.Build`):
 
@@ -105,7 +105,7 @@ Open `Assets/Scenes/VRRocket_Main.unity`. These are its root objects. Each is on
 | `LaunchScreen` | Overlay on the room's big TV | text, bands, failure diagram | [05](05-screens-and-displays.md) |
 | `CountdownClock` | Overlay on the small TV top right of the big TV | text | [05](05-screens-and-displays.md) |
 | `LaunchSite` | The pad, the 36× vehicle, effects, sounds and the pad camera | `LaunchSequence` | [04](04-launch-simulator.md) |
-| `Outside` | Ground, launch pad disc and gantry tower | meshes and colliders | [04](04-launch-simulator.md) |
+| `Outside` | Ground, launch pad disc, launch mount and gantry tower | meshes and colliders | [04](04-launch-simulator.md) |
 | `WindowWall` | Our copy of the room's right wall, with a window cut in. **Saved switched off on purpose.** | `WindowOpening` | [01](01-scenes-and-room.md) |
 | `RoomFit/TeleportFloor` | Six thin boxes you can teleport onto | `TeleportationArea` | [08](08-xr-rig-and-input.md) |
 | `Sun` | Directional light for the outside | `Light` | [01](01-scenes-and-room.md) |
