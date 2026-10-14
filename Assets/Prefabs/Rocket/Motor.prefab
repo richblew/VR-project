@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4817576192335634725}
   - component: {fileID: 7194182703479346324}
   - component: {fileID: 8333649998428817309}
+  - component: {fileID: 4093782356693960865}
   m_Layer: 0
   m_Name: Motor
   m_TagString: Untagged
@@ -313,6 +314,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.ImpactAudio
   m_MinSpeed: 0.25
   m_Cooldown: 0.12
+--- !u!114 &4093782356693960865
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 47445463558231655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: 0}
 --- !u!1 &5454806919370908136
 GameObject:
   m_ObjectHideFlags: 0
