@@ -18,11 +18,16 @@ MonoBehaviour:
   breakRadius: 0.08
   guideLengthPlates: 0.05
   guideLengthNose: 0.06
-  guideLengthMotor: 0.08
+  guideLengthMotor: 0.14
   guideLengthCap: 0.04
   guideLengthTube: 0.1
   orientationTolerancePlates: 40
   orientationToleranceOthers: 45
+  motorEntryRadius: 0.02
+  motorEntryTilt: 60
+  motorExitMargin: 0.01
+  motorLength: 0.07
+  motorBlockRadius: 0.04
   seatDuration: 0.12
   seatDurationMotor: 0.3
   noseMagnetism: 0.5
@@ -30,7 +35,10 @@ MonoBehaviour:
   capLockAngle: 180
   capDetentAngle: 30
   capUnlockedGap: 0.002
-  capPullOff: 0.04
+  capPullOff: 0.06
+  capTwistSensitivity: 1.5
+  capAutoFinishFraction: 0.75
+  capGrabPriorityRadius: 0.07
   enforceOrder: 0
   standClearance: 0.2
   respawnDelay: 1.5

@@ -71,7 +71,7 @@ The game engine calls one `Show...` method per moment. Each one sets every text,
 | `ShowPreLaunch` (PreLaunch, pad ready) | PROTOTYPE RECEIVED \| PAD 01 READY | | "Press LAUNCH to begin the countdown. ABORT returns the prototype." | T-00:00:10 | pad camera |
 | `ShowCountdown(n)` (Countdown) | COUNTDOWN \| PAD 01 | T-10 ... T-01 | ALL SYSTEMS GO, then IGNITION from T-03 | T-00:00:10 ... | pad camera |
 | `ShowFlight` (Launch) | LIFTOFF \| PAD 01 | | "T+12.4 s     ALT 812 m     VEL 145 m/s" | T+00:00:12 | pad camera |
-| `ShowResult` (Result) | MISSION SUCCESS, or LAUNCH FAILED | NOMINAL FLIGHT, or MOTOR RETENTION LOSS, or UNSTABLE FLIGHT | "Clean launch. Well built.", or "Failed components (2): MotorCap, WingFlap_2 \| The prototype is returned for inspection. A new kit is on the bench." | unchanged | placeholder; the diagram on a failure |
+| `ShowResult` (Result) | MISSION SUCCESS, or LAUNCH FAILED | NOMINAL FLIGHT, or BATTERY RETENTION LOSS, or UNSTABLE FLIGHT | "Clean launch. Well built.", or how it failed (`BuildReport.FlightDetail`: VEERED OFF COURSE AND CRASHED, BROKE UP IN FLIGHT, BATTERY BLEW OUT ON THE PAD) then "Failed components (2): Battery cap, Wing flap 2 \| The prototype is returned for inspection. A new kit is on the bench." | unchanged | placeholder; the diagram on a failure |
 
 ### The console mirror
 

@@ -382,3 +382,44 @@ Merged `test-hand-models` (Yi-Xuan, up to be9eb60) into `interactions`. Details 
 - **Side TVs:** each top TV sits exactly over its bottom TV, all four the same size, both pairs at the same height; the countdown clock, ABORT and live screens refitted.
 - **Battery:** the kit's motor is an AA battery (MasterYogurt, CC BY), 24 x 70 mm, + end up; everything the player reads says battery (build steps, hints, GO / NO-GO, BATTERY RETENTION LOSS, "Battery cap" in failed parts). Build-step pictures re-rendered. Code names unchanged.
 - **Verified:** edit mode 40/40, play mode 37/37 (new: TVs stacked square and the same size; the kit motor shows the battery; failed parts read as the player sees them).
+
+## 2026-10-14: Battery slot and cap twist made reliable (done)
+
+From Praise's headset session: the battery popped out through the tube's wall when not slotted perfectly, and the cap twisted off the rocket's axis, ended up crooked, and was hard to grab.
+- **Causes found:** parts never collide with each other, so a battery not yet caught (or knocked off its track by sideways hand drift mid-insert, or let go uncaught) passed through the tube; the cap's twist was computed against the rocket's orientation at the moment the cap was seated, so once the rocket was turned (and twisting needs it held) the cap turned about the wrong axis and was left crooked; the cap was moved through physics a step behind the rocket; a hand at the cap was given the whole rocket; the twist read the hand orbiting the axis rather than the wrist turning.
+- **Battery:** caught from 11 cm and up to 70 degrees off axis; while any of it is in the tube sideways drift never knocks it off the track; let go within 15 cm, the right way up, it slides home; the wrong way up it is held out of the tube with a buzz.
+- **Cap:** everything in the seat's own frame (like the XRI example knob), so it always turns about the tube's current axis and is left square; the wrist's twist about the axis (swing-twist decomposition) at 1.5x; placed directly while twisted; a hand at an unlocked cap takes the cap, not the rocket, and can twist it on a resting rocket; pull-off needs a deliberate 6 cm axial pull with the rocket steady; let go at 75 percent and it finishes the lock.
+- **Verified:** edit mode 40/40, play mode 44/44 (new `BatteryInsertTests`; cap tests for a rocket turned after seating, auto-finish, and grab priority).
+
+## 2026-10-14: Launch fire, smoke and failures reworked (done)
+
+From Praise: the fire and smoke started halfway up the rocket, so it looked on fire rather than lifted by its flame; and the failures needed checking. Details in [spec 04](../specs/04-launch-simulator.md).
+- **Cause:** the flame's streaks (9 to 15 m long) are drawn centred on the nozzle, and the nozzle sat 8 cm above the pad, so only the upper half of each streak, running up the rocket's side, could be seen; the pad smoke shot upward beside the rocket and only started at liftoff.
+- **Launch mount:** the rocket stands on a 2 m steel deck on four legs over a flame deflector; the gantry steps back and its arm no longer reaches over the nose.
+- **Fire and smoke:** the flame's streaks start at the nozzle and reach down (the emitter sits half a streak below it), with a glow at the nozzle; at T-3 the flame lights small and builds while the pad smoke rolls out along the ground and fire sprays out under the deck; at liftoff a surge of smoke and a trail left in the air behind the climb.
+- **Failures by number of wrong flaps:** one veers off course, arcs over and crashes about 80 m out, in the window's view, with a ground explosion (shockwave, dirt, scorch, fire, smoke column); two or three corkscrew and break up about 16 m up. Both throw the fins, flaps, nose and cap out as debris that falls trailing smoke. The result screens add how it failed. The unlocked cap still blows the battery out on the pad, now with a puff of smoke, down off the deck.
+- **Flight model:** thrust now pushes along the rocket's body with more drag flying sideways; a crash is detected when the nose meets the ground. Fixed on the way: the rocket used to lean 90 degrees away from the direction it drifted.
+- **Explosion:** rebuilt with a solid fireball (additive fire washed out against the sky), a flash with a short light, flames, embers and rising smoke.
+- **Verified:** edit mode 43/43, play mode 49/49 (new `LaunchEffectsTests`: no flame streak reaches above the nozzle, smoke rolls out along the ground, the trail and the pad fire, the crash on the ground in the window's view, the break-up low in the air and a reset clearing it, abort putting everything out; flight-model tests for each failure). Frame rate during the launch is still to be checked in the headset.
+
+## 2026-10-14: main and Yi-Xuan's branch merged; menu words editable per state, menu restyled; fixed sockets (done)
+
+- **Merged** `main` (Richard's menu update: NASA colours, new copy, BRIEF ME and BUILD ROCKET) and `test-hand-models` (Yi-Xuan: the sockets fixed to the well's floor, one cable per pair, new insulation colours, our intro link renamed `IntroController` and her calibration `RoomLink`). Her branch also switched to her hand-model rig; the merge keeps our rig on and hers off, as before.
+- **Menu words editable:** every word of the menu, for each state (First Play, After Success), is edited on `MenuCanvas`'s Menu Panel in the Inspector, with a preview switch; nothing in code overrides them any more (they were hard-coded in `GameFlowController`). Texts auto-size so new words fit. Details in [spec 06](../specs/06-menu.md).
+- **Menu restyled in Richard's direction:** his NASA frame (`nasa_button.png`) turned into a transparent nine-sliced button sprite, a glowing blue rule with red-and-white stripe ends, a faint HUD grid, NASA red title (#FC3D21), white button labels, dimmed buttons that glow under the ray and flash warm when pressed.
+- **Sockets:** they sat 1.5 cm into the well's floor, so only their faces showed; they now stand on it.
+- **Verified:** edit mode 43/43, play mode 50/50 (new: the menu's words per state and edits showing; the after-success menu; the fixed sockets; the console-button test now presses with the menu gone, as in play, since Richard's menu hangs over the console).
+
+## 2026-10-14: The battery goes in only once it is in, and always seats straight (done)
+
+From Praise's headset session: the battery slid in on its own as it approached the base, twisting and tilting on the way when it was not lined up, and its glow ring lit the wrong end.
+- **Causes found** (checked with a throwaway test): it was caught from an 11 cm zone round its seat, from any side (8 cm below and 6 cm aside was enough), and up to 70 degrees over, then snapped straight in mid-air; letting go within 15 cm slid it in even with its + end 7 cm outside the tube; its straight angle was worked out once, when caught, so a rocket turned in the other hand left it 30 degrees crooked and through the wall, and it seated crooked; leaning past 70 degrees it was never caught and could fall through the tube; the glow ring sat on the - end, the end that goes in last.
+- **Now:** caught only once its + end is in the tube's base (a little or a long way, up to 60 degrees over); it straightens on the axis without moving in or out; drifting or leaning the hand or turning the rocket never takes it off the axis; let go while in, it always slides home straight; let go outside, it drops; pulled back out, it comes free. The wrong way up it is still kept out with a buzz. The glow ring is on the + end. The straight angle is kept relative to the seat for every part (the nose cone had the same hidden fault).
+- **Tuning:** Motor Capture Radius, Motor Orientation Tolerance and Motor Release Snap Radius are replaced by Motor Entry Radius (2 cm), Motor Entry Tilt (60 degrees) and Motor Exit Margin (1 cm).
+- **Verified:** edit mode 43/43, play mode 55/55 (`BatteryInsertTests` rewritten: 9 tests). Feel in the headset still to check.
+
+## 2026-10-14: Yi-Xuan's socket holes merged (done)
+
+- **Merged** `main` (Yi-Xuan, f3d4bb9 and c1b4133): the well's floor is now pieces round a hole at each socket row, raised about 1.3 cm, so the fixed sockets sit down in the floor with their faces level with it; the puzzle's volume moved to match.
+- **Kept on:** her save had the menu canvas and the wiring hatch switched off (left over from working on the puzzle); both are switched on again, as Praise asked.
+- **Verified:** edit mode 43/43, play mode 55/55.

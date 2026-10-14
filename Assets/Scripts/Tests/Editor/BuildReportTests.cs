@@ -61,6 +61,25 @@ namespace VRRocket.Tests
         }
 
         [Test]
+        public void Wrong_Flap_Count_Sets_How_The_Flight_Fails()
+        {
+            var one = AllCorrect();
+            one[1] = Flap(2, FlapPosition.Midpoint, FlapOrientation.Down, "FlapSlot_Mid_2");
+            var r1 = BuildReport.Build(one, capLocked: true);
+            Assert.AreEqual(1, r1.wrongFlapCount);
+            Assert.AreEqual("VEERED OFF COURSE AND CRASHED", r1.FlightDetail, "one wrong flap: off course");
+            var three = AllCorrect();
+            three[0] = Flap(1, FlapPosition.Base, FlapOrientation.Up, "FlapSlot_Low_1");
+            three[1] = Flap(2, FlapPosition.Base, FlapOrientation.Down, "FlapSlot_Low_2");
+            three[2] = Flap(3, FlapPosition.Midpoint, FlapOrientation.Down, "FlapSlot_Mid_3");
+            var r3 = BuildReport.Build(three, capLocked: true);
+            Assert.AreEqual(3, r3.wrongFlapCount);
+            Assert.AreEqual("BROKE UP IN FLIGHT", r3.FlightDetail, "more: it breaks up");
+            Assert.AreEqual(0, BuildReport.Build(AllCorrect(), true).wrongFlapCount);
+            Assert.AreEqual("BATTERY BLEW OUT ON THE PAD", BuildReport.Build(three, capLocked: false).FlightDetail, "the cap rule wins");
+        }
+
+        [Test]
         public void UpsideDownFlap_IsNotCorrect()
         {
             Assert.IsFalse(Flap(1, FlapPosition.Midpoint, FlapOrientation.Down).IsCorrect);
