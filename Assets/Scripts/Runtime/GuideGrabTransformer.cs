@@ -41,6 +41,9 @@ namespace VRRocket
         bool m_HandlerActive;
         Coroutine m_SeatRoutine;
 
+        bool m_MovementOverridden;
+        XRBaseInteractable.MovementType m_SavedMovementType;
+        bool m_WrongWayWarned;
         bool m_Blending;
         float m_BlendStart;
         Pose m_BlendFrom;
@@ -147,6 +150,12 @@ namespace VRRocket
         {
             if (m_Grab.interactorsSelecting.Count > 0) return; // still held by the other hand
             m_PendingAttachedGrab = false;
+            m_WrongWayWarned = false;
+            if (m_MovementOverridden)
+            {
+                m_MovementOverridden = false;
+                m_Grab.movementType = m_SavedMovementType;
+            }
             if (!isActiveAndEnabled || !gameObject.activeInHierarchy)
             {
                 // XRBaseInteractable.OnDisable releases a held object while it is being deactivated (scene unload, part
@@ -165,6 +174,14 @@ namespace VRRocket
                 m_Grab.throwOnDetach = false;
                 FinishSeat();
                 return;
+            }
+            if (!m_Guided && m_Part.partType == PartType.Motor && m_Part.state != PartState.Attached)
+            {
+                // Let go near the tube's base the right way up: the battery slides home rather than dropping (it must never be
+                // left half inside the tube).
+                var t = tuning;
+                var near = t != null ? NearestAccepting(transform.position, t.motorReleaseSnapRadius * WorldScale) : null;
+                if (near != null && OrientationOk(near, transform.rotation, t)) Engage(near, transform.rotation);
             }
             if (m_Guided)
             {
@@ -195,6 +212,11 @@ namespace VRRocket
                 if (m_Handler != null && m_Handler.OnAttachedGrabBegin(m_Part, m_Point, m_Grab))
                 {
                     m_HandlerActive = true;
+                    // The handler sets the pose every frame (the twisted cap): place it directly, not through physics a step
+                    // behind the rocket in the other hand.
+                    m_SavedMovementType = m_Grab.movementType;
+                    m_MovementOverridden = true;
+                    m_Grab.movementType = XRBaseInteractable.MovementType.Instantaneous;
                 }
                 else
                 {
@@ -220,8 +242,9 @@ namespace VRRocket
 
             if (!m_Guided)
             {
-                var glowR = t.glowRadius * s;
-                var captureR = t.captureRadius * s;
+                var glowR = Mathf.Max(t.glowRadius, t.CaptureRadiusFor(m_Part.partType)) * s;
+                var captureR = t.CaptureRadiusFor(m_Part.partType) * s;
+                if (m_Part.partType == PartType.Motor) KeepWrongWayBatteryOut(ref targetPose, t, s);
                 AttachPoint best = null;
                 var bestDist = float.MaxValue;
                 var points = AttachPoint.active;
@@ -264,6 +287,11 @@ namespace VRRocket
                         return;
                     }
                 }
+                else if (m_Part.partType == PartType.Motor && depth < t.motorLength * s)
+                {
+                    // Part of the battery is in the tube: sideways drift of the hand never knocks it off the track (only pulling
+                    // it back out does), so it can never be dragged through the tube's wall.
+                }
                 else if (GuideMath.ShouldBreak(depth, sideways, guideLength, breakRadius))
                 {
                     ReleaseGuide();
@@ -296,6 +324,56 @@ namespace VRRocket
             }
 
             ApplyBlend(ref targetPose, t);
+        }
+
+        AttachPoint NearestAccepting(Vector3 position, float radius)
+        {
+            AttachPoint best = null;
+            var bestDist = radius;
+            var points = AttachPoint.active;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var p = points[i];
+                if (!p.Accepts(m_Part)) continue;
+                var d = Vector3.Distance(position, p.transform.position);
+                if (d <= bestDist) { bestDist = d; best = p; }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// A battery the wrong way up is refused (it goes in + end up), and it must not pass into the tube either: parts do not
+        /// collide with each other, so near the base it is held out below the tube's end along the axis, with one buzz.
+        /// </summary>
+        void KeepWrongWayBatteryOut(ref Pose targetPose, AssemblyTuning t, float s)
+        {
+            var seatPoint = NearestAccepting(targetPose.position, (t.motorLength + t.motorCaptureRadius) * s);
+            if (seatPoint == null || OrientationOk(seatPoint, targetPose.rotation, t)) return;
+            var away = seatPoint.GuideAxisWorld;
+            var seat = seatPoint.transform.position;
+            var top = targetPose.position + targetPose.rotation * Vector3.up * (t.motorLength * s);
+            var tubeEnd = TubeEndDepth(seatPoint);
+            var nearest = Mathf.Min(GuideMath.Depth(targetPose.position, seat, away), GuideMath.Depth(top, seat, away));
+            var offAxis = Mathf.Min(GuideMath.Sideways(targetPose.position, seat, away), GuideMath.Sideways(top, seat, away));
+            if (nearest >= tubeEnd || offAxis > t.motorBlockRadius * s) return;
+            targetPose.position += away * (tubeEnd - nearest);
+            if (m_WrongWayWarned) return;
+            m_WrongWayWarned = true;
+            var fb = AssemblyFeedback.instance;
+            if (fb != null && fb.library != null && m_Grab.interactorsSelecting.Count > 0) fb.Play(m_Grab.interactorsSelecting[0], fb.library.hapticPartRemoved);
+        }
+
+        /// <summary>How far below the battery's seat the tube ends (its cap seat), along the guide axis; 0 when it has none.</summary>
+        static float TubeEndDepth(AttachPoint motorSeat)
+        {
+            var points = AttachPoint.active;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var p = points[i];
+                if (p.pointName == "CapSeat" && p.tube == motorSeat.tube)
+                    return Mathf.Max(0f, GuideMath.Depth(p.transform.position, motorSeat.transform.position, motorSeat.GuideAxisWorld));
+            }
+            return 0f;
         }
 
         bool OrientationOk(AttachPoint point, Quaternion heldRotation, AssemblyTuning t)
