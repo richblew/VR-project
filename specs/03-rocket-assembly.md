@@ -19,7 +19,7 @@ The rocket parts, how they are grabbed and attached, the motor cap twist, the bu
 | Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight |
 | Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose** |
 | Nose cone | 1 | `NoseCone_1` | 0.08 kg | `NoseSeat` on top | is pulled gently onto the seat (magnetism) |
-| Motor | 1 | `Motor_1` | 0.08 kg | `MotorSeat` at the bottom | nozzle down only; held nozzle up, nothing glows |
+| Motor | 1 | `Motor_1` | 0.08 kg | `MotorSeat` at the bottom | the battery: + end into the tube only; held the wrong way up, nothing glows |
 | Motor cap | 1 | `MotorCap_1` | 0.06 kg | `CapSeat` at the bottom | needs the motor first; seats unlocked, then must be **twisted until it clicks** |
 
 `rocketScale = 1` in the tuning asset is the real model size. The meshes come from a BSD-licensed model rocket kit, cleaned up in Blender (see `Docs/ASSET_CREDITS.md`).
@@ -128,14 +128,17 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 - **Fins:** exactly the slot's rotation (a slightly crooked fin snaps straight).
 - **Flaps:** the slot's rotation, or that rotation flipped upside down, whichever is closer to how it is held. So a flap fits either way up, and the build report later reads which way it went.
 - **Nose, motor, cap:** the part's axis lines up with the tube; its spin around the axis is kept.
+- It is kept relative to the attach point, not the room: a rocket turned in the other hand while a part is on its track keeps the part straight in it, and it seats straight.
 
 **Special cases:**
 
-- **The battery (the motor part) slots in with no real chance of failure:**
-  - it is caught from a larger zone, **Motor Capture Radius** (11 cm from its base), and up to **Motor Orientation Tolerance** (70°) off the tube's axis, so its top is never inside the tube before it is caught;
-  - its rail (**Guide Length Motor**, 14 cm) is longer than that zone, and while any of the battery (**Motor Length**, 7 cm) is in the tube, sideways movement of the hand never knocks it off the rail: only pulling it back out does. It can never be dragged through the tube's wall;
-  - let go within **Motor Release Snap Radius** (15 cm) of its seat, the right way up, it slides home even if it was not caught yet;
-  - **held the wrong way up** (it goes in + end up): no glow, no capture, and within **Motor Block Radius** (4 cm) of the axis it is held out below the tube's end, with one buzz, instead of passing into the tube.
+- **The battery (the motor part) goes in only once it is in, and then always goes in straight:**
+  - it is caught **only once its + end is inside the tube's base**: past the tube's end (a few millimetres or most of the way in, either counts), within **Motor Entry Radius** (2 cm: the opening plus a little give) of the tube's axis, and leaning no more than **Motor Entry Tilt** (60°). Nothing happens before that: no snap, no turning in mid-air. The seat glows as its + end approaches (within **Glow Radius**, 12 cm);
+  - caught, it straightens onto the tube's axis over 0.1 s **without moving in or out**: its + end stays as far in as the hand put it. From then on it runs only along the axis, as far in as the hand holds its + end; drifting or leaning the hand, or turning the rocket, never takes it off the axis or through the wall;
+  - **let go while it is in**, it slides home straight (**Seat Duration Motor**, 0.3 s). **Let go outside the base**, it simply drops;
+  - pulled back out until its + end is **Motor Exit Margin** (1 cm) past the tube's end, it comes off the track (an attached battery, grabbed to take it out, comes off the same way);
+  - **held the wrong way up** (it goes in + end up), or leaning more than 60°: no glow, no catch, and within **Motor Block Radius** (4 cm) of the axis it is held out below the tube's end, with one buzz, instead of passing into the tube;
+  - its glow ring is on its **+ end**, the end that goes into the tube.
 - **Nose magnetism:** the nose is drawn toward its seat. Near the seat it is shown at **Nose Magnetism** (50%) of the hand's distance; at the rail's outer end it follows the hand exactly.
 - **A refused point** (gating says no, section 6) behaves as if it were not there: no glow, no snap.
 

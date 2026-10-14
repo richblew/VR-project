@@ -23,9 +23,9 @@ MonoBehaviour:
   guideLengthTube: 0.1
   orientationTolerancePlates: 40
   orientationToleranceOthers: 45
-  motorCaptureRadius: 0.11
-  motorOrientationTolerance: 70
-  motorReleaseSnapRadius: 0.15
+  motorEntryRadius: 0.02
+  motorEntryTilt: 60
+  motorExitMargin: 0.01
   motorLength: 0.07
   motorBlockRadius: 0.04
   seatDuration: 0.12
