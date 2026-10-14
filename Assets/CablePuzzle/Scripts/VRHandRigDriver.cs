@@ -72,6 +72,14 @@ namespace CablePuzzle
                 new ThumbJoint(new Vector3(0, 0, 1), 20f, new Vector3(0, 1, 0), 0f),    // 3
             };
 
+            [Tooltip("Create a 'Hold Point' on this hand and make the controller's Near-Far / Direct interactor use it as the point held objects attach to. Objects only follow it if 'Use Dynamic Attach' is off (GrabPose > Snap To Hold Point does that for you).")]
+            public bool useHoldPoint = true;
+            [Tooltip("Where held objects sit, relative to the hand (Position Offset), in controller space, metres. Controller +Z points forward, out of the front of the hand/fist - try small positive Z first (0.05 - 0.15).")]
+            public Vector3 holdPointOffset;
+            [Tooltip("Rotation of the hold point in controller space, degrees. Held objects (with Snap To Hold Point) take on this orientation.")]
+            public Vector3 holdPointRotation;
+
+            [System.NonSerialized] public Transform holdPoint;      // created at runtime, child of the controller
             [System.NonSerialized] public Transform[][] bones;      // [finger][joint]
             [System.NonSerialized] public Quaternion[][] rest;
             [System.NonSerialized] public Vector3[][] autoAxes;   // curl axis in each bone's local space
@@ -149,6 +157,38 @@ namespace CablePuzzle
                 Debug.Log($"VRHandRigDriver: {h.side} hand follows '{PathOf(h.controller)}'", this);
         }
 
+        void Start()
+        {
+            // Done in Start so every interactor has finished its own Awake (the Near-Far Interactor builds its attach controller there).
+            SetupHoldPoint(left);
+            SetupHoldPoint(right);
+        }
+
+        // Creates the hold point under the controller and points the grabbing interactors at it.
+        void SetupHoldPoint(Hand h)
+        {
+            if (!h.useHoldPoint || h.controller == null || h.interactors == null) return;
+            if (h.holdPoint == null)
+            {
+                h.holdPoint = new GameObject($"Hold Point ({h.side})").transform;
+                h.holdPoint.SetParent(h.controller, false);
+                h.holdPoint.SetLocalPositionAndRotation(h.positionOffset + h.holdPointOffset, Quaternion.Euler(h.holdPointRotation));
+            }
+            foreach (var i in h.interactors)
+            {
+                if (i is NearFarInteractor nf)
+                {
+                    // The Near-Far interactor's attach point is built and moved by its attach controller, which follows this transform.
+                    var c = nf.interactionAttachController;
+                    if (c != null) c.transformToFollow = h.holdPoint;
+                }
+                else if (i is XRDirectInteractor)
+                {
+                    i.attachTransform = h.holdPoint;
+                }
+            }
+        }
+
         void LateUpdate()
         {
             Tick(left);
@@ -183,13 +223,27 @@ namespace CablePuzzle
             float target = useTestValue ? testGrip
                          : (h.grip != null && h.grip.action != null ? h.grip.action.ReadValue<float>() : 0f);
 
+            GrabPose heldPose = null;
             foreach (var i in h.interactors)
             {
                 if (i == null || !i.hasSelection) continue;
                 var held = i.firstInteractableSelected;
-                var pose = held != null ? held.transform.GetComponentInParent<GrabPose>() : null;
-                target = pose != null ? pose.closure : 1f;
+                heldPose = held != null ? held.transform.GetComponentInParent<GrabPose>() : null;
+                target = heldPose != null ? heldPose.closure : 1f;
                 break;
+            }
+
+            // keep the hold point where the settings say; the held object's own GrabPose can shift it a little (this hand only)
+            if (h.holdPoint != null)
+            {
+                Quaternion hr = Quaternion.Euler(h.holdPointRotation);
+                Vector3 hp = h.positionOffset + h.holdPointOffset;
+                if (heldPose != null)
+                {
+                    hp += hr * heldPose.holdOffset;
+                    hr = hr * Quaternion.Euler(heldPose.holdRotation);
+                }
+                h.holdPoint.SetLocalPositionAndRotation(hp, hr);
             }
 
             h.value = Mathf.MoveTowards(h.value, target, speed * Time.deltaTime);
@@ -224,6 +278,22 @@ namespace CablePuzzle
         {
             if (axis.sqrMagnitude < 1e-6f || Mathf.Approximately(degrees, 0f)) return Quaternion.identity;
             return Quaternion.AngleAxis(degrees, axis.normalized);
+        }
+
+        // Shows the hold points in the Scene view while playing: sphere = where objects sit, blue line = hold point's forward (Z).
+        void OnDrawGizmos()
+        {
+            DrawHold(left);
+            DrawHold(right);
+        }
+
+        static void DrawHold(Hand h)
+        {
+            if (h == null || h.holdPoint == null) return;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(h.holdPoint.position, 0.015f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(h.holdPoint.position, h.holdPoint.position + h.holdPoint.forward * 0.06f);
         }
 
         // Finds an object by name even if it is inactive, ignoring anything inside this hand rig.
