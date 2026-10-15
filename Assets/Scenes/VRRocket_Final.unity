@@ -4545,7 +4545,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 327382929471172723, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: m_SafeZones.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 327382929471172723, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: 'm_SafeZones.Array.data[0]'
@@ -8299,12 +8299,32 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4778211696441940833, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_TeleportInteractor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4778211696441940833, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_SmoothMotionEnabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4778211696441940833, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_NearFarEnableTeleportDuringNearInteraction
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5167925059111895691, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5563199296126487199, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5663893676086941514, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_TeleportInteractor
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5663893676086941514, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
+      propertyPath: m_NearFarEnableTeleportDuringNearInteraction
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5895826684305351068, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
@@ -25282,7 +25302,7 @@ MonoBehaviour:
   - {fileID: 262967942}
   head: {fileID: 766360192}
   warnDistance: 0.3
-  fadeDistance: 0.2
+  fadeDistance: 1
   outlineColor: {r: 0.2, g: 0.9, b: 1, a: 1}
   outlineWidth: 0.04
   outlineHeight: 0.01
@@ -35062,6 +35082,10 @@ PrefabInstance:
       propertyPath: onAllConnected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 979922750}
+    - target: {fileID: 3254914404311373312, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4438640197589661606, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: flow
       value: 
@@ -35086,6 +35110,10 @@ PrefabInstance:
       propertyPath: 'lights.Array.data[4]'
       value: 
       objectReference: {fileID: 1056688570}
+    - target: {fileID: 6303708926684689951, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6765194938511844289, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_Name
       value: PuzzleBox
