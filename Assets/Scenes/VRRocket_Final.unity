@@ -35078,6 +35078,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 68374147526910436, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1806669616002059809, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: onAllConnected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -35161,8 +35165,148 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3324495602198966916, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345036}
+    - targetCorrespondingSourceObject: {fileID: 6937353264894256240, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345035}
+    - targetCorrespondingSourceObject: {fileID: 5300439931000415042, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345034}
+    - targetCorrespondingSourceObject: {fileID: 8789043314240838000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345033}
+    - targetCorrespondingSourceObject: {fileID: 7483322356060553725, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8899078703083345032}
   m_SourcePrefab: {fileID: 100100000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+--- !u!1 &8899078703083345027 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7483322356060553725, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345028 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8789043314240838000, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345029 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5300439931000415042, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345030 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6937353264894256240, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8899078703083345031 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3324495602198966916, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+  m_PrefabInstance: {fileID: 8899078703083345026}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8899078703083345032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db085c13973294247b00e1b59133f219, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.PlugRespawn
+  volume: {fileID: 0}
+  volumeMargin: 0.05
+  outsideSeconds: 1
+  fallDistance: 0.5
+  cables: []
+  onRespawned:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &8899078703083345033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db085c13973294247b00e1b59133f219, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.PlugRespawn
+  volume: {fileID: 0}
+  volumeMargin: 0.05
+  outsideSeconds: 1
+  fallDistance: 0.5
+  cables: []
+  onRespawned:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &8899078703083345034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db085c13973294247b00e1b59133f219, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.PlugRespawn
+  volume: {fileID: 0}
+  volumeMargin: 0.05
+  outsideSeconds: 1
+  fallDistance: 0.5
+  cables: []
+  onRespawned:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &8899078703083345035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db085c13973294247b00e1b59133f219, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.PlugRespawn
+  volume: {fileID: 0}
+  volumeMargin: 0.05
+  outsideSeconds: 1
+  fallDistance: 0.5
+  cables: []
+  onRespawned:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &8899078703083345036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8899078703083345031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db085c13973294247b00e1b59133f219, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.PlugRespawn
+  volume: {fileID: 0}
+  volumeMargin: 0.05
+  outsideSeconds: 1
+  fallDistance: 0.5
+  cables: []
+  onRespawned:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!65 &8905752016034681301
 BoxCollider:
   m_ObjectHideFlags: 0
