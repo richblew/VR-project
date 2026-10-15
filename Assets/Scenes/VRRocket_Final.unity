@@ -35080,7 +35080,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68374147526910436, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1806669616002059809, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: onAllConnected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
