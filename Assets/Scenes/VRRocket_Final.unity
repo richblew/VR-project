@@ -35255,10 +35255,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1434639222000686596, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_TrackScale
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1806669616002059809, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: onAllConnected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 979922750}
+    - target: {fileID: 2738711437586909249, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_TrackScale
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2794036701702062347, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_TrackScale
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3254914404311373312, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -35277,6 +35289,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3709165609833328502, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_ConstrainProportionsScale
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4254646540974799521, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_TrackScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4438640197589661606, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
@@ -35310,6 +35326,10 @@ PrefabInstance:
     - target: {fileID: 6765194938511844289, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_Name
       value: PuzzleBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 7850098111545253177, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_TrackScale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8843132379172594349, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_LocalScale.z
