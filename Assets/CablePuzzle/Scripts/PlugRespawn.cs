@@ -34,7 +34,7 @@ namespace CablePuzzle
 
         [Header("Stuck on the edge (not held)")]
         [Tooltip("Respawn if the plug lies still within Edge Inset of the volume's edge (sides, front, top) - or outside it - for this long. 0 = never use this rule.")]
-        public float stuckSeconds = 2f;
+        public float stuckSeconds = 0.5f;
         [Tooltip("Distance from the volume's edge, in the volume's local units, that counts as 'on the edge'. The floor of the box is not an edge. 0 = only outside the volume.")]
         public float edgeInset = 0.06f;
         [Tooltip("Slower than this (metres per second) counts as lying still.")]
