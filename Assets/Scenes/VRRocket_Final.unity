@@ -1247,7 +1247,7 @@ Transform:
   m_GameObject: {fileID: 112124328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.016}
+  m_LocalPosition: {x: 0, y: -0.101, z: -0.522}
   m_LocalScale: {x: 0.9, y: 0.6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1610,7 +1610,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &141943868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5607,7 +5607,7 @@ Transform:
   m_GameObject: {fileID: 447460669}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.11, z: -0.519}
   m_LocalScale: {x: 0.98, y: 0.68, z: 0.03}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25515,7 +25515,7 @@ Transform:
   m_GameObject: {fileID: 1704324442}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.101, z: -0.506}
   m_LocalScale: {x: 0.98, y: 0.68, z: 0.03}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27160,7 +27160,7 @@ Transform:
   m_GameObject: {fileID: 1916155857}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.016}
+  m_LocalPosition: {x: 0, y: -0.11, z: -0.535}
   m_LocalScale: {x: 0.9, y: 0.6, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28396,7 +28396,7 @@ Transform:
   m_GameObject: {fileID: 1996881927}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.525, y: 0.8899999, z: 3.72}
+  m_LocalPosition: {x: -0.525, y: 0.8901859, z: 3.4016826}
   m_LocalScale: {x: 0.24, y: 0.03, z: 0.14}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -29346,7 +29346,7 @@ Transform:
   m_GameObject: {fileID: 2102469533}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.66, y: 0.8899999, z: 3.72}
+  m_LocalPosition: {x: 0.66, y: 0.8938462, z: 3.410435}
   m_LocalScale: {x: 0.24, y: 0.03, z: 0.14}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -32618,7 +32618,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4444793519587280024}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.02}
+  m_LocalPosition: {x: 0, y: 0, z: -0.526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -32626,7 +32626,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.101}
   m_SizeDelta: {x: 0.84, y: 0.54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!136 &3828635871857142402
@@ -35080,7 +35080,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 68374147526910436, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1806669616002059809, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: onAllConnected.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -35088,6 +35088,22 @@ PrefabInstance:
       objectReference: {fileID: 979922750}
     - target: {fileID: 3254914404311373312, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3709165609833328502, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 3709165609833328502, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 3709165609833328502, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3709165609833328502, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4438640197589661606, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
@@ -35121,6 +35137,18 @@ PrefabInstance:
     - target: {fileID: 6765194938511844289, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_Name
       value: PuzzleBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 8843132379172594349, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 8843132379172594349, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 8843132379172594349, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9131071295951338854, guid: dbe7957f86bfe6d4cafb64433d37cd37, type: 3}
       propertyPath: m_LocalPosition.x
@@ -35223,6 +35251,12 @@ MonoBehaviour:
   volumeMargin: 0.05
   outsideSeconds: 1
   fallDistance: 0.5
+  stuckSeconds: 0.5
+  edgeInset: 0.06
+  stillSpeed: 0.03
+  homeTolerance: 0.06
+  heldLagDistance: 0.35
+  heldLagSeconds: 1
   cables: []
   onRespawned:
     m_PersistentCalls:
@@ -35243,6 +35277,12 @@ MonoBehaviour:
   volumeMargin: 0.05
   outsideSeconds: 1
   fallDistance: 0.5
+  stuckSeconds: 0.5
+  edgeInset: 0.06
+  stillSpeed: 0.03
+  homeTolerance: 0.06
+  heldLagDistance: 0.35
+  heldLagSeconds: 1
   cables: []
   onRespawned:
     m_PersistentCalls:
@@ -35263,6 +35303,12 @@ MonoBehaviour:
   volumeMargin: 0.05
   outsideSeconds: 1
   fallDistance: 0.5
+  stuckSeconds: 0.5
+  edgeInset: 0.06
+  stillSpeed: 0.03
+  homeTolerance: 0.06
+  heldLagDistance: 0.35
+  heldLagSeconds: 1
   cables: []
   onRespawned:
     m_PersistentCalls:
@@ -35283,6 +35329,12 @@ MonoBehaviour:
   volumeMargin: 0.05
   outsideSeconds: 1
   fallDistance: 0.5
+  stuckSeconds: 0.5
+  edgeInset: 0.06
+  stillSpeed: 0.03
+  homeTolerance: 0.06
+  heldLagDistance: 0.35
+  heldLagSeconds: 1
   cables: []
   onRespawned:
     m_PersistentCalls:
@@ -35303,6 +35355,12 @@ MonoBehaviour:
   volumeMargin: 0.05
   outsideSeconds: 1
   fallDistance: 0.5
+  stuckSeconds: 0.5
+  edgeInset: 0.06
+  stillSpeed: 0.03
+  homeTolerance: 0.06
+  heldLagDistance: 0.35
+  heldLagSeconds: 1
   cables: []
   onRespawned:
     m_PersistentCalls:
