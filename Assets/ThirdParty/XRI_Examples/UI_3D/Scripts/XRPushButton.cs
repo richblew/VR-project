@@ -207,6 +207,10 @@ namespace UnityEngine.XR.Content.Interaction
                     {
                         pressInfo.m_WrongSide = (localOffset.y < m_ButtonOffset);
                     }
+                    else if (localOffset.y >= m_ButtonOffset)
+                    {
+                        pressInfo.m_WrongSide = false;
+                    }
 
                     if (!pressInfo.m_WrongSide)
                         minimumHeight = Mathf.Min(minimumHeight, localOffset.y - m_ButtonOffset);
