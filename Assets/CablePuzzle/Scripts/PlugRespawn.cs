@@ -184,7 +184,7 @@ namespace CablePuzzle
         public void ForceRespawn()
         {
             if (grab != null && grab.isSelected && grab.interactionManager != null)
-                grab.interactionManager.CancelInteractableSelection(grab);
+                grab.interactionManager.CancelInteractableSelection((IXRSelectInteractable)grab);   // cast: picks the non-obsolete overload
             DoRespawn();
         }
 
