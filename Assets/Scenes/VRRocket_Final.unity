@@ -27568,6 +27568,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 766360193}
     m_Modifications:
+    - target: {fileID: 2386736720334551354, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e6cd050fd4b84fdfb962c1d17273d3b5, type: 2}
     - target: {fileID: 2576277652969372420, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
       propertyPath: m_Name
       value: VR Hands ( Rigged )
