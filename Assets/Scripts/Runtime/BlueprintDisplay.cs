@@ -17,11 +17,11 @@ namespace VRRocket
         static readonly string[] k_StepTitles = { "TAIL FINS", "WING FLAPS", "NOSE CONE", "BATTERY", "BATTERY CAP" };
         static readonly string[] k_StepHints =
         {
-            "slide into the slots at the base, any order",
-            "midpoint slots, swept edge toward the nose",
-            "press it onto the top",
-            "insert from below, + end up",
-            "seat it, then twist clockwise until it clicks",
+            "slide orange fins into the slots at the base, any order",
+            "slide red fins into the upper slots, any order",
+            "place on the top of the cylinder",
+            "hover battery above bottom hole and drop into cylinder",
+            "place it over battery, and twist hand",
         };
 
         [SerializeField] TextMeshPro m_Text;

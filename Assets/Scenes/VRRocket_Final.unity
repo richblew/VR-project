@@ -8145,7 +8145,7 @@ GameObject:
   - component: {fileID: 460768431}
   - component: {fileID: 460768430}
   m_Layer: 0
-  m_Name: Left side desk (1)
+  m_Name: Front desk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8405,7 +8405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1543070802843469984, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.017
+      value: -0.0242
       objectReference: {fileID: 0}
     - target: {fileID: 1543070802843469984, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -21602,8 +21602,8 @@ Transform:
   m_GameObject: {fileID: 1346871126}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.5406, y: 0, z: 1.1001}
+  m_LocalScale: {x: 0.51918566, y: 1, z: 0.47013795}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2080007308}
@@ -27661,6 +27661,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 766360193}
     m_Modifications:
+    - target: {fileID: 2386736720334551354, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e6cd050fd4b84fdfb962c1d17273d3b5, type: 2}
     - target: {fileID: 2576277652969372420, guid: 1d1689ae50a8a104c9ab9eabe6f00d6c, type: 3}
       propertyPath: m_Name
       value: VR Hands ( Rigged )
@@ -29461,7 +29465,7 @@ Transform:
   m_GameObject: {fileID: 2080007307}
   serializedVersion: 2
   m_LocalRotation: {x: -0.000000030908623, y: 0.7071068, z: 0.7071068, w: -0.000000030908623}
-  m_LocalPosition: {x: -1.47, y: 0.87499994, z: 1.8850471}
+  m_LocalPosition: {x: -1.23, y: 0.87499994, z: 1.8850471}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
