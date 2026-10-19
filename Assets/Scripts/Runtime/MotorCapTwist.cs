@@ -29,11 +29,18 @@ namespace VRRocket
         [SerializeField, Tooltip("Seconds for the 2 mm gap to close when the cap locks.")]
         float m_GapCloseDuration = 0.1f;
         [Header("Twist hint")]
-        [SerializeField, Tooltip("While the cap is seated but not locked, an arrow circles it in the direction it twists and its glow pulses, so the player knows it needs turning")]
+        [SerializeField, Tooltip("Before, during and after the twist: an arrow and a ghost cap show how to turn it, a ring shows how far it has turned, and the ring flashes when it locks")]
         bool m_ShowTwistHint = true;
+        [SerializeField, Tooltip("Seconds the cap rests seated and untouched (after seating, or after letting go mid-twist) before the arrow and ghost show how to turn it")]
+        float m_HintDelay = 1.5f;
         [SerializeField, Tooltip("Degrees per second the arrow travels round the cap")] float m_HintSpeed = 120f;
-        [SerializeField, Tooltip("Arrow radius round the tube's axis, metres before scale")] float m_HintRadius = 0.026f;
+        [SerializeField, Tooltip("Arrow and ring radius round the tube's axis, metres before scale")] float m_HintRadius = 0.026f;
         [SerializeField, ColorUsage(false, true)] Color m_HintColor = new Color(1f, 0.55f, 0.1f) * 2f;
+        [SerializeField, ColorUsage(false, true), Tooltip("The ring's flash when the cap locks")] Color m_DoneColor = new Color(0.3f, 1f, 0.45f) * 2.5f;
+        [SerializeField, Tooltip("How long the ring flashes when the cap locks")] float m_FlashSeconds = 0.45f;
+        [SerializeField, Tooltip("See-through material for the ghost cap that demonstrates the turn (empty: no ghost)")] Material m_GhostMaterial;
+        [SerializeField, Tooltip("How far the ghost cap turns, in degrees, before it starts over")] float m_GhostSwing = 90f;
+        [SerializeField, Tooltip("Seconds for one ghost turn")] float m_GhostPeriod = 1.4f;
 
         readonly CapTwistLogic m_Logic = new CapTwistLogic();
         RocketPart m_Part;
@@ -65,13 +72,23 @@ namespace VRRocket
         public float progressDegrees => m_Logic.progress;
         public bool isTwisting => m_Active;
         public float seatOffset => m_GapShown;
-        /// <summary>The twist hint (arrow round the cap, pulsing glow) is showing: seated on the rocket being built, not locked.</summary>
-        public bool twistHintShown => m_Hint != null && m_Hint.gameObject.activeSelf;
+        /// <summary>The arrow showing how to turn the cap is up (seated, unlocked, left untouched for Hint Delay).</summary>
+        public bool twistHintShown => m_Arrow != null && m_Arrow.gameObject.activeInHierarchy;
+        /// <summary>The ghost cap demonstrating the turn is up (with the arrow).</summary>
+        public bool ghostShown => m_Ghost != null && m_Ghost.gameObject.activeInHierarchy;
+        /// <summary>The progress ring is up (while twisting, when part turned, and flashing on the lock).</summary>
+        public bool progressRingShown => m_Ring != null && m_Ring.gameObject.activeInHierarchy;
+        /// <summary>How many of the ring's segments (one per detent) are lit.</summary>
+        public int litSegments { get; private set; }
+        /// <summary>The ring is flashing because the cap has just locked.</summary>
+        public bool lockFlashing => Time.time < m_FlashUntil;
         /// <summary>The arrow's current angle round the tube's axis (it travels the way the cap twists).</summary>
         public float twistHintAngle => m_HintAngle;
 
-        Transform m_Hint;
-        float m_HintAngle;
+        Transform m_Hint, m_Arrow, m_Ring, m_Ghost;
+        LineRenderer[] m_Segments = new LineRenderer[0];
+        float m_HintAngle, m_IdleSince, m_FlashUntil = -1f;
+        bool m_WasLocked;
         RocketAssembly m_Assembly;
         MaterialPropertyBlock m_HintBlock;
 
@@ -112,28 +129,76 @@ namespace VRRocket
             m_BaseLocalRotation = Quaternion.AngleAxis(-SignedProgress(), Vector3.up) * local;
             var t = tuning;
             m_GapShown = m_Logic.locked ? 0f : (t != null ? t.capUnlockedGap : 0.002f);
+            m_IdleSince = Time.time;
+            m_WasLocked = m_Logic.locked;
         }
 
         // ---- twist hint ----
 
+        /// <summary>
+        /// The twist hint, in three stages: before (the cap seated and left alone for Hint Delay) an arrow circles the cap the way
+        /// it locks and a see-through ghost cap turns that way, with the cap's glow pulsing; during the twist they give way to a
+        /// ring of one segment per detent that lights as the cap turns; on the lock the ring flashes and everything goes.
+        /// </summary>
         void Update()
         {
-            var show = m_ShowTwistHint && m_Point != null && m_Part.state == PartState.Attached && m_Part.attachedTo == m_Point && !m_Logic.locked && OnWorkingRocket();
-            if (!show)
+            var seated = m_ShowTwistHint && m_Point != null && m_Part.state == PartState.Attached && m_Part.attachedTo == m_Point && OnWorkingRocket();
+            if (seated && m_Logic.locked && !m_WasLocked) m_FlashUntil = Time.time + m_FlashSeconds;
+            m_WasLocked = m_Logic.locked;
+            var flashing = seated && Time.time < m_FlashUntil;
+            if (!seated || (m_Logic.locked && !flashing))
             {
                 if (m_Hint != null && m_Hint.gameObject.activeSelf) m_Hint.gameObject.SetActive(false);
+                litSegments = 0;
                 return;
             }
             if (m_Hint == null || m_Hint.parent != m_Point.transform) BuildHint();
             if (!m_Hint.gameObject.activeSelf) m_Hint.gameObject.SetActive(true);
-            // travel the way the cap locks: clockwise viewed from below
-            m_HintAngle = Mathf.Repeat(m_HintAngle + (m_ClockwiseFromBelowIsNegativeYaw ? -1f : 1f) * m_HintSpeed * Time.deltaTime, 360f);
-            m_Hint.localRotation = Quaternion.AngleAxis(m_HintAngle, Vector3.up);
-            var pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+            if (m_Active) m_IdleSince = Time.time;
             if (m_HintBlock == null) m_HintBlock = new MaterialPropertyBlock();
-            m_HintBlock.SetColor("_BaseColor", m_HintColor * (0.55f + 0.45f * pulse));
-            foreach (var line in m_Hint.GetComponentsInChildren<LineRenderer>()) line.SetPropertyBlock(m_HintBlock);
-            if (!m_Active) m_Part.RequestGlow(0.35f + 0.5f * pulse);
+
+            // before: show how, once the cap has been left alone for a moment
+            var before = !m_Logic.locked && !m_Active && Time.time - m_IdleSince >= m_HintDelay;
+            SetActive(m_Arrow, before);
+            SetActive(m_Ghost, before && m_GhostMaterial != null);
+            var pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+            var dir = m_ClockwiseFromBelowIsNegativeYaw ? -1f : 1f;
+            if (before)
+            {
+                m_HintAngle = Mathf.Repeat(m_HintAngle + dir * m_HintSpeed * Time.deltaTime, 360f);
+                m_Arrow.localRotation = Quaternion.AngleAxis(m_HintAngle, Vector3.up);
+                m_HintBlock.SetColor("_BaseColor", m_HintColor * (0.55f + 0.45f * pulse));
+                foreach (var line in m_Arrow.GetComponentsInChildren<LineRenderer>()) line.SetPropertyBlock(m_HintBlock);
+                if (m_Ghost != null)
+                {
+                    // the ghost turns from where the cap is now through Ghost Swing, then starts over
+                    var k = Mathf.SmoothStep(0f, 1f, Mathf.Repeat(Time.time / Mathf.Max(0.2f, m_GhostPeriod), 1f));
+                    m_Ghost.localRotation = Quaternion.AngleAxis(SignedProgress() + dir * m_GhostSwing * k, Vector3.up) * m_BaseLocalRotation;
+                }
+                m_Part.RequestGlow(0.35f + 0.5f * pulse);
+            }
+
+            // during, part turned, and on the lock: the ring of detents
+            var fraction = m_Logic.lockAngle > 0f ? Mathf.Clamp01(m_Logic.progress / m_Logic.lockAngle) : 0f;
+            var showRing = flashing || m_Active || m_Logic.progress > 0.5f;
+            SetActive(m_Ring, showRing);
+            if (showRing)
+            {
+                litSegments = flashing ? m_Segments.Length : Mathf.Min(m_Segments.Length, Mathf.FloorToInt(m_Logic.progress / Mathf.Max(1f, m_Logic.detentAngle) + 1e-3f));
+                for (var i = 0; i < m_Segments.Length; i++)
+                {
+                    var c = flashing ? m_DoneColor * (Mathf.Repeat(Time.time * 8f, 1f) < 0.6f ? 1f : 0.5f) : i < litSegments ? m_HintColor : m_HintColor * 0.15f;
+                    m_HintBlock.SetColor("_BaseColor", c);
+                    m_Segments[i].SetPropertyBlock(m_HintBlock);
+                }
+                if (m_Active) m_Part.RequestGlow(0.3f + 0.7f * fraction);
+            }
+            else litSegments = 0;
+        }
+
+        static void SetActive(Transform t, bool on)
+        {
+            if (t != null && t.gameObject.activeSelf != on) t.gameObject.SetActive(on);
         }
 
         bool OnWorkingRocket()
@@ -142,32 +207,78 @@ namespace VRRocket
             return m_Assembly != null && m_Assembly.interactionEnabled && !m_Assembly.isFrozen && m_Point.tube != null && m_Point.tube == m_Assembly.tube;
         }
 
-        /// <summary>A curved arrow round the cap, in the seat's frame (so it stays with the rocket), drawn with the glow material.</summary>
+        /// <summary>The arrow, the ring and the ghost, in the seat's frame (so they stay with the rocket), drawn with the glow material.</summary>
         void BuildHint()
         {
             if (m_Hint != null) Destroy(m_Hint.gameObject);
             m_Hint = new GameObject("TwistHint").transform;
             m_Hint.SetParent(m_Point.transform, false);
-            m_Hint.localPosition = Vector3.down * 0.005f;   // round the middle of the cap, below the tube's end
             var material = m_Part.glowRenderer != null ? m_Part.glowRenderer.sharedMaterial : null;
             var dir = m_ClockwiseFromBelowIsNegativeYaw ? -1f : 1f;
-            const int n = 28; const float sweep = 250f;
-            var arc = Line("Arc", material, n);
             Vector3 At(float deg) { var a = deg * Mathf.Deg2Rad; return new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * m_HintRadius; }
+
+            // the arrow: a 250 degree arc round the middle of the cap with a head at its leading end
+            m_Arrow = Group("Arrow", Vector3.down * 0.005f);
+            const int n = 28; const float sweep = 250f;
+            var arc = Line(m_Arrow, "Arc", material, n);
             for (var i = 0; i < n; i++) arc.SetPosition(i, At(dir * sweep * i / (n - 1)));
-            // the arrowhead at the leading end, pointing the way it travels
             var end = dir * sweep;
             var tip = At(end) + Quaternion.AngleAxis(dir * 90f, Vector3.up) * At(end).normalized * 0.008f;
-            var head = Line("Head", material, 3);
+            var head = Line(m_Arrow, "Head", material, 3);
             head.SetPosition(0, At(end) * 1.25f);
             head.SetPosition(1, tip);
             head.SetPosition(2, At(end) * 0.75f);
+
+            // the ring: one segment per detent, from the angle the cap seated at, the way it locks
+            m_Ring = Group("Ring", Vector3.down * 0.005f);
+            var count = Mathf.Max(1, Mathf.RoundToInt(m_Logic.lockAngle / Mathf.Max(1f, m_Logic.detentAngle)));
+            var span = 360f / count;
+            m_Segments = new LineRenderer[count];
+            for (var i = 0; i < count; i++)
+            {
+                var seg = Line(m_Ring, "Segment_" + (i + 1), material, 7);
+                for (var j = 0; j < 7; j++) seg.SetPosition(j, At(dir * (i * span + 6f + (span - 12f) * j / 6f)));
+                m_Segments[i] = seg;
+            }
+
+            // the ghost: a see-through copy of the cap, a little larger, turning the way it locks
+            m_Ghost = null;
+            MeshFilter mesh = null;   // the cap's body, not its glow ring
+            foreach (var mf in GetComponentsInChildren<MeshFilter>())
+                if (mf.GetComponent<Renderer>() != m_Part.glowRenderer) { mesh = mf; break; }
+            if (m_GhostMaterial != null && mesh != null && mesh.sharedMesh != null)
+            {
+                m_Ghost = Group("Ghost", Vector3.down * (m_GapShown * 1f));
+                var visual = new GameObject("GhostCap").transform;
+                visual.SetParent(m_Ghost, false);
+                const float grow = 1.12f;
+                var p = Quaternion.Inverse(transform.rotation) * (mesh.transform.position - transform.position) / Mathf.Max(1e-4f, WorldScale);
+                var c = Quaternion.Inverse(transform.rotation) * (mesh.GetComponent<Renderer>().bounds.center - transform.position) / Mathf.Max(1e-4f, WorldScale);
+                c.x = 0f; c.z = 0f;   // on the axis
+                visual.localPosition = c + (p - c) * grow;
+                visual.localRotation = Quaternion.Inverse(transform.rotation) * mesh.transform.rotation;
+                visual.localScale = mesh.transform.lossyScale / Mathf.Max(1e-4f, WorldScale) * grow;
+                visual.gameObject.AddComponent<MeshFilter>().sharedMesh = mesh.sharedMesh;
+                var renderer = visual.gameObject.AddComponent<MeshRenderer>();
+                renderer.sharedMaterial = m_GhostMaterial;
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.receiveShadows = false;
+            }
+            SetActive(m_Arrow, false); SetActive(m_Ring, false); SetActive(m_Ghost, false);
         }
 
-        LineRenderer Line(string name, Material material, int points)
+        Transform Group(string name, Vector3 localPosition)
+        {
+            var t = new GameObject(name).transform;
+            t.SetParent(m_Hint, false);
+            t.localPosition = localPosition;
+            return t;
+        }
+
+        LineRenderer Line(Transform parent, string name, Material material, int points)
         {
             var go = new GameObject(name);
-            go.transform.SetParent(m_Hint, false);
+            go.transform.SetParent(parent, false);
             var line = go.AddComponent<LineRenderer>();
             line.useWorldSpace = false;
             line.positionCount = points;
