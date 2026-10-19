@@ -449,3 +449,10 @@ From Praise: only SUBMIT on a dead console said anything; LAUNCH and ABORT got n
 - **Cap twist cue:** an unlocked seated cap shows an orange arrow circling it the way it locks, and its glow pulses, until it locks. The bin monitor's READY screen asks "Cap twisted until it clicks?".
 - **Fin and flap glow** is a band round the root edge, visible from both faces at any angle; the glow material is double-sided.
 - **Verified:** edit mode 44/44, play mode 72/72 (new: twist arrow, glow band, plug comes back). Feel in the headset still to check.
+
+## 2026-10-19: The cap twist hint shows how, then how far, then the lock (done)
+
+From Praise: the twist arrow showed the same thing the whole time; how long should it last, and how is this best done?
+- **Research** (Ultraleap and Leap Motion XR guidelines, Meta's hands design and onboarding guidance, Road to VR on Half-Life: Alyx, Roblox onboarding techniques): give a cue before the action and feedback during it; show state through light (Alyx's half-bright half-full magazine); give hints at the moment of need, after a short hesitation, resetting on input; make the cue as specific as the motion (a turning ghost for a turn).
+- **Now:** before (after 1.5 s left alone) an arrow and a see-through ghost cap turning the locking way, with a pulsing glow; during the twist a ring of six detent segments lights with each click; let go early, the ring keeps the progress and the hint returns; on the lock the ring flashes green and everything goes. The ghost uses a new transparent material referenced by the cap prefab, so it is in the Quest build.
+- **Verified:** edit mode 44/44, play mode 72/72 (the cap hint test now walks all three stages); each stage checked in pictures. Feel in the headset still to check.

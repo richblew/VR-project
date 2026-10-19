@@ -146,7 +146,13 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 
 The cap is guided onto `CapSeat` like any part, but it seats **unlocked**: it rests 2 mm proud of the tube (**Cap Unlocked Gap**). An unlocked cap makes the launch fail (the motor shoots out).
 
-**Twist hint** (playtesters could not tell the cap needs turning): while the cap is seated but not locked on the rocket being built, an orange curved arrow (`TwistHint`, a child of the cap seat, drawn with the glow material) circles the cap in the direction it locks, clockwise viewed from below, and the cap's own glow pulses. Both go the moment it locks. `MotorCapTwist`: **Show Twist Hint**, **Hint Speed** (120 degrees per second), **Hint Radius** (2.6 cm), **Hint Color**. The bin monitor's READY screen also asks "Cap twisted until it clicks?" (always, so it gives nothing away).
+**Twist hint** (playtesters could not tell the cap needs turning), in three stages, on the rocket being built only (`TwistHint`, a child of the cap seat, so it stays with the rocket):
+
+1. **Before, showing how:** once the cap has rested seated and untouched for **Hint Delay** (1.5 s: after seating, or after letting go mid-twist), an orange curved arrow circles the cap the way it locks (clockwise viewed from below) at **Hint Speed** (120 degrees per second), a see-through orange **ghost cap** (`Mat_CapGhost`, 12% larger) turns through **Ghost Swing** (90 degrees) every **Ghost Period** (1.4 s), and the cap's glow pulses. A quick player who twists at once never sees it.
+2. **During, showing how far:** gripping the cap hides the arrow and ghost; a ring of one segment per detent (six of 30 degrees for the 180 degree lock) lights segment by segment with each ratchet click, and the cap's glow brightens with progress. Let go short of the auto-finish (75%), the ring keeps the progress and the arrow returns after the delay.
+3. **On the lock:** the ring flashes green for **Flash Seconds** (0.45 s), then everything goes.
+
+The research behind it (cue before the action, feedback during it, state shown in light, hints after a short hesitation) is in Docs/PROGRESS.md, 2026-10-19. `MotorCapTwist` fields: **Show Twist Hint**, **Hint Delay**, **Hint Speed**, **Hint Radius** (2.6 cm), **Hint Color**, **Done Color**, **Flash Seconds**, **Ghost Material**, **Ghost Swing**, **Ghost Period**. The bin monitor's READY screen also asks "Cap twisted until it clicks?" (always, so it gives nothing away).
 
 To lock it:
 

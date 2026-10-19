@@ -71,23 +71,47 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
-        public IEnumerator An_Unlocked_Cap_Shows_A_Twist_Arrow_Until_It_Locks()
+        public IEnumerator The_Twist_Hint_Shows_How_Then_How_Far_Then_Flashes_On_The_Lock()
         {
             yield return SeatCap();
             yield return null;
-            Assert.IsTrue(m_Twist.twistHintShown, "seated but unlocked: an arrow circles the cap");
+            Assert.IsFalse(m_Twist.twistHintShown, "not straight away: a quick player is not nagged");
+            yield return new WaitForSeconds(1.7f);
+            Assert.IsTrue(m_Twist.twistHintShown, "left alone seated and unlocked: an arrow circles the cap");
+            Assert.IsTrue(m_Twist.ghostShown, "with a see-through ghost cap turning the way it locks");
+            Assert.IsFalse(m_Twist.progressRingShown, "nothing turned yet");
             var a0 = m_Twist.twistHintAngle;
             yield return new WaitForSeconds(0.3f);
-            var turned = Mathf.DeltaAngle(a0, m_Twist.twistHintAngle);
-            Assert.Less(turned, -5f, "it travels the way the cap locks (clockwise viewed from below: a negative yaw)");
-            var hint = m_Seat.transform.Find("TwistHint");
-            Assert.IsNotNull(hint, "the arrow stays with the rocket (a child of the cap seat)");
-            Assert.AreEqual(2, hint.GetComponentsInChildren<LineRenderer>().Length, "an arc and an arrowhead");
+            Assert.Less(Mathf.DeltaAngle(a0, m_Twist.twistHintAngle), -5f, "the arrow travels the way the cap locks (clockwise viewed from below: a negative yaw)");
+            Assert.IsNotNull(m_Seat.transform.Find("TwistHint"), "it stays with the rocket (a child of the cap seat)");
+
+            // during: the arrow and ghost give way to a ring of detents that lights as the cap turns
             yield return GrabSeatedCapOnOrbit();
-            yield return Turn(0f, tuning.capLockAngle + 10f);
+            yield return Turn(0f, 100f);
+            Assert.IsFalse(m_Twist.twistHintShown, "no arrow while twisting");
+            Assert.IsFalse(m_Twist.ghostShown);
+            Assert.IsTrue(m_Twist.progressRingShown, "the ring shows how far it has turned");
+            Assert.AreEqual(3, m_Twist.litSegments, "100 degrees: three 30 degree detents lit");
+
+            // let go short of the auto-finish: the ring keeps the progress, the arrow comes back after a moment
+            Release(m_Cap);
+            yield return new WaitForSeconds(0.2f);
+            Assert.IsFalse(m_Twist.capLocked);
+            Assert.IsTrue(m_Twist.progressRingShown);
+            Assert.AreEqual(3, m_Twist.litSegments);
+            yield return new WaitForSeconds(1.6f);
+            Assert.IsTrue(m_Twist.twistHintShown, "and how to finish it shows again");
+
+            // finish: the ring flashes, then everything goes
+            yield return GrabSeatedCapOnOrbit();
+            yield return Turn(0f, 100f);
             Assert.IsTrue(m_Twist.capLocked);
             yield return null;
-            Assert.IsFalse(m_Twist.twistHintShown, "locked: the arrow goes");
+            Assert.IsTrue(m_Twist.lockFlashing, "the ring flashes on the lock");
+            Assert.AreEqual(6, m_Twist.litSegments, "all six detents");
+            yield return new WaitForSeconds(0.6f);
+            Assert.IsFalse(m_Twist.progressRingShown, "then it goes");
+            Assert.IsFalse(m_Twist.twistHintShown);
         }
 
         [UnityTest]

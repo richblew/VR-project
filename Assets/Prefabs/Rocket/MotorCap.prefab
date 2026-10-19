@@ -303,6 +303,7 @@ MonoBehaviour:
   m_Tuning: {fileID: 11400000, guid: 5bec0ada554af36478887b4b612ebda8, type: 2}
   m_ClockwiseFromBelowIsNegativeYaw: 1
   m_GapCloseDuration: 0.1
+  m_GhostMaterial: {fileID: 2100000, guid: cd557a179740416e8a6e3c56404ea8b4, type: 2}
 --- !u!114 &3214221124227867370
 MonoBehaviour:
   m_ObjectHideFlags: 0
