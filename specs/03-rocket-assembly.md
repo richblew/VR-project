@@ -95,6 +95,11 @@ Children: `Mesh` (the model) and `PartGlow` (an orange glow mesh, hidden until n
 | A part attached to the rocket while the rocket is **held in the other hand** | yes, if the build rules allow removing it (section 6). This is the **two-handed removal**: hold the rocket, pull the part off along its guide. |
 | The inspection prototype (a failed rocket returned on the console) | only as a whole; its parts can never be taken off |
 
+**Switching hands:** to move the rocket to the other hand, grip any part of it with that hand (a flap, the nose, the cap: whatever the hand lands on, which the bulky hand models make easier than finding the white tube), then let go with the hand holding the rocket. The rocket stays in the second hand and the part it gripped goes back on its seat, as any part let go on its track does; a half-pulled part slides home and a half-twisted cap keeps its twist. `RocketAssembly` does this in its `LateUpdate` the frame the rocket is let go (after XRI has finished the release, so the rocket never drops), through the interaction manager: the hand lets go of the part and takes the rocket. It goes past the grab gate on purpose, since a hand at an unlocked cap would otherwise take the cap.
+- **Pulling parts off is unchanged:** it needs the rocket held, and a hand-over only happens once it is not. A part already pulled free is just a part in the hand: letting go of the rocket then drops it, as before.
+- **No jump in the hand:** after a hand-over, `HandOverHold` (a grab transformer the hand-over adds to the tube, after its others) keeps the rocket where it was relative to the hand itself, not its attach point, until that hand lets go. Yi-Xuan's hand rig moves the attach point to a hold point that carries the gripped part's GrabPose offset (a flap's is 2 cm and a quarter turn), and that offset goes when the hand holds the rocket instead: without this the rocket jumped 4.7 cm and turned in the hand.
+- **Feedback:** the receiving hand gets the rocket-grab vibration, and the part going back on gives its usual seat click.
+
 **One physical object:** when a part seats, `RocketAssembly` copies its colliders onto a new child of the tube called `Compound_<part name>`. The tube's single rigidbody then carries the whole rocket's shape: it rests on its fins and gets pushed as one piece. The part keeps its own (kinematic) body and collider only so it can be hovered for removal. The copies are deleted when the part comes off.
 
 **Parts never collide with each other.** `RocketAssembly.ApplyPartCollisionRules` turns off collisions between every pair of rocket parts, so a held part cannot shove the tube around or knock attached parts. Parts still collide with the desk, the floor and the room.
@@ -303,7 +308,8 @@ All in `Assets/Scripts/Runtime/`, namespace `VRRocket`:
 
 | Script | Role |
 |---|---|
-| `RocketAssembly.cs` | the brain: state, grab permission, gating, compound colliders, report, submit, return, new kit |
+| `RocketAssembly.cs` | the brain: state, grab permission, switching hands, gating, compound colliders, report, submit, return, new kit |
+| `HandOverHold.cs` | keeps the rocket's place in the hand after it changed hands (section 3) |
 | `AssemblyStateMachine.cs` | states and build rules (plain C#) |
 | `BuildReport.cs` | report and outcome rule (plain C#) |
 | `RocketWorkstation.cs` | scale, tray layout, spawning kits |

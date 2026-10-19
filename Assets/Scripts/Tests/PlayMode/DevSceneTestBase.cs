@@ -311,6 +311,50 @@ namespace VRRocket.Tests
             manager.SelectExit((IXRSelectInteractor)hand, part.grabInteractable);
         }
 
+        /// <summary>The rig's left hand, once a test takes it over with <see cref="TakeLeftHand"/> (most tests freeze the tube instead).</summary>
+        protected NearFarInteractor leftHand;
+        protected Transform leftController;
+
+        /// <summary>Takes over the left controller the way the set-up takes over the right: tracking off, rigid attach, parked away from the tray.</summary>
+        protected IEnumerator TakeLeftHand()
+        {
+            var rig = hand.GetComponentInParent<Unity.XR.CoreUtils.XROrigin>(true);
+            foreach (var nf in (rig != null ? rig.transform : hand.transform.root).GetComponentsInChildren<NearFarInteractor>(true))
+                if (nf.transform.parent != null && nf.transform.parent.name.StartsWith("Left")) leftHand = nf;
+            Assert.IsNotNull(leftHand, "left NearFarInteractor in the rig in use");
+            leftController = leftHand.transform.parent;
+            if (!leftController.gameObject.activeSelf) leftController.gameObject.SetActive(true);
+            foreach (var tpd in leftController.GetComponents<TrackedPoseDriver>()) tpd.enabled = false;
+            foreach (var iac in leftHand.GetComponents<UnityEngine.XR.Interaction.Toolkit.Attachment.InteractionAttachController>())
+            {
+                iac.smoothOffset = false;
+                iac.useDistanceBasedVelocityScaling = false;
+            }
+            leftController.SetPositionAndRotation(new Vector3(-0.6f, 1.4f, 0.3f), Quaternion.identity);
+            Physics.SyncTransforms();
+            yield return null;
+            Assert.IsTrue(leftHand.isActiveAndEnabled, "left hand active");
+        }
+
+        /// <summary>
+        /// The left hand takes the rocket by the middle of its tube, where the set-up parked it, as a player holds it while fitting or
+        /// taking off parts. The tube is made dynamic first, so letting go of it drops it rather than leaving it frozen in the air.
+        /// </summary>
+        protected IEnumerator HoldTubeInLeftHand()
+        {
+            var tube = Tube;
+            leftController.SetPositionAndRotation(GrabPoint(tube), Quaternion.identity);
+            Physics.SyncTransforms();
+            yield return new WaitForSeconds(0.25f);
+            Assert.IsTrue(manager.IsSelectPossible(leftHand, tube.grabInteractable), "the left hand can take the rocket");
+            if (tube.body != null) tube.body.isKinematic = false;
+            manager.SelectEnter((IXRSelectInteractor)leftHand, tube.grabInteractable);
+            Assert.IsTrue(tube.grabInteractable.interactorsSelecting.Contains(leftHand), "the rocket is in the left hand");
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        protected void LetGoWithLeft() => manager.SelectExit((IXRSelectInteractor)leftHand, Tube.grabInteractable);
+
         /// <summary>The upright pose a part takes when guided into a point: slots use the point's rotation, seats keep the part upright.</summary>
         protected static Quaternion SeatPoseRotation(AttachPoint point) => point.isSlot ? point.transform.rotation : point.transform.rotation;
 

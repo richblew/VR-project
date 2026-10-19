@@ -92,12 +92,14 @@ namespace VRRocket
         {
             AssemblyEvents.PartSeated += OnPartSeated;
             AssemblyEvents.PartRemoved += OnPartRemoved;
+            AssemblyEvents.PartReleased += OnPartReleased;
         }
 
         void OnDisable()
         {
             AssemblyEvents.PartSeated -= OnPartSeated;
             AssemblyEvents.PartRemoved -= OnPartRemoved;
+            AssemblyEvents.PartReleased -= OnPartReleased;
         }
 
         void Start()
@@ -314,6 +316,72 @@ namespace VRRocket
             var rocketHeld = m_Tube.isHeld || (m_Tube.body != null && m_Tube.body.isKinematic);
             if (!rocketHeld) return false;
             return m_Machine.CanRemove(part.partType);
+        }
+
+        // ---- switching hands (5.6) ----
+
+        bool m_HandOverPending;
+
+        void OnPartReleased(RocketPart part, UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor hand)
+        {
+            if (part == null || part != m_Tube) return;
+            if (part.TryGetComponent<HandOverHold>(out var hold)) hold.End();
+            m_HandOverPending = true;
+        }
+
+        // XRI finishes a release (the throw) in its manager's LateUpdate, which runs before this one: by now the rocket is fully
+        // let go, and it has not moved yet.
+        void LateUpdate()
+        {
+            if (!m_HandOverPending) return;
+            m_HandOverPending = false;
+            TryHandOver();
+        }
+
+        /// <summary>
+        /// Switching hands: the hand holding the rocket let go while the other hand grips one of its parts that is still on it
+        /// (seated, on its track, or the cap mid-twist). The rocket stays in that other hand: the part is let go, so it goes back
+        /// on its seat as any part let go on its track does (the cap keeps its twist), and the hand takes the rocket where it is,
+        /// so nothing jumps. Pulling parts off is untouched: it needs the rocket held, and this only happens once it is not.
+        /// A part already pulled free is just a part in the hand, and the rocket drops as before.
+        /// </summary>
+        void TryHandOver()
+        {
+            if (m_Tube == null || m_Tube.isHeld || m_Frozen || !m_InteractionEnabled || m_Respawner == null) return;
+            var tubeGrab = m_Tube.grabInteractable;
+            if (tubeGrab == null || tubeGrab.interactionManager == null) return;
+            foreach (var p in m_Respawner.parts)
+            {
+                if (p == null || !p.isHeld || !IsOnWorkingRocket(p)) continue;
+                var grab = p.grabInteractable;
+                var hand = grab.interactorsSelecting[0];
+                var hold = HandOverHoldOn(tubeGrab);
+                grab.interactionManager.SelectExit(hand, grab);
+                // Past the grab gate on purpose: a hand at an unlocked cap normally takes the cap, not the rocket. The gate and
+                // the near-only filter both keep a hold already in progress.
+                tubeGrab.interactionManager.SelectEnterUnconditionally(hand, tubeGrab);
+                if (tubeGrab.interactorsSelecting.Contains(hand)) hold.Begin(hand);
+                return;
+            }
+        }
+
+        /// <summary>The tube's <see cref="HandOverHold"/>, registered after its other grab transformers so it has the last word.</summary>
+        static HandOverHold HandOverHoldOn(UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable tubeGrab)
+        {
+            if (!tubeGrab.TryGetComponent<HandOverHold>(out var hold)) hold = tubeGrab.gameObject.AddComponent<HandOverHold>();
+            for (var i = 0; i < tubeGrab.singleGrabTransformersCount; i++)
+                if (ReferenceEquals(tubeGrab.GetSingleGrabTransformerAt(i), hold)) return hold;
+            tubeGrab.AddSingleGrabTransformer(hold);
+            return hold;
+        }
+
+        /// <summary>Is this part on the working rocket: seated on one of its points, or on one of its tracks?</summary>
+        bool IsOnWorkingRocket(RocketPart p)
+        {
+            if (p.state == PartState.Attached) return p.attachedTo != null && p.attachedTo.tube == m_Tube;
+            if (p.state != PartState.Guided) return false;
+            var guide = p.GetComponent<GuideGrabTransformer>();
+            return guide != null && guide.guidePoint != null && guide.guidePoint.tube == m_Tube;
         }
 
         bool HandAtUnlockedCap(UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor hand)
