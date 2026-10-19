@@ -175,7 +175,7 @@ stateDiagram-v2
     Submitted --> PrototypeComplete : ABORT (editable return)
 ```
 
-The state is recalculated from the counts every time a part seats or comes off, so taking parts off moves it back. The rule, in order: submitted → **Submitted**; cap seated → **PrototypeComplete**; motor in → **MotorFitted**; 3 fins, 3 flaps and the nose → **AirframeComplete**; otherwise **BuildingAirframe**.
+The state is recalculated from the counts every time a part seats or comes off, so taking parts off moves it back. The rule, in order: submitted → **Submitted**; any of the 3 fins, 3 flaps or the nose missing → **BuildingAirframe**; battery and cap in → **PrototypeComplete**; battery in → **MotorFitted**; otherwise **AirframeComplete**. So **PrototypeComplete means all nine parts** (the cap may still be unlocked: that is a launch failure to discover, not a missing part). `AssemblyStateMachine.MissingParts()` and `DescribeMissing()` name what is still needed ("2 fins, the nose cone and the battery").
 
 **Build order is free** (`Enforce Order` off in the tuning asset, Praise's decision on 11 October 2026). What still applies:
 
@@ -190,7 +190,7 @@ With **Enforce Order** on, the old strict order returns: the motor only fits onc
 
 `RocketAssembly.RefreshGating` pushes these rules into every attach point (`AttachPoint.gatingAllows`) whenever something changes. Points of the inspection prototype never accept anything.
 
-> **Known gap (free order).** Because the state only looks at the cap and motor first, a rocket with the motor and cap fitted counts as PrototypeComplete even if fins, flaps or the nose are missing, and it can be submitted. The build report only checks the flaps and the cap (section 7): missing flaps count as wrong, but **missing fins or a missing nose are not detected**, so such a rocket can even fly as a success. The blueprint panel still shows the fins step in that case. Fix idea: require `airframeComplete` for PrototypeComplete (and MotorFitted) in `AssemblyStateMachine.State`, and update `AssemblyStateMachineTests`.
+**An unfinished rocket** can be put in the bin and SUBMIT pressed: the bin takes it for a moment (`TryTakeIncomplete`: frozen, sinks 30 cm), the screens say PARTS MISSING with the list, and it comes back up on its spot on the workbench, next to the parts still on the tray, editable (`ReturnIncomplete`). It is not launched and does not count as a flight ([spec 07](07-console-and-bin.md)).
 
 ## 7. The build report
 
@@ -204,6 +204,8 @@ With **Enforce Order** on, the old strict order returns: the motor only fits onc
 | `outcome` | `MotorRetentionLoss` if the cap is not locked (checked first); otherwise `UnstableFlight` if any flap is wrong; otherwise `Success` |
 | `failedComponents` | for example `{ "MotorCap", "WingFlap_2" }` |
 | `FailedCount` | how many failed |
+| `wrongFlapCount` | flaps in the wrong place or upside down (one veers off course, more break up) |
+| `parts` | every part on the rocket: type, id, the point it is on, and whether it is upside down (flaps). The launch vehicle is built from it ([spec 04](04-launch-simulator.md)) |
 
 A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits is read from its rotation compared with its slot (`GuideMath.FlapOrientationFor`).
 
@@ -217,14 +219,14 @@ A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits
 
 **The dropped rocket** (`RocketAssembly.Update`): the working rocket, out of bounds and not held, goes back to the tube's original spot on the tray after the same delay. A dropped **inspection prototype** goes back to where it was returned.
 
-**Submitting** (`TrySubmit`, called by the bin, [spec 07](07-console-and-bin.md)): only when the state is PrototypeComplete and the rocket is not held. It builds the report, marks the machine submitted, freezes the rocket (kinematic) and raises `Submitted`.
+**Submitting** (`TrySubmit`, called by the bin, [spec 07](07-console-and-bin.md)): only when the state is PrototypeComplete (all nine parts) and the rocket is not held. It builds the report, marks the machine submitted, freezes the rocket (kinematic) and raises `Submitted`.
 
 **Returning** (`ReturnPrototype`, called by the game engine):
 
 | Mode | When | What happens |
 |---|---|---|
 | `Editable` | ABORT | the same rocket goes back to its spot on the desk with all its parts, unfrozen and editable; the state leaves Submitted |
-| `InspectOnly` | failed launch (the previous inspection prototype is removed when the next rocket is submitted, so at most two rockets exist: the one being built and the last failed one) | the rocket is placed at the bin's return spot on the console shelf as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
+| `InspectOnly` | failed launch (the previous inspection prototype is removed when the next rocket is submitted, so at most two rockets exist: the one being built and the last failed one) | the rocket is placed on the side desk under the moon-landing painting (the game engine's Failed Rocket Spot), lying along the desk, as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
 
 **A new kit** (`BeginNewBuild`, after every launch): the loose parts and the working rocket are destroyed (not the inspection prototype), and a fresh tube and nine parts are spawned from the prefabs in the `RocketWorkstation` component, in the places they started. Both hands get a soft pulse ("kit spawned").
 

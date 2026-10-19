@@ -19,16 +19,46 @@ namespace VRRocket
 
         public bool airframeComplete => finsAttached >= 3 && flapsAttached >= 3 && noseAttached;
 
+        /// <summary>
+        /// The next thing the rocket needs. PrototypeComplete means all nine parts (3 fins, 3 flaps, the nose, the battery, the
+        /// cap); with the free build order a battery and cap on an unfinished airframe is still BuildingAirframe.
+        /// </summary>
         public AssemblyState State
         {
             get
             {
                 if (submitted) return AssemblyState.Submitted;
-                if (capAttached) return AssemblyState.PrototypeComplete;
+                if (!airframeComplete) return AssemblyState.BuildingAirframe;
+                if (capAttached && motorAttached) return AssemblyState.PrototypeComplete;
                 if (motorAttached) return AssemblyState.MotorFitted;
-                if (airframeComplete) return AssemblyState.AirframeComplete;
-                return AssemblyState.BuildingAirframe;
+                return AssemblyState.AirframeComplete;
             }
+        }
+
+        /// <summary>All nine parts are on the rocket (the cap may still be unlocked: that is a launch failure, not a missing part).</summary>
+        public bool complete => airframeComplete && motorAttached && capAttached;
+
+        /// <summary>What the rocket still needs, as the player reads it, one item per entry ("2 fins", "the nose cone"...).</summary>
+        public System.Collections.Generic.List<string> MissingParts()
+        {
+            var list = new System.Collections.Generic.List<string>();
+            var fins = 3 - finsAttached;
+            var flaps = 3 - flapsAttached;
+            if (fins > 0) list.Add(fins + (fins == 1 ? " fin" : " fins"));
+            if (flaps > 0) list.Add(flaps + (flaps == 1 ? " flap" : " flaps"));
+            if (!noseAttached) list.Add("the nose cone");
+            if (!motorAttached) list.Add("the battery");
+            if (!capAttached) list.Add("the battery cap");
+            return list;
+        }
+
+        /// <summary>The missing parts in one line: "2 fins, the nose cone and the battery".</summary>
+        public string DescribeMissing()
+        {
+            var list = MissingParts();
+            if (list.Count == 0) return "nothing";
+            if (list.Count == 1) return list[0];
+            return string.Join(", ", list.GetRange(0, list.Count - 1)) + " and " + list[list.Count - 1];
         }
 
         /// <summary>Record a part seating or coming off. Returns true when the state changed.</summary>

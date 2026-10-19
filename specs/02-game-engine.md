@@ -61,7 +61,8 @@ And two children:
 | Field | Points at | Used for |
 |---|---|---|
 | Assembly | `RocketWorkstation` (`RocketAssembly`) | locking the kit, the build state, returning the rocket, a new kit |
-| Bin | `ConsoleAddOn/SubmissionBin` | the "bin opens" sound and the return spot for a failed rocket |
+| Bin | `ConsoleAddOn/SubmissionBin` | the "bin opens" sound |
+| Failed Rocket Spot | `FailedRocketDesk/FailedRocketSpot` | where a rocket that failed its launch comes back: the side desk under the moon-landing painting (empty: the bin's return spot) |
 | Launch | `LaunchSite` (`LaunchSequence`) | the pad, the vehicle and the flight |
 | Screen | `GameFlow` (`LaunchScreenController`) | everything shown on the big TV |
 | Menu | `GameFlow/MenuCanvas` (`MenuPanel`) | the start menu |
@@ -154,7 +155,7 @@ The first hint depends on how Assembly was entered:
 
 ### Countdown
 
-**Entered:** LAUNCH (`Launch()`), when the phase is PreLaunch and the pad is ready. Otherwise LAUNCH plays a buzz and nothing happens.
+**Entered:** LAUNCH (`Launch()`), when the phase is PreLaunch and the pad is ready. Otherwise LAUNCH is refused with the reason (section "Buttons pressed at the wrong time").
 
 Every second, from 10 down to 1, the engine shows `T-10` ... `T-01` and beeps. When the count reaches Ignition At (3), it calls `LaunchSequence.Ignite()`: flame, sparks, steam, ignition sound, engine loop. After `T-01` it plays a high beep and counts one attempt (`attempts` counts liftoffs, not submissions).
 
@@ -171,22 +172,37 @@ Every second, from 10 down to 1, the engine shows `T-10` ... `T-01` and beeps. W
 **Entered:** after the flight. The engine shows the result ([spec 05](05-screens-and-displays.md): success text, or the failure with the red failure diagram) and plays a chime (success) or a buzz (failure). After Result Seconds (9 s):
 
 - **Success:** counts one success, puts a fresh kit on the desk (`BeginNewBuild`) and goes to Menu with "MISSION SUCCESS / BUILD AGAIN".
-- **Failure:** plays the bin's open sound, returns the failed rocket onto the console shelf as the **inspection prototype** (`ReturnPrototype(InspectOnly, bin.returnSpot)`: it can be picked up but not changed), puts a fresh kit on the desk, and goes to Assembly with the "Launch failed" hint.
+- **Failure:** plays the bin's open sound, returns the failed rocket onto the side desk under the moon-landing painting as the **inspection prototype** (`ReturnPrototype(InspectOnly, Failed Rocket Spot)`: it can be picked up but not changed), puts a fresh kit on the workbench, and goes to Assembly with the "Launch failed" hint.
 
 ### ABORT
 
-`Abort()` works in PreLaunch and Countdown only (anywhere else it buzzes). It stops the sequence and the engine effects, plays a buzz and the bin's open sound, returns the **same** rocket to its spot on the desk, still editable (`ReturnPrototype(Editable, null)`), and enters Assembly with the "Aborted" hint. An abort does not count as an attempt.
+`Abort()` works in PreLaunch and Countdown only (anywhere else it is refused with the reason). It stops the sequence and the engine effects, plays a buzz and the bin's open sound, returns the **same** rocket to its spot on the desk, still editable (`ReturnPrototype(Editable, null)`), and enters Assembly with the "Aborted" hint. An abort does not count as an attempt.
 
 ### Buttons pressed at the wrong time
 
-| Button | Outside its phase |
-|---|---|
-| START | ignored (the menu is hidden outside Menu anyway) |
-| LAUNCH | buzz |
-| ABORT | buzz |
-| SUBMIT | the bin refuses: nothing happens unless a complete rocket is resting in the bin |
+Every refused press goes through `GameFlowController.Refuse(title, big, detail)`: a buzz, the `Refused` event (the pressing button's `ButtonPressHaptics` turns it into a double vibration), the `Notice` event (the status monitor beside the bin shows it) and, in Assembly and PreLaunch, the reason on the big screen and console monitor for Message Seconds (4 s), after which the screen returns to what it showed.
 
-The test `ButtonsOutOfPhase_DoNothing` checks this.
+| Situation | Big screen title (4 s) | What it says to do |
+|---|---|---|
+| Console offline, any console button | CONSOLE FAULT | reconnect the wiring under the hatch |
+| SUBMIT, empty bin | BIN EMPTY | put the rocket in the bin, let go, press SUBMIT |
+| SUBMIT, the rocket still in the hand | LET GO OF THE ROCKET | rest it in the bin and let go |
+| SUBMIT, the rocket that failed is in the bin | WRONG ROCKET | put the new build in the bin |
+| SUBMIT, a rocket already submitted | ALREADY SUBMITTED | press LAUNCH, or ABORT to bring it back |
+| SUBMIT, an unfinished rocket | PARTS MISSING | lists what is missing; the rocket comes back to the workbench |
+| LAUNCH, nothing submitted | NO ROCKET ON THE PAD | submit a finished rocket first |
+| LAUNCH, the rocket still growing on the pad | STAND BY | press LAUNCH once it is full size |
+| LAUNCH, countdown or flight running | LAUNCH IN PROGRESS | |
+| LAUNCH, result showing | FLIGHT OVER | wait for the next build |
+| ABORT, nothing on the pad | NOTHING TO ABORT | |
+| ABORT, after liftoff | TOO LATE TO ABORT | |
+| The cap brought to the base before the battery | BATTERY FIRST | fit the battery, + end up, then the cap |
+| A plug let go at a socket of another colour | WRONG SOCKET | each plug fits the socket of its own colour |
+| Any button on the menu or in the intro | (none: the screens are not up) | |
+
+Every row also plays the buzz and gives the hand that pressed a double vibration (`hapticRefused`). The title and the whole explanation also show on the status monitor beside the bin; the big screen shows the explanation's first sentence.
+
+START is ignored outside Menu (the menu is hidden then). `ConsoleFeedbackTests` checks the rows.
 
 ## 5. The engine's sounds
 
@@ -197,7 +213,7 @@ Made in code when the game starts (`ProceduralAudio`), so they need no audio fil
 | beep | 880 Hz, 0.09 s | each countdown second |
 | high beep | 1320 Hz, 0.25 s | liftoff |
 | chime | 660 Hz then 990 Hz, 0.35 s | START, submission accepted, successful flight |
-| buzz | 160 Hz, 0.3 s, half volume | refused button, ABORT, failed flight |
+| buzz | 160 Hz, 0.3 s, half volume | a refused press (with the reason on the screens), ABORT, failed flight |
 
 They play through the `AudioSource` on `GameFlow`. To use real clips instead, change `Awake` in `GameFlowController.cs` to use `AudioClip` fields.
 
@@ -282,8 +298,7 @@ Or, without code: add an entry to **On Phase Changed** on `GameFlowController` a
 |---|---|
 | START does nothing | The menu button's **On Click** must call `GameFlowController.StartGame`. `GameFlow/EventSystem` must have `XRUIInputModule`, and `MenuCanvas` must have `TrackedDeviceGraphicRaycaster`. The phase must be Menu. See [spec 06](06-menu.md). |
 | Nothing can be grabbed after START | Is `GameFlowController.Assembly` set? The engine unlocks the kit through it. Then see [spec 03](03-rocket-assembly.md). |
-| LAUNCH buzzes | Not in PreLaunch, or the vehicle is still growing (wait Submit To Pad Seconds). |
-| ABORT buzzes | Only works in PreLaunch and Countdown. |
+| LAUNCH or ABORT is refused | The screens say why (section 4): usually nothing is submitted yet, or the vehicle is still growing. |
 | The game is stuck in Launch | `LaunchSequence` never reported the end of the flight: check the Console and that `LaunchSite` is active. |
 | The screens stay dark after START | `PhaseDisplays` must point at `GameFlow`; the three screens must be in Game Displays. |
 | The intro keeps playing after START | See `TransmissionBridge` in [spec 01](01-scenes-and-room.md). |

@@ -337,7 +337,57 @@ namespace VRRocket
                     flaps[i] = new FlapPlacement { flapId = i + 1, slotName = "", position = FlapPosition.Base, orientation = FlapOrientation.Down };
             }
             var capLocked = m_CapTwist != null && m_CapTwist.capLocked;
-            return BuildReport.Build(flaps, capLocked);
+            var report = BuildReport.Build(flaps, capLocked);
+            report.parts = BuiltParts();
+            return report;
+        }
+
+        /// <summary>Every part on the working rocket: which point it is on, and whether a flap is upside down.</summary>
+        public BuiltPart[] BuiltParts()
+        {
+            var list = new List<BuiltPart>();
+            var points = AttachPoint.active;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var p = points[i];
+                if (m_Tube == null || p.tube != m_Tube || p.attachedPart == null) continue;
+                var part = p.attachedPart;
+                var down = part.partType == PartType.WingFlap && m_FlapPlacements.TryGetValue(part.partId, out var fp) && fp.orientation == FlapOrientation.Down;
+                list.Add(new BuiltPart { type = part.partType, partId = part.partId, pointName = p.pointName, upsideDown = down });
+            }
+            return list.ToArray();
+        }
+
+        /// <summary>All nine parts are on the working rocket.</summary>
+        public bool isComplete => m_Machine.complete;
+
+        /// <summary>
+        /// The bin takes an unfinished rocket for a moment (it sinks, the screens say what is missing): frozen and kinematic so
+        /// nothing can grab it meanwhile. False when there is no working rocket, it is held, or it is already submitted.
+        /// </summary>
+        public bool TryTakeIncomplete()
+        {
+            if (m_Tube == null || m_Tube.isHeld || State == AssemblyState.Submitted) return false;
+            m_Frozen = true;
+            var body = m_Tube.body;
+            if (body != null)
+            {
+                if (!body.isKinematic) { body.linearVelocity = Vector3.zero; body.angularVelocity = Vector3.zero; }
+                body.isKinematic = true;
+            }
+            RefreshGating();
+            return true;
+        }
+
+        /// <summary>Gives an unfinished rocket back: on its spot on the workbench, next to the parts still on the tray, editable.</summary>
+        public void ReturnIncomplete()
+        {
+            if (m_Tube == null) return;
+            m_Frozen = false;
+            m_Tube.gameObject.SetActive(true);
+            if (m_Tube.homeParent != null && m_Tube.transform.parent != m_Tube.homeParent) m_Tube.transform.SetParent(m_Tube.homeParent, true);
+            ReturnTubeHome();
+            AfterChange();
         }
 
         /// <summary>Called by the bin: freezes the rocket and raises Submitted. False unless the prototype is complete and not held.</summary>

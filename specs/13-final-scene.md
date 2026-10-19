@@ -22,7 +22,7 @@ The scene we ship: our game inside Richard's updated room, as one scene. Back to
 - **Console monitor:** `ConsoleAddOn/ConsoleMonitor`, one wide monitor (0.94 x 0.30 m screen, dark housing) over the console's three centre screens; the two angled side screens stay as they are. The console mirror is laid out across it: the pad view on the left, title and clock on top right, the full status text under them. While the mirror is hidden (menu, intro) the monitor shows a black screen. The builder measures the three screens from the console's `Monitors` mesh.
 - **Console side monitors:** two more monitors in the same style over the console's angled side screens (`ConsoleMonitorLeft`, `ConsoleMonitorRight`, driven by `ConsoleStatusScreens` on the left one). With all five native screens covered, the console's own `Monitors` mesh is switched off.
   - **Left, GO / NO-GO:** a launch readiness poll: FINS n/3, FLAPS n/3, NOSE CONE, MOTOR, MOTOR CAP, PAD, each GO, NO-GO or STBY (standby on the menu and in the intro), and a verdict line (HOLD BUILD IN PROGRESS, READY TO SUBMIT, ALL STATIONS GO, GO FOR LAUNCH, LIFTOFF). It counts fitted parts only; it never says whether the flaps are the right way round or the cap is locked, because finding that out is the game.
-  - **Right, FLIGHT DATA:** RANGE STATUS while idle and building (weather, wind and range are scenery; pad state and the mission log of flights, successes and the last result are live), the T-minus during the countdown, live T+, altitude, speed and max altitude in flight, then FLIGHT n RESULT with the outcome and how it failed.
+  - **Right, beside the bin: SUBMISSION BIN** while building and on the pad (empty, let go, ready, parts missing with the list, the failed rocket, submitted; [spec 07](07-console-and-bin.md) section 3a), the T-minus during the countdown, live T+, altitude, speed and max altitude in flight, then FLIGHT n RESULT with the outcome and how it failed. A refused press shows its reason here for 4 s.
 - **Countdown clock:** `CountdownClock` covers the whole face of the top-left side TV, so none of the TV's own picture shows around it.
 - **Side TVs aligned:** Richard's four side TVs were hand placed with small differences. Each top TV now sits exactly over its bottom TV, all four are the same size (width scale 2.13), and both pairs hang at the same height (bottom at y 0.65, 1.2 cm gap). The countdown clock, ABORT and live screens are fitted to them.
 - **The motor is a battery:** the kit part that was the rocket motor shows as an AA battery (MasterYogurt, CC BY; `Assets/Models/Rocket/Battery.fbx`), inserted + end up, held in by the battery cap. Everything the player reads says battery (build steps, hints, GO / NO-GO, BATTERY RETENTION LOSS, failed parts listed as "Battery cap", "Wing flap 2" through `BuildReport.DisplayName`). Code names (`PartType.Motor`, `MotorSeat`, `MotorCap`) and object names are unchanged.
@@ -68,7 +68,7 @@ Pressing ABORT during pre-launch or the countdown:
 
 **Why panels and not the TVs' own material?** Each side TV is one mesh with one material: a picture put on that material wraps around the whole TV body. So the builder lays a quad (`AbortPanel_*`, saved switched off) on each TV's front face, measured from the TV mesh. The TVs are the intro's own `sideScreens`: if Richard changes them, rebuild the panels. To change the picture (1024 x 828, the TVs' shape), edit `AbortScreenTools` and run VR Rocket > Make Abort Screen.
 
-Pressing ABORT outside pre-launch and the countdown only buzzes, as before.
+Pressing ABORT outside pre-launch and the countdown is refused with the reason (NOTHING TO ABORT, TOO LATE TO ABORT), a buzz and a double vibration ([spec 02](02-game-engine.md) section 4).
 
 ## 6. The console's wiring (Yi-Xuan's cable puzzle)
 
@@ -86,7 +86,7 @@ Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the con
 - a new play after a successful flight (`GameFlowController.ResetMiniGame`) unplugs everything, puts every end back, shuffles the sockets and takes the console offline again.
 
 **The rule:** `GameFlowController` has **Require Mini Game** on in this scene. Until `MiniGameSolved()` is called (by `CablePairManager.onAllConnected`), the console is offline:
-- SUBMIT refuses the rocket (so LAUNCH and ABORT have nothing to act on) with a fault buzz, and the big TV and console monitor show CONSOLE FAULT · OFFLINE with what to do, for 4 s, then the build text again;
+- SUBMIT, LAUNCH and ABORT are refused with a fault buzz and a double vibration on the pressing hand, and the big TV and console monitor show CONSOLE FAULT · OFFLINE with what to do, for 4 s, then the build text again;
 - the GO / NO-GO monitor shows WIRING NO-GO and CONSOLE OFFLINE · RESTORE WIRING;
 - the side TVs keep their NO SIGNAL test card.
 

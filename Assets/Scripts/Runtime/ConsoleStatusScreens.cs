@@ -9,8 +9,9 @@ namespace VRRocket
     /// <list type="bullet">
     /// <item>Left, GO / NO-GO: a launch readiness poll of the build and the pad. It counts fitted parts only: it never says whether
     /// the flaps are the right way round or the cap is locked, because finding that out is the game.</item>
-    /// <item>Right, FLIGHT DATA: range status and the mission log while building, the countdown, live altitude and speed in
-    /// flight, then the flight's result.</item>
+    /// <item>Right, beside the submission bin: the bin's state while building and on the pad (empty, a rocket still in the hand,
+    /// ready to submit, parts missing with the list, the failed rocket, submitted), then the countdown, live altitude and speed in
+    /// flight, and the flight's result. A refused console button or submission shows its reason here for a few seconds.</item>
     /// </list>
     /// </summary>
     public sealed class ConsoleStatusScreens : MonoBehaviour
@@ -18,6 +19,8 @@ namespace VRRocket
         [SerializeField] GameFlowController m_Flow;
         [SerializeField] RocketAssembly m_Assembly;
         [SerializeField] LaunchSequence m_Launch;
+        [SerializeField, Tooltip("The submission bin whose state the right monitor shows (found in the scene when empty)")] SubmissionBin m_Bin;
+        [SerializeField, Tooltip("Seconds a refusal's reason stays on the right monitor")] float m_NoticeSeconds = 4f;
         [SerializeField] TextMeshPro m_PollText;
         [SerializeField] TextMeshPro m_PollVerdict;
         [SerializeField] TextMeshPro m_DataTitle;
@@ -27,15 +30,26 @@ namespace VRRocket
         const string k_Go = "<color=#4CFF7A>GO</color>";
         const string k_NoGo = "<color=#FF5A4C>NO-GO</color>";
         const string k_Standby = "<color=#FFC14C>STBY</color>";
+        const string k_Red = "#FF5A4C", k_Amber = "#FFC14C", k_Green = "#4CFF7A";
+
+        string m_NoticeTitle, m_NoticeText;
+        float m_NoticeUntil = -1f;
 
         readonly StringBuilder m_Sb = new StringBuilder(256);
         float m_Next, m_PhaseStart, m_MaxAltitude;
-        string m_LastFlight = "NONE";
 
         public string pollText => m_PollText != null ? m_PollText.text : "";
         public string pollVerdict => m_PollVerdict != null ? m_PollVerdict.text : "";
         public string dataTitle => m_DataTitle != null ? m_DataTitle.text : "";
         public string dataText => m_DataText != null ? m_DataText.text : "";
+        SubmissionBin bin
+        {
+            get
+            {
+                if (m_Bin == null) m_Bin = FindAnyObjectByType<SubmissionBin>();
+                return m_Bin;
+            }
+        }
 
         public void Configure(GameFlowController flow, RocketAssembly assembly, LaunchSequence launch, TextMeshPro pollText, TextMeshPro pollVerdict, TextMeshPro dataTitle, TextMeshPro dataText)
         {
@@ -48,6 +62,7 @@ namespace VRRocket
             if (m_Flow == null) return;
             m_Flow.PhaseChanged += OnPhaseChanged;
             m_Flow.MiniGameChanged += Refresh;
+            m_Flow.Notice += OnNotice;
         }
 
         void OnDisable()
@@ -55,13 +70,21 @@ namespace VRRocket
             if (m_Flow == null) return;
             m_Flow.PhaseChanged -= OnPhaseChanged;
             m_Flow.MiniGameChanged -= Refresh;
+            m_Flow.Notice -= OnNotice;
+        }
+
+        void OnNotice(string title, string text)
+        {
+            m_NoticeTitle = title;
+            m_NoticeText = text;
+            m_NoticeUntil = Time.time + m_NoticeSeconds;
+            Refresh();
         }
 
         void OnPhaseChanged(GamePhase phase)
         {
             m_PhaseStart = Time.time;
             if (phase == GamePhase.Launch) m_MaxAltitude = 0f;
-            if (phase == GamePhase.Result) m_LastFlight = Outcome(false);
             m_Next = 0f;
         }
 
@@ -130,6 +153,13 @@ namespace VRRocket
             var successes = m_Flow != null ? m_Flow.successes : 0;
             m_Sb.Clear();
             string title;
+            if (Time.time < m_NoticeUntil && !string.IsNullOrEmpty(m_NoticeTitle))
+            {
+                // a refused button or submission: the reason, in red, for a few seconds
+                m_DataText.text = "<color=" + k_Red + "><size=130%>" + Wrap(m_NoticeTitle, 15) + "</size></color>\n\n" + Wrap(m_NoticeText, 22);
+                if (m_DataTitle != null) m_DataTitle.text = "CONSOLE";
+                return;
+            }
             switch (phase)
             {
                 case GamePhase.Countdown:
@@ -163,18 +193,80 @@ namespace VRRocket
                     m_Sb.Append("SUCCESSES ").Append(successes);
                     break;
                 default:
-                    title = "RANGE STATUS";
-                    m_Sb.Append("WEATHER    ").Append(k_Go).Append('\n');
-                    m_Sb.Append("WIND       4 KT\n");
-                    m_Sb.Append("RANGE      CLEAR\n");
-                    m_Sb.Append("PAD 01     ").Append(phase == GamePhase.PreLaunch ? "VEHICLE" : "EMPTY").Append("\n\n");
-                    m_Sb.Append("FLIGHTS    ").Append(attempts).Append('\n');
-                    m_Sb.Append("SUCCESSES  ").Append(successes).Append('\n');
-                    m_Sb.Append("LAST       ").Append(m_LastFlight);
+                    title = "SUBMISSION BIN";
+                    WriteBin(phase);
                     break;
             }
             m_DataText.text = m_Sb.ToString();
             if (m_DataTitle != null) m_DataTitle.text = title;
+        }
+
+        /// <summary>Breaks text into lines of at most <paramref name="width"/> characters at spaces: the monitor's text does not wrap by itself.</summary>
+        public static string Wrap(string text, int width)
+        {
+            if (string.IsNullOrEmpty(text)) return "";
+            var sb = new StringBuilder(text.Length + 8);
+            var line = 0;
+            foreach (var word in text.Split(' '))
+            {
+                if (word.Length == 0) continue;
+                if (line > 0 && line + 1 + word.Length > width) { sb.Append('\n'); line = 0; }
+                else if (line > 0) { sb.Append(' '); line++; }
+                sb.Append(word);
+                line += word.Length;
+            }
+            return sb.ToString();
+        }
+
+        void Big(string text, string colour = null)
+        {
+            m_Sb.Append("<size=150%>");
+            if (colour != null) m_Sb.Append("<color=").Append(colour).Append('>');
+            m_Sb.Append(text);
+            if (colour != null) m_Sb.Append("</color>");
+            m_Sb.Append("</size>\n\n");
+        }
+
+        /// <summary>The bin's state, while building and with the rocket on the pad.</summary>
+        void WriteBin(GamePhase phase)
+        {
+            if (phase == GamePhase.PreLaunch)
+            {
+                Big("SUBMITTED", k_Green);
+                m_Sb.Append("Rocket on the pad.\nLAUNCH or ABORT.");
+                return;
+            }
+            var b = bin;
+            switch (b != null ? b.state : BinState.Empty)
+            {
+                case BinState.Busy:
+                    Big("CHECKING");
+                    m_Sb.Append("The bin is checking\nthe rocket.");
+                    break;
+                case BinState.RocketHeld:
+                    Big("LET GO");
+                    m_Sb.Append("Rest the rocket in the\nbin and let go of it.");
+                    break;
+                case BinState.Ready:
+                    Big("READY", k_Green);
+                    m_Sb.Append("Rocket complete.\nPress SUBMIT.");
+                    break;
+                case BinState.PartsMissing:
+                    Big("PARTS MISSING", k_Amber);
+                    var missing = m_Assembly != null ? m_Assembly.machine.MissingParts() : null;
+                    if (missing != null) foreach (var m in missing) m_Sb.Append("- ").Append(m).Append('\n');
+                    m_Sb.Append("\nSUBMIT sends it back\nto your bench.");
+                    break;
+                case BinState.OldRocket:
+                    Big("FAILED ROCKET", k_Amber);
+                    m_Sb.Append("That is the rocket\nthat failed. Put your\nnew build in the bin.");
+                    break;
+                default:
+                    Big("EMPTY");
+                    m_Sb.Append("Place your finished\nrocket in the bin\nand let go of it.");
+                    break;
+            }
+            if (m_Flow != null && !m_Flow.consoleOnline) m_Sb.Append("\n\n<color=").Append(k_Red).Append(">CONSOLE OFFLINE</color>");
         }
 
         /// <summary>The last flight's outcome, coloured for the screen or plain for the mission log.</summary>

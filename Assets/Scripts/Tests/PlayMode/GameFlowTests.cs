@@ -185,9 +185,9 @@ namespace VRRocket.Tests
             Assert.AreEqual(AssemblyState.BuildingAirframe, assembly.State);
             Assert.AreEqual(9, workstation.respawner.parts.Count, "nine fresh parts");
             Assert.IsTrue(assembly.interactionEnabled);
-            Assert.Less(Vector3.Distance(tube.transform.position, bin.returnSpot.position), 0.35f, "returned at the console's return spot");
+            Assert.Less(Vector3.Distance(tube.transform.position, flow.failedRocketSpot.position), 0.35f, "returned on the side desk under the painting");
             yield return new WaitForSeconds(tuning.respawnDelay + 1f);
-            Assert.Less(Vector3.Distance(tube.transform.position, bin.returnSpot.position), 0.35f, "and it stays there: the console counts as in bounds");
+            Assert.Less(Vector3.Distance(tube.transform.position, flow.failedRocketSpot.position), 0.35f, "and it stays there: the side desk counts as in bounds");
             Assert.IsFalse(diagram.gameObject.activeSelf, "diagram hidden again");
         }
 

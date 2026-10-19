@@ -241,14 +241,15 @@ namespace VRRocket.Tests
             Assert.Greater(left.position.x, right.position.x, "facing the console (-Z), GO / NO-GO is on the player's left");
             screens.Refresh();
             StringAssert.Contains("STBY", screens.pollText, "standby on the menu");
-            Assert.AreEqual("RANGE STATUS", screens.dataTitle);
+            Assert.AreEqual("SUBMISSION BIN", screens.dataTitle, "the right monitor, beside the bin, shows the bin");
+            StringAssert.Contains("EMPTY", screens.dataText);
             Flow.StartWithoutIntro();
             Flow.MiniGameSolved();   // the wiring done: the poll is about the build (Console_Is_Offline_... covers the wiring)
             yield return null;
             screens.Refresh();
             StringAssert.Contains("NO-GO", screens.pollText, "an empty bench is not ready");
             StringAssert.Contains("HOLD", screens.pollVerdict);
-            StringAssert.Contains("FLIGHTS    0", screens.dataText);
+            StringAssert.Contains("EMPTY", screens.dataText, "nothing in the bin yet");
             StringAssert.DoesNotContain("LOCK", screens.pollText, "the poll never gives away whether the cap is locked");
         }
 

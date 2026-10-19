@@ -5421,7 +5421,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 327382929471172723, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: m_SafeZones.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 327382929471172723, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: 'm_SafeZones.Array.data[0]'
@@ -5431,6 +5431,10 @@ PrefabInstance:
       propertyPath: 'm_SafeZones.Array.data[1]'
       value: 
       objectReference: {fileID: 1456329051}
+    - target: {fileID: 327382929471172723, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
+      propertyPath: 'm_SafeZones.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1765018805}
     - target: {fileID: 3636903935074574089, guid: 03beef11fb22e33499f7ca70c65472f4, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.3
@@ -9787,9 +9791,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.SubmissionBin
   m_Assembly: {fileID: 365613977}
+  m_Flow: {fileID: 979922750}
   m_ReturnSpot: {fileID: 1135805410}
   m_SinkDepth: 0.45
   m_SinkSeconds: 1.2
+  m_CheckDepth: 0.3
+  m_CheckSeconds: 0.8
   m_Audio: {fileID: 525530354}
   m_CloseClip: {fileID: 8300000, guid: 1f075b95cdf99a74997fc8c50a4f1ce3, type: 3}
   m_OpenClip: {fileID: 8300000, guid: 724a58e387d7e334c9f626522687b968, type: 3}
@@ -17109,6 +17116,8 @@ MonoBehaviour:
   m_Flow: {fileID: 979922750}
   m_Assembly: {fileID: 365613977}
   m_Launch: {fileID: 934111374}
+  m_Bin: {fileID: 525530353}
+  m_NoticeSeconds: 4
   m_PollText: {fileID: 244684875}
   m_PollVerdict: {fileID: 2114400631}
   m_DataTitle: {fileID: 825066462}
@@ -17805,6 +17814,7 @@ MonoBehaviour:
   m_VisualScale: 1
   m_ArrivalScale: 0.027777778
   m_OffCourseAzimuth: 70
+  m_UnlockedCapGap: 0.002
 --- !u!4 &934111375
 Transform:
   m_ObjectHideFlags: 0
@@ -21046,6 +21056,7 @@ MonoBehaviour:
   m_Blueprint: {fileID: 979922747}
   m_Intro: {fileID: 817437042}
   m_AbortAlarm: {fileID: 613432814}
+  m_FailedRocketSpot: {fileID: 2080007308}
   m_Audio: {fileID: 979922749}
   m_CountdownSeconds: 10
   m_IgnitionAt: 3
@@ -25647,6 +25658,39 @@ Transform:
   - {fileID: 1704324443}
   - {fileID: 112124329}
   - {fileID: 3780116130257555517}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1346871126
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1346871127}
+  m_Layer: 0
+  m_Name: FailedRocketDesk
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1346871127
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1346871126}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2080007308}
+  - {fileID: 1765018804}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1347773418
@@ -33754,6 +33798,59 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1754805569}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1765018803
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1765018804}
+  - component: {fileID: 1765018805}
+  m_Layer: 2
+  m_Name: FailedRocketZone
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1765018804
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765018803}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.47, y: 1.125, z: 2.145}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1346871127}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1765018805
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765018803}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.90000004, y: 0.5, z: 3.6}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1791487638
 GameObject:
   m_ObjectHideFlags: 0
@@ -37220,6 +37317,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2067750791}
   m_CullTransparentMesh: 1
+--- !u!1 &2080007307
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2080007308}
+  m_Layer: 0
+  m_Name: FailedRocketSpot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2080007308
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2080007307}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.000000030908623, y: 0.7071068, z: 0.7071068, w: -0.000000030908623}
+  m_LocalPosition: {x: -1.47, y: 0.87499994, z: 1.8850471}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1346871127}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2088818958
 GameObject:
   m_ObjectHideFlags: 0
@@ -44006,3 +44134,4 @@ SceneRoots:
   - {fileID: 817437046}
   - {fileID: 766360189}
   - {fileID: 1916515090}
+  - {fileID: 1346871127}
