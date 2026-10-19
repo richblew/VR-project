@@ -22,7 +22,6 @@ The project is organised **by type**: scenes in `Assets/Scenes`, scripts in `Ass
 | `Packages/`, `ProjectSettings/` | packages and project settings | shared |
 | `Docs/` | the original design spec, port notes, progress log, credits, screenshots | VR Rocket |
 | `specs/` | these specs | everyone |
-| `.claude/` | instructions for Claude Code agents working in this repo | everyone |
 
 Never committed (ignored by `.gitignore`): `Library/`, `Temp/`, `Logs/`, `UserSettings/`, `Builds/`, `*.apk`. Also keep out: `.utmp/` (left by Android builds) and `Assets/InitTestScene*.unity` (left by the Test Runner when a run is interrupted).
 
