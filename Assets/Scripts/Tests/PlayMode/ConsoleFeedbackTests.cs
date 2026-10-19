@@ -238,6 +238,67 @@ namespace VRRocket.Tests
         }
 
         /// <summary>Builds the rocket from the current kit, fin i in finSlots[i] and flap i in flapSlots[i], the cap seated but never twisted, and submits it.</summary>
+        bool InBin(RocketPart part) => Bin.GetComponent<Collider>().bounds.Contains(part.transform.position);
+
+        /// <summary>Carries a part over the bin, lets go, and gives it time to fall to the bottom of the shaft.</summary>
+        IEnumerator DropInBin(RocketPart part)
+        {
+            yield return Grab(part);
+            yield return PlaceHeld(Bin.GetComponent<Collider>().bounds.center + Vector3.up * 0.15f, part.transform.rotation);
+            Release(part);
+            yield return new WaitForSeconds(0.7f);
+            Assert.IsTrue(InBin(part), part.name + " lies in the bin");
+        }
+
+        [UnityTest]
+        public IEnumerator A_Flap_Thrown_In_The_Bin_Comes_Back_To_The_Workbench()
+        {
+            yield return StartBuilding();
+            RocketPart respawned = null;
+            System.Action<RocketPart> onRespawned = p => respawned = p;
+            AssemblyEvents.PartRespawned += onRespawned;
+            try
+            {
+                // a rocket with everything on but one flap, and that flap goes in the bin
+                for (var i = 1; i <= 3; i++) yield return SeatPart(Part(PartType.TailFin, i), Point("FinSlot_" + i));
+                yield return SeatPart(Part(PartType.WingFlap, 1), Point("FlapSlot_Mid_1"));
+                yield return SeatPart(Part(PartType.WingFlap, 2), Point("FlapSlot_Mid_2"));
+                var flap = Part(PartType.WingFlap, 3);
+                yield return DropInBin(flap);
+                Assert.AreEqual(BinState.Empty, Bin.state, "the bin only counts rockets");
+                yield return new WaitForSeconds(tuning.respawnDelay + 0.5f);
+                Assert.AreSame(flap, respawned, "the flap does not stay in the bin: it respawns like any part dropped out of reach");
+                Assert.IsFalse(InBin(flap));
+                Assert.AreEqual(PartState.Free, flap.state);
+                Assert.Less(Vector3.Distance(flap.transform.position, workstation.partsTray.position), 1f, "it is back on the workbench");
+                Assert.AreEqual(GamePhase.Assembly, Flow.phase);
+            }
+            finally { AssemblyEvents.PartRespawned -= onRespawned; }
+        }
+
+        [UnityTest]
+        public IEnumerator Submit_With_Only_A_Loose_Part_In_The_Bin_Sends_It_Back_And_Says_Why()
+        {
+            yield return StartBuilding();
+            RocketPart respawned = null;
+            System.Action<RocketPart> onRespawned = p => respawned = p;
+            AssemblyEvents.PartRespawned += onRespawned;
+            try
+            {
+                var flap = Part(PartType.WingFlap, 1);
+                yield return DropInBin(flap);
+                Bin.Submit();
+                Assert.AreSame(flap, respawned, "SUBMIT sends the flap straight back to the workbench");
+                Assert.IsFalse(InBin(flap));
+                Assert.AreEqual("ONLY ROCKETS", ScreenTitle, "and the screens say a part on its own cannot be submitted");
+                StringAssert.Contains("wing flap", ScreenStatus);
+                Assert.AreEqual(1, m_Refusals, "a refused press buzzes the hand");
+                Assert.AreEqual(GamePhase.Assembly, Flow.phase, "nothing was submitted");
+                Assert.AreNotEqual(AssemblyState.Submitted, assembly.State);
+            }
+            finally { AssemblyEvents.PartRespawned -= onRespawned; }
+        }
+
         IEnumerator BuildAndSubmit(string[] finSlots, string[] flapSlots, bool flap2UpsideDown)
         {
             for (var i = 0; i < 3; i++) yield return SeatPart(Part(PartType.TailFin, i + 1), Point(finSlots[i]));

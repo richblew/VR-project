@@ -86,6 +86,7 @@ Pressing a button at the wrong time is harmless and always answered: the screens
    - on the menu or in the intro: a buzz only;
    - the console offline: CONSOLE FAULT;
    - a rocket already submitted: ALREADY SUBMITTED;
+   - **loose parts in the bin** (off the rocket, not in a hand): sent straight back to the workbench pad, with the bin-opening sound. With no rocket in the bin as well, the press is refused: ONLY ROCKETS / LOOSE PART, "A wing flap on its own cannot be submitted: fit it to your rocket. It is back on your workbench." With a rocket in the bin, its submission goes on as below;
    - Empty, RocketHeld, OldRocket: refused with the reason ([spec 02](02-game-engine.md) section 4);
    - **PartsMissing:** the bin takes it (`RocketAssembly.TryTakeIncomplete`), sinks it 0.3 m over 0.8 s, shows PARTS MISSING with the list, then brings it back up on the workbench at its spot, editable (`ReturnIncomplete`). Not a flight;
    - **Ready:** `RocketAssembly.TrySubmit()`, `onAccepted`, the rocket is frozen and the game engine moves to PreLaunch. The bin plays the door-close sound and **sinks** the rocket 0.45 m down over 1.2 s, then hides it. If the player aborts during the sink, it stops.
@@ -126,7 +127,7 @@ The console's right side monitor (`ConsoleAddOn/ConsoleMonitorRight`, written by
 
 **Safe zones** also include `FailedRocketDesk/FailedRocketZone` over that side desk, so the failed rocket stays where it was put.
 
-**Safe zones:** the bin's trigger and `ConsoleZone` (a 4.0 × 0.4 × 0.6 m trigger over the shelf) are registered with `PartRespawner` as safe zones, so a rocket or part resting there never jumps back to the desk, even though the bin shaft is lower than the desk.
+**Safe zones:** the bin's trigger and `ConsoleZone` (a 4.0 × 0.4 × 0.6 m trigger over the shelf) are registered with `PartRespawner` as safe zones, so a rocket or part resting there never jumps back to the desk, even though the bin shaft is lower than the desk. **Except loose parts in the bin:** the bin only keeps the rocket, so a part thrown in on its own comes back to the workbench after the respawn delay (1.5 s), or at once on SUBMIT.
 
 ## 4. The invisible console colliders
 

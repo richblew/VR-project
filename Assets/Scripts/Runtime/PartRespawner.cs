@@ -13,7 +13,7 @@ namespace VRRocket
     {
         [SerializeField] AssemblyTuning m_Tuning;
         [SerializeField, Tooltip("Trigger box marking the workstation bounds. Parts outside it for respawnDelay respawn.")] BoxCollider m_Bounds;
-        [SerializeField, Tooltip("Extra zones that count as in bounds (the submission bin, the console top). Parts inside any of them never respawn.")] List<BoxCollider> m_SafeZones = new List<BoxCollider>();
+        [SerializeField, Tooltip("Extra zones that count as in bounds (the submission bin, the failed-rocket desk). Parts inside any of them never respawn, except loose parts in the submission bin: the bin only keeps the rocket.")] List<BoxCollider> m_SafeZones = new List<BoxCollider>();
         [SerializeField, Tooltip("Parts below this world-space offset from the pad (metres, negative) have touched the floor and respawn at once.")] float m_FloorOffset = -0.5f;
         [SerializeField, Tooltip("Centre of the respawn pad. Parts are laid out in a small grid around it.")] Transform m_Pad;
         [SerializeField] Vector2 m_PadSlotSpacing = new Vector2(0.08f, 0.08f);
@@ -42,14 +42,26 @@ namespace VRRocket
             if (zone != null && !m_SafeZones.Contains(zone)) m_SafeZones.Add(zone);
         }
 
-        /// <summary>Is the position inside the workstation bounds or any safe zone?</summary>
-        public bool Contains(Vector3 position)
+        /// <summary>Is the position inside the workstation bounds or any safe zone? (Where the rocket counts as in bounds.)</summary>
+        public bool Contains(Vector3 position) => Contains(position, true);
+
+        /// <summary>
+        /// The submission bin's zone keeps only the rocket safe (it rests in the bin to be submitted). A loose part dropped or thrown
+        /// into the bin is out of bounds like anywhere else, so it comes back to the workbench instead of staying in the shaft.
+        /// </summary>
+        bool Contains(Vector3 position, bool rocket)
         {
             if (m_Bounds != null && m_Bounds.bounds.Contains(position)) return true;
             for (var i = 0; i < m_SafeZones.Count; i++)
-                if (m_SafeZones[i] != null && m_SafeZones[i].bounds.Contains(position)) return true;
+            {
+                var zone = m_SafeZones[i];
+                if (zone == null || (!rocket && IsBinZone(zone))) continue;
+                if (zone.bounds.Contains(position)) return true;
+            }
             return false;
         }
+
+        static bool IsBinZone(BoxCollider zone) => zone.GetComponentInParent<SubmissionBin>() != null;
 
         void Awake()
         {
@@ -107,7 +119,7 @@ namespace VRRocket
                 var grab = part.grabInteractable;
                 if (grab != null && grab.isSelected) { m_OutsideTimers[part] = 0f; continue; }
                 var pos = part.transform.position;
-                if (Contains(pos))
+                if (Contains(pos, false))
                 {
                     m_OutsideTimers[part] = 0f;
                     continue;

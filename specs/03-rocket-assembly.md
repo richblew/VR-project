@@ -230,6 +230,7 @@ A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits
 
 - A loose part that is not held and is outside `WorkstationBounds` and every safe zone for **Respawn Delay** (1.5 s) reappears on `RespawnPad`.
 - A part that falls below the floor line (0.5 m below the pad) respawns at once, unless it is inside a safe zone (the bin shaft is below that line).
+- **The submission bin's zone keeps only the rocket.** A loose part dropped or thrown into the bin counts as out of bounds and comes back to `RespawnPad` after Respawn Delay, like a part dropped anywhere else (`PartRespawner` treats any safe zone with a `SubmissionBin` on it this way). Pressing SUBMIT sends it back at once ([spec 07](07-console-and-bin.md)).
 - Respawned parts are laid out in a little grid on the pad (3 columns, 8 cm apart), at rest, with a soft "pop".
 
 **The dropped rocket** (`RocketAssembly.Update`): the working rocket, out of bounds and not held, goes back to the tube's original spot on the tray after the same delay. A dropped **inspection prototype** goes back to where it was returned.

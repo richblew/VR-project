@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,6 +14,8 @@ namespace VRRocket
     /// <list type="bullet">
     /// <item>a complete rocket (all nine parts) is submitted and sinks into the bin;</item>
     /// <item>an unfinished one sinks for a moment, the screens say what is missing, and it comes back up on the workbench, editable;</item>
+    /// <item>a loose part in the bin goes straight back to the workbench (it would anyway, after the respawn delay); with no rocket
+    /// in the bin the screens say a part on its own cannot be submitted;</item>
     /// <item>anything else (an empty bin, a rocket still in the hand, the rocket that failed, a rocket already submitted, the
     /// console offline) is refused with the reason on the screens, a buzz and a vibration.</item>
     /// </list>
@@ -127,6 +130,20 @@ namespace VRRocket
                 Refuse("ALREADY SUBMITTED", "ON THE PAD", "Your rocket is on the pad. Press LAUNCH, or ABORT to bring it back.");
                 return;
             }
+            // A part thrown or dropped into the bin is not a rocket: it goes straight back to the workbench.
+            var loose = LoosePartsInside(a);
+            if (loose.Count > 0)
+            {
+                var detail = LooseDetail(loose);
+                var respawner = RespawnerOf(a);
+                foreach (var p in loose) respawner.Respawn(p);
+                PlayOpen();
+                if (state == BinState.Empty)
+                {
+                    Refuse("ONLY ROCKETS", loose.Count == 1 ? "LOOSE PART" : "LOOSE PARTS", detail);
+                    return;
+                }
+            }
             switch (state)
             {
                 case BinState.Empty:
@@ -202,6 +219,46 @@ namespace VRRocket
             PlayOpen();
             a.ReturnIncomplete();
             m_Busy = false;
+        }
+
+        readonly List<RocketPart> m_Loose = new List<RocketPart>(4);
+
+        static PartRespawner RespawnerOf(RocketAssembly a)
+        {
+            var ws = a.GetComponent<RocketWorkstation>();
+            return ws != null && ws.respawner != null ? ws.respawner : FindAnyObjectByType<PartRespawner>();
+        }
+
+        /// <summary>Loose parts lying in the bin: off the rocket and out of the hand.</summary>
+        List<RocketPart> LoosePartsInside(RocketAssembly a)
+        {
+            m_Loose.Clear();
+            var respawner = RespawnerOf(a);
+            var zone = GetComponent<Collider>();
+            if (respawner == null || zone == null) return m_Loose;
+            var box = zone.bounds;
+            foreach (var p in respawner.parts)
+                if (p != null && p.state == PartState.Free && !p.isHeld && p.gameObject.activeInHierarchy && box.Contains(p.transform.position)) m_Loose.Add(p);
+            return m_Loose;
+        }
+
+        static string LooseDetail(List<RocketPart> loose)
+        {
+            if (loose.Count > 1) return "Loose parts cannot be submitted on their own: fit them to your rocket. They are back on your workbench.";
+            return "A " + PartName(loose[0].partType) + " on its own cannot be submitted: fit it to your rocket. It is back on your workbench.";
+        }
+
+        static string PartName(PartType type)
+        {
+            switch (type)
+            {
+                case PartType.TailFin: return "tail fin";
+                case PartType.WingFlap: return "wing flap";
+                case PartType.NoseCone: return "nose cone";
+                case PartType.Motor: return "battery";
+                case PartType.MotorCap: return "battery cap";
+                default: return "part";
+            }
         }
 
         /// <summary>Plays the "bin opens" sound when something is returned through it.</summary>
