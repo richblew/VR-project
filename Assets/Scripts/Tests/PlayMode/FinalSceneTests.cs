@@ -58,8 +58,11 @@ namespace VRRocket.Tests
                 Assert.IsFalse(jump.enabled, "Jump off");
             Assert.AreEqual(XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "floor tracking: the player is their real height");
             Assert.AreEqual(0f, origin.CameraYOffset, "no camera offset to add height in any mode");
+            // Yi-Xuan's room-scale rig (hand models, calibrated to the real room) has no stick locomotion: the player walks the room
+            var roomScale = false;
+            foreach (var mb in Object.FindObjectsByType<MonoBehaviour>()) if (mb.GetType().Name == "RoomCalibrator" && mb.isActiveAndEnabled) roomScale = true;
             var mediator = origin.GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.LocomotionMediator>(true);
-            Assert.IsTrue(mediator != null && mediator.gameObject.activeInHierarchy, "locomotion (move, turn, teleport, gravity) is on");
+            if (!roomScale) Assert.IsTrue(mediator != null && mediator.gameObject.activeInHierarchy, "locomotion (move, turn, teleport, gravity) is on");
             var cc = origin.GetComponent<CharacterController>();
             if (cc != null) Assert.GreaterOrEqual(cc.center.y - cc.height * 0.5f, -0.001f, "the body capsule does not reach below the feet");
             for (var i = 0; i < 90; i++) yield return null;

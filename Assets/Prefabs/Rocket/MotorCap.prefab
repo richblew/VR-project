@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1103938074413026780}
   - component: {fileID: 3214221124227867370}
   - component: {fileID: 1669978548150984183}
+  - component: {fileID: 5832018861713969983}
   m_Layer: 0
   m_Name: MotorCap
   m_TagString: Untagged
@@ -213,8 +214,8 @@ MonoBehaviour:
   m_SnapToColliderVolume: 1
   m_ReinitializeDynamicAttachEverySingleGrab: 1
   m_AttachEaseInTime: 0
-  m_MovementType: 1
-  m_PredictedVisualsTransform: {fileID: 8506055962424925712}
+  m_MovementType: 2
+  m_PredictedVisualsTransform: {fileID: 0}
   m_VelocityDamping: 1
   m_VelocityScale: 1
   m_AngularVelocityDamping: 1
@@ -232,7 +233,7 @@ MonoBehaviour:
   m_SmoothScaleAmount: 8
   m_TightenScale: 0.1
   m_ThrowOnDetach: 1
-  m_ThrowSmoothingDuration: 0.25
+  m_ThrowSmoothingDuration: 0.15
   m_ThrowSmoothingCurve:
     serializedVersion: 2
     m_Curve:
@@ -248,7 +249,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_ThrowVelocityScale: 1.5
+  m_ThrowVelocityScale: 1
   m_ThrowAngularVelocityScale: 1
   m_ForceGravityOnDetach: 0
   m_UnparentTransformOnGrab: 1
@@ -257,10 +258,10 @@ MonoBehaviour:
   m_StartingMultipleGrabTransformers: []
   m_AddDefaultGrabTransformers: 1
   m_FarAttachMode: 0
-  m_LimitLinearVelocity: 0
-  m_LimitAngularVelocity: 0
-  m_MaxLinearVelocityDelta: 10
-  m_MaxAngularVelocityDelta: 20
+  m_LimitLinearVelocity: 1
+  m_LimitAngularVelocity: 1
+  m_MaxLinearVelocityDelta: 3
+  m_MaxAngularVelocityDelta: 8
 --- !u!114 &6783473487170415487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,7 +303,6 @@ MonoBehaviour:
   m_Tuning: {fileID: 11400000, guid: 5bec0ada554af36478887b4b612ebda8, type: 2}
   m_ClockwiseFromBelowIsNegativeYaw: 1
   m_GapCloseDuration: 0.1
-  m_PositionModeRadius: 0.03
 --- !u!114 &3214221124227867370
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,6 +329,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: VRRocket.Runtime::VRRocket.ImpactAudio
   m_MinSpeed: 0.25
   m_Cooldown: 0.12
+--- !u!114 &5832018861713969983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1219120453780004628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d05d0d682a67345448949dd865479d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CablePuzzle.GrabPose
+  closure: 0.8
+  snapToHoldPoint: 1
+  holdOffset: {x: 0, y: 0, z: 0}
+  holdRotation: {x: 0, y: 0, z: -90}
 --- !u!1 &3803707007211446495
 GameObject:
   m_ObjectHideFlags: 0

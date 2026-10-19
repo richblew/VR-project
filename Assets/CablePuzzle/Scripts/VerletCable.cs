@@ -74,8 +74,10 @@ namespace CablePuzzle
                 Init();
             if (pos.Length < 2) return;
 
-            // The whole box was moved/teleported: restart the rope instead of letting it whip.
-            if (Vector3.Distance(pos[0], startAnchor.position) > TeleportDistance)
+            // The whole box was moved/teleported, or the connector was (e.g. a plug respawning):
+            // restart the rope instead of letting it whip.
+            if (Vector3.Distance(pos[0], startAnchor.position) > TeleportDistance ||
+                Vector3.Distance(pos[pos.Length - 1], endAnchor.position) > TeleportDistance)
                 ResetRope();
 
             accumulator += Mathf.Min(Time.deltaTime, 0.05f);

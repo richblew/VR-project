@@ -31,6 +31,7 @@ namespace VRRocket.Tests
             yield return Grab(nose);
             Assert.AreEqual(PartState.Free, nose.state);
             Assert.IsFalse(guide.isGuided);
+            var grabOffset = heldOffset;   // the hand's offset from the nose's origin, as it settled in the hand
 
             // Free, far: follows the hand, no glow
             yield return MoveHand(seatPos + new Vector3(0.4f, 0.1f, 0f) + grabOffset);
@@ -96,7 +97,7 @@ namespace VRRocket.Tests
             Assert.IsTrue(playedSeatClip, "nose seat clip was queued on a pooled 3D source");
 
             // Remove: grab the seated nose, it re-enters the guide at depth 0, pulling past guideLength detaches
-            yield return Grab(nose);
+            yield return Grab(nose);   // the hand holds it as before: keep the offset from the first grab (the guide is already moving it)
             Assert.IsTrue(guide.isGuided, "grabbing an attached part re-enters the guide");
             Assert.AreEqual(PartState.Guided, nose.state);
             var d3 = guideLen * 0.5f;
@@ -128,6 +129,7 @@ namespace VRRocket.Tests
             var captureR = tuning.captureRadius;
 
             yield return Grab(nose);
+            var grabOffset = heldOffset;
             // Approach along the axis to just outside capture, then step just inside with a sideways offset:
             // the part must ease onto the axis over guideBlendDuration rather than snap.
             yield return MoveHand(seatPos + Vector3.up * (captureR * 1.3f) + grabOffset);
