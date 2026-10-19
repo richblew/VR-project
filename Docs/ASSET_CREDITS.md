@@ -1,6 +1,6 @@
 # Asset credits
 
-Every third-party asset that the VR Rocket port added to this project, and a placeholder for the room's own assets. Licence texts:
+Every third-party asset in this project: those added with the VR Rocket game, the hand models, Unity's own packages, and the room's assets (whose sources are still to be recorded by the room's owners). Licence texts:
 
 - CC0: https://creativecommons.org/publicdomain/zero/1.0/
 - BSD 2-Clause: as noted.
@@ -29,10 +29,16 @@ Every third-party asset that the VR Rocket port added to this project, and a pla
 | Power cable (high poly) | icvetlan (Sketchfab) | https://sketchfab.com/3d-models/power-cable-hight-poly-9b7fe4759a694c978a11c1ccbd64356f | CC BY 4.0 | 2026-10-13 | the wiring puzzle's plugs: the Schuko plug head only, reduced from 8.3k to 1.5k triangles (`Assets/Models/Console/Console_Plug.fbx`) |
 | Handles | RuslanOz (@KarinaOz, Sketchfab) | https://sketchfab.com/3d-models/handles-ddd1c24620814c2eb022b97c90c7df2f | CC BY 4.0 | 2026-10-13 | the wiring hatch's grip: the bar pull only, reduced to 1.2k triangles (`Assets/Models/Console/Console_Grip.fbx`) |
 | DiamondPlate008D | ambientCG | https://ambientcg.com/view?id=DiamondPlate008D | CC0 | 2026-10-13 | the wiring hatch's tread plate (`Assets/Texture/Console`) |
-| Rubber004 | ambientCG | https://ambientcg.com/view?id=Rubber004 | CC0 | 2026-10-13 | the puzzle cables' rubber, tinted per pair (`Assets/Texture/Console`) |
+| Rubber004 | ambientCG | https://ambientcg.com/view?id=Rubber004 | CC0 | 2026-10-13 | the puzzle cables' rubber, tinted per pair (`Assets/Texture/Console`), and the normal map of the glove material on the hand models (`Assets/PolyOneHands/Free VR Hands/Texture`) |
 | Simple AA Battery | MasterYogurt (Sketchfab) | https://sketchfab.com/3d-models/simple-aa-battery-5dcd884e27b642c8a7932a227d7c1b7a | CC BY 4.0 | 2026-10-13 | the rocket's battery (the kit part that was the motor), scaled to 24 x 70 mm, + end up (`Assets/Models/Rocket/Battery.fbx`, `Assets/Texture/Rocket/Battery_*.png`) |
 
 Beeps, chimes, buzzes and the abort siren are generated in code (`ProceduralAudio`).
+
+## Hand models
+
+| Asset | Author | Source | Licence | Used for |
+|---|---|---|---|---|
+| Free Pack - VR Hands (Rigged) | PolyOne Studio | Unity Asset Store (added by Yi-Xuan); the same pack is on Sketchfab: https://sketchfab.com/3d-models/free-pack-vr-hands-rigged-b3b8309e59c748e3956531c8f57dd233 | the Sketchfab copy is CC BY; the licence of the copy used here is Yi-Xuan's to confirm | the hand models of the rig in `VRRocket_Final` (`Assets/PolyOneHands`) |
 
 ## Unity
 
@@ -40,6 +46,9 @@ Beeps, chimes, buzzes and the abort siren are generated in code (`ProceduralAudi
 |---|---|---|---|---|
 | XR Interaction Toolkit Examples 3.4.0 (subset) | Unity Technologies | https://github.com/Unity-Technologies/XR-Interaction-Toolkit-Examples | Unity Companion License | the console push buttons: `XRPushButton.cs`, `PushButton.fbx`, four materials, two affordance themes, three button sounds (`Assets/ThirdParty/XRI_Examples`) |
 | TextMesh Pro (LiberationSans SDF) | Unity Technologies / Red Hat (font) | Unity package | Unity Companion License / SIL OFL (font) | console and help-board labels |
+| XR Interaction Toolkit 3.6.1 samples: Starter Assets and XR Device Simulator | Unity Technologies | XR Interaction Toolkit package samples | Unity Companion License | the XR rig, its input actions and controller visuals, and the device simulator for testing without a headset (`Assets/Samples/XR Interaction Toolkit/3.6.1`) |
+| Particle System | Unity Technologies | built into Unity | Unity | the launch effects (engine flame, smoke, sparks, explosions), set up by us with the Kenney Particle Pack textures above |
+| URP project template readme | Unity Technologies | Universal 3D project template | Unity Companion License | `Assets/TutorialInfo` (left from the template, not used by the game) |
 
 ## Not carried over from the VR Rocket test project
 
@@ -51,7 +60,7 @@ Added by the room's owners. Their source and licence are theirs to record here:
 
 - `Assets/Models/hq.fbx` (mission control console)
 - the `Assets/TV LED 30*` model
-- the NASA logo and TV images
-- the "no signal" and transmission videos
-- the announcement audio
-- the wall and floor textures
+- the NASA logo and TV images (`Assets/TV images`)
+- the portraits, Apollo 11, Artemis II and Moon landing pictures and the name plaques (`Assets/Frames`)
+- the "no signal" and transmission videos and the incoming-transmission audio (`Assets/Transmission`)
+- the wall and floor textures, `Assets/Wood.jpg`, `Assets/A23DTEX_Albedo*.jpg`, the light profile `Assets/A23D_General-Light_IES.ies` and the wall panel `Assets/TV-wall-panel-01-2017-obj.obj`

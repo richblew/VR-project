@@ -87,4 +87,17 @@ Toolkits used
 - TV imports from free assets
 - Puzzle and sockets are from sketchfab
 - Hand model from the Unity Asset store
-- Particle simulator
+- Unity Particle System for the launch effects (set up by Praise), with textures from Kenney's Particle Pack (CC0)
+- Sound effects from Kenney's Sci-Fi Sounds and Impact Sounds (CC0)
+- Model rocket kit by ellipticaloptician on Printables (BSD 2-Clause), cleaned up in Blender
+- Battery model from Sketchfab (MasterYogurt, CC BY 4.0)
+- Push buttons from Unity's XR Interaction Toolkit Examples
+- Fonts: Orbitron and Share Tech Mono (SIL Open Font License)
+- Full list with authors, sources and licences: Docs/ASSET_CREDITS.md
+
+AI usage
+
+We used Claude to help with:
+- Writing the scripts
+- Understanding and working with XR interactions
+- Research, and coming up with ideas on how to refine the interactions
