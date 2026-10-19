@@ -51,7 +51,7 @@ Assets
 │  │                        Generated/ (glow meshes for the attach points)
 │  └─ Environment/          RightWall_Window.asset: the window wall mesh (generated, spec 01)
 ├─ Materials/               the room team's materials, plus:
-│  ├─ Rocket/               Glow and the part colours (Rocket_Black, _Cardboard, _Orange, _White)
+│  ├─ Rocket/               Glow and the part colours (Rocket_Black, _Cardboard, _Orange, _Red, _White)
 │  ├─ Launch/               Mat_Particle_* (flame, smoke, steam, sparks, explosion)
 │  ├─ Screens/              Mat_LaunchScreen, Mat_PadFeed, Mat_ScreenBand, Mat_Diagram, Mat_Black, Mat_SmallScreen
 │  └─ Environment/          console, window, help board and outside: Mat_AccentGreen, Mat_AccentRed,

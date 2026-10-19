@@ -162,6 +162,22 @@ namespace VRRocket.Tests
                 Assert.AreEqual(36f, VehicleRatio(launch, name, Part(type)), 0.5f, name + ": the launch rocket shows the kit part at 36 times (a model swap must not shrink it)");
         }
 
+        static string PartMaterial(Transform part) => part.Find("Mesh").GetComponent<MeshRenderer>().sharedMaterial.name;
+
+        [UnityTest]
+        public IEnumerator Wing_Flaps_Are_Red_And_Tail_Fins_Orange_On_The_Kit_And_The_Launch_Rocket()
+        {
+            yield return null;
+            var launch = Launch;
+            foreach (var id in new[] { 1, 2, 3 })
+            {
+                StringAssert.StartsWith("Rocket_Red", PartMaterial(Part(PartType.WingFlap, id).transform), "kit flap " + id + " is red, so it reads apart from the fins");
+                StringAssert.StartsWith("Rocket_Red", PartMaterial(VehiclePart(launch, "WingFlap_" + id)), "and so is the launch rocket's flap " + id);
+                StringAssert.StartsWith("Rocket_Orange", PartMaterial(Part(PartType.TailFin, id).transform), "kit fin " + id + " stays orange");
+                StringAssert.StartsWith("Rocket_Orange", PartMaterial(VehiclePart(launch, "TailFin_" + id)), "and so does the launch rocket's fin " + id);
+            }
+        }
+
         [UnityTest]
         public IEnumerator A_Blown_Out_Battery_Comes_Back_Its_Own_Size()
         {

@@ -148,12 +148,12 @@ The blueprint panel and a second screen stand on the back of the assembly desk a
 | Step on the blueprint | Picture (`Assets/Texture/BuildSteps/`) |
 |---|---|
 | STEP 1 tail fins | `BuildStep_1_Fins.png`: tube with the three fins |
-| STEP 2 wing flaps | `BuildStep_2_Flaps.png`: plus the flaps at the midpoint |
+| STEP 2 wing flaps | `BuildStep_2_Flaps.png`: plus the red flaps at the midpoint |
 | STEP 3 nose cone | `BuildStep_3_Nose.png` |
 | STEP 4 motor | `BuildStep_4_Motor.png` |
 | STEP 5 motor cap, COMPLETE, menu, rocket on the pad | `BuildStep_5_Cap.png`: the finished rocket |
 
-`BlueprintDisplay` swaps the picture with a material property block on the screen's `_BaseMap`; its **Image Screen** and **Step Images** fields hold the screen and the five pictures. `GameFlowTests` checks the picture follows the build.
+The pictures are rendered from `AssembledRocket_Static.prefab` by **VR Rocket > Capture Build Step Images**: rerun it after changing a part's model or colour (last run 19 October 2026, for the red flaps and the notched fins). `BlueprintDisplay` swaps the picture with a material property block on the screen's `_BaseMap`; its **Image Screen** and **Step Images** fields hold the screen and the five pictures. `GameFlowTests` checks the picture follows the build.
 
 **To remake the pictures** (for example after the rocket's look changes): run **VR Rocket > Capture Build Step Images**. It renders `Prefabs/Rocket/AssembledRocket_Static.prefab` lying on its side, nose to the right, against the menu's dark background, adding the parts step by step, at 768 x 512. **To rebuild the monitor** in `VRRocket_Main`: **VR Rocket > Set Up Build Step Monitor**, then save the scene (it copies the blueprint panel's frame and screen, and wires `BlueprintDisplay`). To use other pictures (a slideshow, Richard's art), drop them into Step Images in the same order.
 

@@ -17,7 +17,7 @@ The rocket parts, how they are grabbed and attached, the motor cap twist, the bu
 |---|---|---|---|---|---|
 | Body tube | 1 | `BodyTube` | 0.2 kg | (carries everything) | 0.30 m long, about 34 mm wide; all 12 attach points are on it |
 | Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight. Like the flaps, its attaching edge has a tab 2 mm proud along the middle 45 mm of its 58.6 mm root, notched at both ends (`TailFin.fbx`, rebuilt 19 October 2026) |
-| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose**. Its attaching edge has a tab 2 mm proud along the middle 60 mm of its 78 mm root |
+| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose**. Its attaching edge has a tab 2 mm proud along the middle 60 mm of its 78 mm root. **Red** (`Rocket_Red.mat`, #F31E1E, the red of Yi-Xuan's test fin), so it reads apart from the orange tail fins |
 | Nose cone | 1 | `NoseCone_1` | 0.08 kg | `NoseSeat` on top | is pulled gently onto the seat (magnetism) |
 | Motor | 1 | `Motor_1` | 0.08 kg | `MotorSeat` at the bottom | the battery: + end into the tube only; held the wrong way up, nothing glows |
 | Motor cap | 1 | `MotorCap_1` | 0.06 kg | `CapSeat` at the bottom | needs the motor first; seats unlocked, then must be **twisted until it clicks** |
@@ -336,6 +336,8 @@ All in `Assets/Scripts/Runtime/`, namespace `VRRocket`:
 **Make the cap lock with less twist.** Lower Cap Lock Angle (keep it a multiple of Cap Detent Angle so the last tick is the lock).
 
 **Change a part's look.** Edit its prefab's `Mesh` child (or its material in `Assets/Materials/Rocket`, for example `Rocket_Orange.mat`). Keep the root's collider roughly matching the new shape.
+
+**Change a part's colour everywhere.** A kit part gets its material from its FBX's import settings (Materials > Remapped Materials: the FBX's own material, for example the flap's `Rocket_Orange`, mapped to a project material). Change that remap, then the same part's `Mesh` renderers in `Assets/Prefabs/Launch/LaunchVehicle.prefab` (the launch rocket sets its materials directly), then run **VR Rocket > Capture Build Step Images** for the step pictures. `LaunchEffectsTests` checks the kit and launch rocket agree for the flaps and fins.
 
 ## 14. Troubleshooting
 

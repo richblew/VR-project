@@ -477,3 +477,10 @@ From Praise: the tail fins did not appear on the launch rocket; on the second la
 - **From main:** Richard's new wording for the five build-step hints on the blueprint monitor (spec 05 updated to match); Yi-Xuan's rubber-glove material on the hand models; the failed-rocket desk area made smaller to fit the room (the spot moved with it and still sits on the right side desk, the rocket lying along the zone with room to spare); a font asset reset. Merged cleanly, kept as they made them.
 - **Rigs:** unchanged. Yi-Xuan's rig is on and ours is off in the scene; ours is only switched on for Praise's own Quest builds.
 - **Verified:** edit mode 44/44, play mode 75/75 (the failed rocket still lands and stays on the side desk).
+
+## 2026-10-19: Red wing flaps (done)
+
+From Praise, in line with Richard's new step hints ("orange fins" at the base, "red fins" in the upper slots): the wing flaps are now red so the two kinds of fin read apart.
+- **The red** is Yi-Xuan's test fin's (`testTail.fbx` on her branch, its material imported by Unity as #F31E1E), on a new `Rocket_Red.mat` that is otherwise our orange (same smoothness, no metal).
+- **Everywhere a rocket is shown:** the kit's flaps (the flap model's material now maps to `Rocket_Red`), the launch rocket's three flaps, and the five build-step pictures (re-rendered; they now also show the notched fins). The pad camera feed, the explosion debris and the failed rocket on the side desk show the same parts, so they follow. Tail fins and the nose are unchanged.
+- **Verified:** new test, flaps red and fins orange on the kit and the launch rocket; pictures of the launch rocket on the pad, the kit on the tray and the new step pictures checked. Edit mode 44/44, play mode 76/76.
