@@ -441,3 +441,11 @@ From Praise: only SUBMIT on a dead console said anything; LAUNCH and ABORT got n
 - **Failed rockets** come back on the side desk under the moon-landing painting, lying along it, examinable but not editable.
 - **The launch rocket is the one built:** flaps on the slots they were put on, upside down where they went on upside down, missing parts left off, an unlocked cap sitting out of the base.
 - **Verified:** edit mode 44/44, play mode 69/69 (new `ConsoleFeedbackTests`, 9 tests; checked the side desk and the screens in pictures). Feel in the headset still to check.
+
+## 2026-10-19: Main merged (Yi-Xuan's hand rig and plug respawn); the team's playtest list worked through (done)
+
+- **Merged main:** Yi-Xuan's hand-model rig with room calibration is now the rig in use (room-scale, no stick locomotion); her plug respawn replaces the guard colliders, so a plug that falls out of the box comes back; the puzzle box is a prefab; rocket parts carry her GrabPose and gentler throw settings; Richard's intro video without the "leave a like" end. Her changes are kept as they are, cable thickness included. Tests updated for her rig (the hand-part offset is measured once a grab settles; room-scale has no locomotion).
+- **Fixed:** "Particle Velocity curves must all be in the same mode" errors from the explosion and pad smoke (one axis had a range, the others fixed numbers).
+- **Cap twist cue:** an unlocked seated cap shows an orange arrow circling it the way it locks, and its glow pulses, until it locks. The bin monitor's READY screen asks "Cap twisted until it clicks?".
+- **Fin and flap glow** is a band round the root edge, visible from both faces at any angle; the glow material is double-sided.
+- **Verified:** edit mode 44/44, play mode 72/72 (new: twist arrow, glow band, plug comes back). Feel in the headset still to check.

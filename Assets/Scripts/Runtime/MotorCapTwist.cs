@@ -28,6 +28,12 @@ namespace VRRocket
         bool m_ClockwiseFromBelowIsNegativeYaw = true;
         [SerializeField, Tooltip("Seconds for the 2 mm gap to close when the cap locks.")]
         float m_GapCloseDuration = 0.1f;
+        [Header("Twist hint")]
+        [SerializeField, Tooltip("While the cap is seated but not locked, an arrow circles it in the direction it twists and its glow pulses, so the player knows it needs turning")]
+        bool m_ShowTwistHint = true;
+        [SerializeField, Tooltip("Degrees per second the arrow travels round the cap")] float m_HintSpeed = 120f;
+        [SerializeField, Tooltip("Arrow radius round the tube's axis, metres before scale")] float m_HintRadius = 0.026f;
+        [SerializeField, ColorUsage(false, true)] Color m_HintColor = new Color(1f, 0.55f, 0.1f) * 2f;
 
         readonly CapTwistLogic m_Logic = new CapTwistLogic();
         RocketPart m_Part;
@@ -59,6 +65,15 @@ namespace VRRocket
         public float progressDegrees => m_Logic.progress;
         public bool isTwisting => m_Active;
         public float seatOffset => m_GapShown;
+        /// <summary>The twist hint (arrow round the cap, pulsing glow) is showing: seated on the rocket being built, not locked.</summary>
+        public bool twistHintShown => m_Hint != null && m_Hint.gameObject.activeSelf;
+        /// <summary>The arrow's current angle round the tube's axis (it travels the way the cap twists).</summary>
+        public float twistHintAngle => m_HintAngle;
+
+        Transform m_Hint;
+        float m_HintAngle;
+        RocketAssembly m_Assembly;
+        MaterialPropertyBlock m_HintBlock;
 
         void Awake()
         {
@@ -97,6 +112,71 @@ namespace VRRocket
             m_BaseLocalRotation = Quaternion.AngleAxis(-SignedProgress(), Vector3.up) * local;
             var t = tuning;
             m_GapShown = m_Logic.locked ? 0f : (t != null ? t.capUnlockedGap : 0.002f);
+        }
+
+        // ---- twist hint ----
+
+        void Update()
+        {
+            var show = m_ShowTwistHint && m_Point != null && m_Part.state == PartState.Attached && m_Part.attachedTo == m_Point && !m_Logic.locked && OnWorkingRocket();
+            if (!show)
+            {
+                if (m_Hint != null && m_Hint.gameObject.activeSelf) m_Hint.gameObject.SetActive(false);
+                return;
+            }
+            if (m_Hint == null || m_Hint.parent != m_Point.transform) BuildHint();
+            if (!m_Hint.gameObject.activeSelf) m_Hint.gameObject.SetActive(true);
+            // travel the way the cap locks: clockwise viewed from below
+            m_HintAngle = Mathf.Repeat(m_HintAngle + (m_ClockwiseFromBelowIsNegativeYaw ? -1f : 1f) * m_HintSpeed * Time.deltaTime, 360f);
+            m_Hint.localRotation = Quaternion.AngleAxis(m_HintAngle, Vector3.up);
+            var pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+            if (m_HintBlock == null) m_HintBlock = new MaterialPropertyBlock();
+            m_HintBlock.SetColor("_BaseColor", m_HintColor * (0.55f + 0.45f * pulse));
+            foreach (var line in m_Hint.GetComponentsInChildren<LineRenderer>()) line.SetPropertyBlock(m_HintBlock);
+            if (!m_Active) m_Part.RequestGlow(0.35f + 0.5f * pulse);
+        }
+
+        bool OnWorkingRocket()
+        {
+            if (m_Assembly == null) m_Assembly = FindAnyObjectByType<RocketAssembly>();
+            return m_Assembly != null && m_Assembly.interactionEnabled && !m_Assembly.isFrozen && m_Point.tube != null && m_Point.tube == m_Assembly.tube;
+        }
+
+        /// <summary>A curved arrow round the cap, in the seat's frame (so it stays with the rocket), drawn with the glow material.</summary>
+        void BuildHint()
+        {
+            if (m_Hint != null) Destroy(m_Hint.gameObject);
+            m_Hint = new GameObject("TwistHint").transform;
+            m_Hint.SetParent(m_Point.transform, false);
+            m_Hint.localPosition = Vector3.down * 0.005f;   // round the middle of the cap, below the tube's end
+            var material = m_Part.glowRenderer != null ? m_Part.glowRenderer.sharedMaterial : null;
+            var dir = m_ClockwiseFromBelowIsNegativeYaw ? -1f : 1f;
+            const int n = 28; const float sweep = 250f;
+            var arc = Line("Arc", material, n);
+            Vector3 At(float deg) { var a = deg * Mathf.Deg2Rad; return new Vector3(Mathf.Sin(a), 0f, Mathf.Cos(a)) * m_HintRadius; }
+            for (var i = 0; i < n; i++) arc.SetPosition(i, At(dir * sweep * i / (n - 1)));
+            // the arrowhead at the leading end, pointing the way it travels
+            var end = dir * sweep;
+            var tip = At(end) + Quaternion.AngleAxis(dir * 90f, Vector3.up) * At(end).normalized * 0.008f;
+            var head = Line("Head", material, 3);
+            head.SetPosition(0, At(end) * 1.25f);
+            head.SetPosition(1, tip);
+            head.SetPosition(2, At(end) * 0.75f);
+        }
+
+        LineRenderer Line(string name, Material material, int points)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(m_Hint, false);
+            var line = go.AddComponent<LineRenderer>();
+            line.useWorldSpace = false;
+            line.positionCount = points;
+            line.widthMultiplier = 0.003f * WorldScale;
+            line.numCapVertices = 2; line.numCornerVertices = 2;
+            line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            line.receiveShadows = false;
+            if (material != null) line.sharedMaterial = material;
+            return line;
         }
 
         void OnPartRemoved(RocketPart part, AttachPoint point)

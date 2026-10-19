@@ -249,7 +249,7 @@ namespace VRRocket
                     break;
                 case BinState.Ready:
                     Big("READY", k_Green);
-                    m_Sb.Append("Rocket complete.\nPress SUBMIT.");
+                    m_Sb.Append("Rocket complete.\nCap twisted until it\nclicks? Then press\nSUBMIT.");
                     break;
                 case BinState.PartsMissing:
                     Big("PARTS MISSING", k_Amber);

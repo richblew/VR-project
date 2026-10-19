@@ -97,6 +97,22 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator A_Fin_Or_Flaps_Own_Glow_Shows_On_Both_Faces()
+        {
+            yield return null;
+            foreach (var part in new[] { Part(PartType.TailFin), Part(PartType.WingFlap) })
+            {
+                var glow = part.glowRenderer;
+                var faces = part.transform.Find("Mesh").GetComponent<MeshFilter>().sharedMesh.bounds;
+                var thickness = faces.size.x;
+                var band = glow.GetComponent<MeshFilter>().sharedMesh.bounds.size.x * glow.transform.localScale.x;
+                Assert.Greater(band, thickness + 0.001f, part.name + ": the glow band stands proud of both faces");
+                Assert.Greater(glow.GetComponent<MeshFilter>().sharedMesh.bounds.size.z * glow.transform.localScale.z, 0.005f, part.name + ": it has height up both faces, not a flat strip seen edge-on");
+                Assert.AreEqual(0f, glow.sharedMaterial.GetFloat("_Cull"), part.name + ": the glow material is double-sided");
+            }
+        }
+
+        [UnityTest]
         public IEnumerator The_Slot_Light_Shows_Either_Side_Of_A_Flaps_Edge()
         {
             yield return null;

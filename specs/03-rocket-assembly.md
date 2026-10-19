@@ -146,6 +146,8 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 
 The cap is guided onto `CapSeat` like any part, but it seats **unlocked**: it rests 2 mm proud of the tube (**Cap Unlocked Gap**). An unlocked cap makes the launch fail (the motor shoots out).
 
+**Twist hint** (playtesters could not tell the cap needs turning): while the cap is seated but not locked on the rocket being built, an orange curved arrow (`TwistHint`, a child of the cap seat, drawn with the glow material) circles the cap in the direction it locks, clockwise viewed from below, and the cap's own glow pulses. Both go the moment it locks. `MotorCapTwist`: **Show Twist Hint**, **Hint Speed** (120 degrees per second), **Hint Radius** (2.6 cm), **Hint Color**. The bin monitor's READY screen also asks "Cap twisted until it clicks?" (always, so it gives nothing away).
+
 To lock it:
 
 1. Grip the seated cap. It does not come off; it stays on the rocket.
