@@ -471,3 +471,9 @@ From Praise: the tail fins did not appear on the launch rocket; on the second la
 - **The battery:** when it blows out, it is taken off the 36 times rocket keeping its world size, so its own scale became 36. `ResetPad` put it back in the base but kept that scale, so the next launch showed it 36 × 36 times its size, swallowing the rocket. `ResetPad` now restores the battery's and cap's whole local pose and scale, and every vehicle part gets its own scale back when the vehicle is built.
 - **Matching the build** was already in (flaps on the slots they went on, upside down where they went on upside down, missing parts left off, an unlocked cap out of the base); the fin size was what hid it for fins. Now checked end to end.
 - **Verified:** new tests: every launch rocket part is 36 times its kit part; a blown-out battery and cap come back at their own size (on the old code the battery came back 100.8 m long instead of 2.8 m); two games back to back, an unscrewed cap then a build with the fins one slot round and a flap upside down in a Low slot, the launch rocket matching each build. Edit mode 44/44, play mode 75/75. The Quest build is redone with this fix.
+
+## 2026-10-19: Main merged again (Richard's build-step hints, Yi-Xuan's gloves and smaller failed-rocket zone) (done)
+
+- **From main:** Richard's new wording for the five build-step hints on the blueprint monitor (spec 05 updated to match); Yi-Xuan's rubber-glove material on the hand models; the failed-rocket desk area made smaller to fit the room (the spot moved with it and still sits on the right side desk, the rocket lying along the zone with room to spare); a font asset reset. Merged cleanly, kept as they made them.
+- **Rigs:** unchanged. Yi-Xuan's rig is on and ours is off in the scene; ours is only switched on for Praise's own Quest builds.
+- **Verified:** edit mode 44/44, play mode 75/75 (the failed rocket still lands and stays on the side desk).

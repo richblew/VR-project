@@ -131,11 +131,11 @@ A monitor on the back of the assembly desk, at (0.66, 1.36, 3.70) (see the build
 | When | Text |
 |---|---|
 | Menu | BLUEPRINT / standby |
-| Assembly, fewer than 3 fins | STEP 1 / 5 TAIL FINS 0/3, "slide into the slots at the base, any order" |
-| then fewer than 3 flaps | STEP 2 / 5 WING FLAPS n/3, "midpoint slots, swept edge toward the nose" |
-| then no nose | STEP 3 / 5 NOSE CONE, "press it onto the top" |
-| then no motor | STEP 4 / 5 MOTOR, "insert from below, nozzle down" |
-| then no cap | STEP 5 / 5 MOTOR CAP, "seat it, then twist clockwise until it clicks" |
+| Assembly, fewer than 3 fins | STEP 1 / 5 TAIL FINS 0/3, "slide orange fins into the slots at the base, any order" |
+| then fewer than 3 flaps | STEP 2 / 5 WING FLAPS n/3, "slide red fins into the upper slots, any order" |
+| then no nose | STEP 3 / 5 NOSE CONE, "place on the top of the cylinder" |
+| then no motor | STEP 4 / 5 BATTERY, "hover battery above bottom hole and drop into cylinder" |
+| then no cap | STEP 5 / 5 BATTERY CAP, "place it over battery, and twist hand" |
 | everything on | COMPLETE, "carry the rocket to the bin and SUBMIT" |
 | rocket on the pad | "Rocket on the pad. LAUNCH or ABORT at the console." |
 
