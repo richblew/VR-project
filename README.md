@@ -63,6 +63,22 @@ Yi-Xuan
 - Readme
 
 Praise
+- Game engine: the game flow from the menu and intro to building, submitting, countdown, launch and result
+- Rocket model and its parts, cleaned up in Blender (notched fins, red wing flaps)
+- Rocket assembly: parts slide onto their tracks and click into place, the battery slides in, the cap twists to lock
+- Picking up the rocket as one piece, taking parts off with two hands, switching hands
+- Glow, sound and controller vibration feedback for every part that goes on, plus hints for the cap twist
+- Build rules and the build report (flaps in the right slots, cap locked)
+- Console wiring: SUBMIT, LAUNCH and ABORT, the console coming online once the puzzle is solved, and a message for every button pressed at the wrong time
+- Submission bin and its monitor (an unfinished rocket comes back to the workbench, a failed one goes to the side desk)
+- Rocket launch simulator: flight physics and the full-size rocket built the way the player built it
+- Launch failures: veering off and crashing, breaking up in the air, the battery blowing out
+- Launch effects: engine flame, smoke, explosions and the pad camera
+- Launch screen, build-step monitor, and the countdown and abort screens on the TVs
+- A new rocket kit after every flight
+- Putting everyone's work together in the final scene
+- Automated tests and Quest builds
+- Specs and documentation
 
 Toolkits used
 - OpenXR
