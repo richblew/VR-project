@@ -37,6 +37,8 @@ Because all values live in one asset, the team's final sounds can be dropped in 
 | Cap thread texture (every 6° between ticks) | | | `hapticTwistTexture`: 0.08, 0.012 s, 200 Hz | holding |
 | Cap locked (180°) | the gap closes | `capLock` → Button_22_Click.wav | `hapticCapLock`: 1.0, 0.20 s, 80 Hz; then 0.3, 0.10 s after 0.05 s | holding |
 | A part taken off | | `unseat` → Button_14_Hover.wav | `hapticPartRemoved`: 0.2, 0.04 s, 150 Hz | holding |
+| A refused press (SUBMIT, LAUNCH, ABORT at the wrong time; the cap before the battery; a plug at the wrong socket) | the reason on the big screen, the console monitor and the monitor beside the bin | buzz (160 Hz) | `hapticRefused`: 0.7, 0.06 s, 110 Hz, twice 0.07 s apart (the pressing hand; for the cap and a plug, `hapticPartRemoved` on the holding hand) | pressing or holding |
+| A rocket enters or leaves the bin | the bin monitor's state | `seat` / `unseat`, at 60% | | |
 | Rocket complete | | `standRelease` → Button_22_Click.wav, at the rocket | `hapticPrototypeComplete`: 0.3, 0.10 s, 90 Hz; then 0.2, 0.06 s after 0.08 s | both |
 | A dropped part respawns | it reappears on the pad | `respawnPop` → Button Pop.wav | | |
 | A part hits something | | `impactDesk` → impactGeneric_light_000.ogg (`impactPart` → impactMetal_002.ogg if it hit another part) | | |

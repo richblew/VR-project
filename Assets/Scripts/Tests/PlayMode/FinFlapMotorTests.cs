@@ -146,7 +146,8 @@ namespace VRRocket.Tests
 
             assembly.enforceOrder = false;
             yield return SeatPart(Part(PartType.Motor), Point("MotorSeat"), Quaternion.identity);
-            Assert.AreEqual(AssemblyState.MotorFitted, assembly.State, "with order off the motor seats on a bare tube");
+            Assert.AreEqual(PartState.Attached, Part(PartType.Motor).state, "with order off the battery seats on a bare tube");
+            Assert.AreEqual(AssemblyState.BuildingAirframe, assembly.State, "but the rocket is still being built: the airframe comes first in the state");
             Assert.IsTrue(capSeat.Accepts(cap), "the cap needs the motor, which is now there");
             Assert.IsTrue(Point("FinSlot_1").Accepts(Part(PartType.TailFin, 1)), "airframe points stay open with order off");
         }

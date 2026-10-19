@@ -109,6 +109,8 @@ namespace VRRocket
         public Haptic hapticButtonPress = new Haptic(0.6f, 0.03f, 200f);
         [Tooltip("A push button coming back up.")]
         public Haptic hapticButtonRelease = new Haptic(0.25f, 0.02f, 180f);
+        [Tooltip("A console button that was refused (with the reason on the screens): a double buzz on the pressing hand.")]
+        public Haptic hapticRefused = new Haptic(0.7f, 0.06f, 110f, 0.7f, 0.06f, 0.07f);
 
         [Header("Controllers other than Touch Plus (first match wins; no match plays the table as designed)")]
         public DeviceTuning[] deviceTunings =

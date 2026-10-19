@@ -40,4 +40,4 @@ UCT VR course project, team of three. The player hand-assembles a model rocket (
 - Place a world-space canvas through its `RectTransform` (`anchoredPosition3D`), not `transform.localPosition` alone.
 - Unity 6.6 turns `Object.GetInstanceID` into a compile error (CS0619): use `GetEntityId`.
 - XRI auto-creates an interaction manager in `DontDestroyOnLoad` when a scene has none: every scene needs its own `XR Interaction Manager`.
-- Known gap: with the free build order, a rocket with the motor and cap fitted counts as complete even with fins, flaps or the nose missing (`specs/03-rocket-assembly.md` section 6).
+- A rocket is complete only with all nine parts; an unfinished one can be put in the bin and bounces back to the workbench with the missing parts listed (`specs/07-console-and-bin.md` section 3).

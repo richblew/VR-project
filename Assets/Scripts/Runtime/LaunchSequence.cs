@@ -162,6 +162,7 @@ namespace VRRocket
         public void PlaceVehicleOnPad(float growSeconds = 0f)
         {
             ResetPad();
+            ApplyBuild();
             if (m_Vehicle != null)
             {
                 m_Vehicle.SetActive(true);
@@ -169,6 +170,98 @@ namespace VRRocket
             }
             UpdatePadCamera(0f);
             if (m_PadCamera != null) m_PadCamera.enabled = true;
+        }
+
+        // ---- the vehicle is built the way the player built the prototype ----
+
+        [Header("Matching the build")]
+        [SerializeField, Tooltip("How far an unlocked cap sits out of the base, in the model rocket's metres (the assembly's Cap Unlocked Gap)")]
+        float m_UnlockedCapGap = 0.002f;
+
+        BuildReport m_Build;
+        Dictionary<string, Transform> m_VehiclePoints;
+        Dictionary<string, Transform> m_VehicleParts;
+        Dictionary<Transform, Transform> m_DefaultPoint;
+
+        /// <summary>
+        /// The next vehicle on the pad is built from this report: each fin, flap, nose, battery and cap on the point the player put
+        /// it on (a flap upside down where it went on upside down), parts the rocket did not have left off, an unlocked cap
+        /// sitting out of the base. Null: the correctly built rocket.
+        /// </summary>
+        public void MatchBuild(BuildReport report) => m_Build = report;
+
+        /// <summary>Which point a vehicle part is on now (its parent's name), and whether it is shown and flipped: for tests.</summary>
+        public bool TryGetVehiclePart(string partName, out string pointName, out bool shown, out bool upsideDown)
+        {
+            CacheVehicle();
+            pointName = null; shown = false; upsideDown = false;
+            if (m_VehicleParts == null || !m_VehicleParts.TryGetValue(partName, out var t)) return false;
+            pointName = t.parent != null ? t.parent.name : null;
+            shown = t.gameObject.activeSelf;
+            upsideDown = Vector3.Dot(t.up, t.parent != null ? t.parent.up : Vector3.up) < 0f;
+            return true;
+        }
+
+        void CacheVehicle()
+        {
+            if (m_VehicleParts != null || m_Vehicle == null) return;
+            Transform points = null;
+            foreach (var t in m_Vehicle.GetComponentsInChildren<Transform>(true)) if (t.name == "AttachPoints") { points = t; break; }
+            if (points == null) return;
+            m_VehiclePoints = new Dictionary<string, Transform>();
+            m_VehicleParts = new Dictionary<string, Transform>();
+            m_DefaultPoint = new Dictionary<Transform, Transform>();
+            foreach (Transform point in points)
+            {
+                m_VehiclePoints[point.name] = point;
+                foreach (Transform part in point)
+                {
+                    m_VehicleParts[part.name] = part;
+                    m_DefaultPoint[part] = point;
+                }
+            }
+        }
+
+        static string VehiclePartName(BuiltPart p)
+        {
+            switch (p.type)
+            {
+                case PartType.TailFin: return "TailFin_" + p.partId;
+                case PartType.WingFlap: return "WingFlap_" + p.partId;
+                case PartType.NoseCone: return "NoseCone_" + Mathf.Max(1, p.partId);
+                case PartType.Motor: return "Motor_" + Mathf.Max(1, p.partId);
+                case PartType.MotorCap: return "MotorCap_" + Mathf.Max(1, p.partId);
+                default: return null;
+            }
+        }
+
+        void ApplyBuild()
+        {
+            CacheVehicle();
+            if (m_VehicleParts == null) return;
+            var parts = m_Build != null ? m_Build.parts : null;
+            if (parts == null || parts.Length == 0)
+            {
+                // no report: every part on its own point, the right way up
+                foreach (var kv in m_DefaultPoint) Place(kv.Key, kv.Value, false, 0f);
+                return;
+            }
+            foreach (var kv in m_VehicleParts) kv.Value.gameObject.SetActive(false);
+            foreach (var p in parts)
+            {
+                var name = VehiclePartName(p);
+                if (name == null || !m_VehicleParts.TryGetValue(name, out var part) || !m_VehiclePoints.TryGetValue(p.pointName ?? "", out var point)) continue;
+                var gap = p.type == PartType.MotorCap && !m_Build.capLocked ? m_UnlockedCapGap : 0f;
+                Place(part, point, p.upsideDown, gap);
+            }
+        }
+
+        static void Place(Transform part, Transform point, bool upsideDown, float gapDown)
+        {
+            part.SetParent(point, false);
+            part.localPosition = Vector3.down * gapDown;
+            part.localRotation = upsideDown ? Quaternion.Euler(0f, 0f, 180f) : Quaternion.identity;
+            part.gameObject.SetActive(true);
         }
 
         IEnumerator Grow(float seconds)
@@ -385,7 +478,7 @@ namespace VRRocket
             ClearDebris();
             foreach (var part in m_DebrisParts)
             {
-                if (part == null) continue;
+                if (part == null || !part.gameObject.activeInHierarchy) continue;   // a part the rocket was built without
                 var src = part.transform;
                 var start = onGround ? centre + Vector3.up * 1.5f + UnityEngine.Random.insideUnitSphere * 2f : src.position;
                 var piece = Instantiate(part.gameObject, start, src.rotation);
