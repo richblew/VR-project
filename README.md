@@ -87,4 +87,4 @@ Toolkits used
 - TV imports from free assets
 - Puzzle and sockets are from sketchfab
 - Hand model from the Unity Asset store
-- Particle simulator (PRAISE)
+- Particle simulator
