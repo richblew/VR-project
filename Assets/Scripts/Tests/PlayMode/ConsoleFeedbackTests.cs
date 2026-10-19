@@ -215,6 +215,29 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator A_Plug_Dropped_Out_Of_The_Box_Comes_Back()
+        {
+            yield return StartBuilding(wired: false);
+            Object.FindAnyObjectByType<SlidingPanel>().SetOpenAmount(1f);
+            yield return null;
+            var box = GameObject.Find("PuzzleBox");
+            foreach (var t in box.GetComponentsInChildren<Transform>(true))
+                if (t.name.EndsWith("Guard (invisible)")) Assert.IsFalse(t.gameObject.activeInHierarchy, t.name + ": no wall keeps a plug out of the box");
+            Transform plug = null;
+            foreach (var c in box.GetComponentsInChildren<MonoBehaviour>())
+                if (c.GetType().Name == "PlugRespawn") { plug = c.transform; break; }
+            Assert.IsNotNull(plug, "the plugs respawn (Yi-Xuan's PlugRespawn)");
+            var home = plug.position;
+            // dropped over the console, outside the box
+            var body = plug.GetComponent<Rigidbody>();
+            plug.position = home + Vector3.up * 0.3f + Vector3.forward * 0.3f;
+            if (body != null) { body.position = plug.position; body.linearVelocity = Vector3.zero; }
+            Physics.SyncTransforms();
+            yield return new WaitForSeconds(2f);
+            Assert.Less(Vector3.Distance(plug.position, home), 0.03f, "it comes back to where it started in the box");
+        }
+
+        [UnityTest]
         public IEnumerator The_Launch_Vehicle_Is_Built_Like_The_Rocket()
         {
             yield return StartBuilding();

@@ -92,7 +92,7 @@ Yi-Xuan's mini game (branch `test-hand-models`, merged 13 October 2026): the con
 
 When it is fixed: the chime, CONSOLE ONLINE on the big TV and console monitor for 4 s, and the three NO SIGNAL TVs come alive (`ConsoleLiveScreens`: the NASA logo, SYSTEMS ONLINE, the rocket on its pad; the fourth TV keeps the countdown clock).
 
-**Yi-Xuan's rig:** her hand-model rig (`PlayerAnchor/Player`) and her physical-room calibration (`RoomLink`: `RoomCalibrator`, `WalkableZone`) are in the scene, switched off (her branch switches them on; the merge keeps them off). With them on, the player floated a metre up, part grabs failed and locomotion was off. Our `Player` and `RoomLink` run the game until her rig grabs parts and stands on the floor; then switch hers on and ours off.
+**The rig in use is Yi-Xuan's** (from main, 19 October 2026): her hand-model rig (`PlayerAnchor/Player`, `VRHandRigDriver`) with her physical-room calibration (`RoomLink`: `RoomCalibrator`, `WalkableZone`) is switched on, and our Starter Assets `Player` is off. It is room-scale: the player walks the real room, there is no stick locomotion or teleport. `XRRigAdapter` (on `IntroController`) adapts whichever rig is active, so its hands grab rocket parts. Rocket parts and plugs carry her `GrabPose`: a grabbed part's pivot eases to the hand's hold point (dynamic attach off), and dropped parts are thrown gently (Instantaneous movement, limited throw speed). The wiring puzzle's guard colliders are off and every plug has her `PlugRespawn`: a plug dropped out of the box, stuck on its rim or wedged while held goes back to its start, with its cables reset.
 
 ## 7. Troubleshooting
 

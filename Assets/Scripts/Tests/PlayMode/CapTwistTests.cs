@@ -71,6 +71,26 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator An_Unlocked_Cap_Shows_A_Twist_Arrow_Until_It_Locks()
+        {
+            yield return SeatCap();
+            yield return null;
+            Assert.IsTrue(m_Twist.twistHintShown, "seated but unlocked: an arrow circles the cap");
+            var a0 = m_Twist.twistHintAngle;
+            yield return new WaitForSeconds(0.3f);
+            var turned = Mathf.DeltaAngle(a0, m_Twist.twistHintAngle);
+            Assert.Less(turned, -5f, "it travels the way the cap locks (clockwise viewed from below: a negative yaw)");
+            var hint = m_Seat.transform.Find("TwistHint");
+            Assert.IsNotNull(hint, "the arrow stays with the rocket (a child of the cap seat)");
+            Assert.AreEqual(2, hint.GetComponentsInChildren<LineRenderer>().Length, "an arc and an arrowhead");
+            yield return GrabSeatedCapOnOrbit();
+            yield return Turn(0f, tuning.capLockAngle + 10f);
+            Assert.IsTrue(m_Twist.capLocked);
+            yield return null;
+            Assert.IsFalse(m_Twist.twistHintShown, "locked: the arrow goes");
+        }
+
+        [UnityTest]
         public IEnumerator Cap_SeatsUnlockedWithGap_RatchetsClockwise_LocksAtLockAngle()
         {
             yield return SeatCap();
