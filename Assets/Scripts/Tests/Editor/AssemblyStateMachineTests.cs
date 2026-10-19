@@ -33,6 +33,29 @@ namespace VRRocket.Tests
         }
 
         [Test]
+        public void Complete_Means_All_Nine_Parts_And_The_Missing_Ones_Are_Named()
+        {
+            var m = new AssemblyStateMachine { enforceOrder = false };
+            m.Apply(PartType.Motor, true);
+            m.Apply(PartType.MotorCap, true);
+            Assert.AreEqual(AssemblyState.BuildingAirframe, m.State, "a battery and cap on a bare tube is not a finished rocket");
+            Assert.IsFalse(m.complete);
+            Assert.AreEqual("3 fins, 3 flaps and the nose cone", m.DescribeMissing());
+            m.Apply(PartType.TailFin, true); m.Apply(PartType.TailFin, true);
+            m.Apply(PartType.WingFlap, true); m.Apply(PartType.WingFlap, true); m.Apply(PartType.WingFlap, true);
+            m.Apply(PartType.NoseCone, true);
+            m.Apply(PartType.MotorCap, false);
+            Assert.AreEqual("1 fin and the battery cap", m.DescribeMissing());
+            CollectionAssert.AreEqual(new[] { "1 fin", "the battery cap" }, m.MissingParts());
+            m.Apply(PartType.TailFin, true);
+            m.Apply(PartType.MotorCap, true);
+            Assert.IsTrue(m.complete);
+            Assert.AreEqual(AssemblyState.PrototypeComplete, m.State);
+            Assert.AreEqual("nothing", m.DescribeMissing());
+            Assert.AreEqual("the battery", new AssemblyStateMachine().MissingParts()[3]);
+        }
+
+        [Test]
         public void BackwardMoves()
         {
             var m = Airframe(new AssemblyStateMachine());

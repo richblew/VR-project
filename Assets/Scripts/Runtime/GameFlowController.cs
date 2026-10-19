@@ -25,6 +25,8 @@ namespace VRRocket
         TransmissionBridge m_Intro;
         [SerializeField, Tooltip("Optional. Flashes the room's side screens and sounds a siren when the launch is aborted (VRRocket_Final).")]
         AbortAlarm m_AbortAlarm;
+        [SerializeField, Tooltip("Where a rocket that failed its launch comes back for inspection (VRRocket_Final: the side desk under the moon-landing painting). Empty: the bin's return spot.")]
+        Transform m_FailedRocketSpot;
         [SerializeField] AudioSource m_Audio;
         [Header("Timing")]
         [SerializeField] float m_CountdownSeconds = 10f;
@@ -47,6 +49,27 @@ namespace VRRocket
         public float resultSeconds { get => m_ResultSeconds; set => m_ResultSeconds = value; }
         public float submitToPadSeconds { get => m_SubmitToPadSeconds; set => m_SubmitToPadSeconds = value; }
         public string assemblyHint { get => m_AssemblyHint; set => m_AssemblyHint = value; }
+        public Transform failedRocketSpot { get => m_FailedRocketSpot; set => m_FailedRocketSpot = value; }
+
+        /// <summary>A console button (or the build) was refused: the hand that pressed gets a double buzz (ButtonPressHaptics).</summary>
+        public event Action Refused;
+        /// <summary>A refusal's title and explanation, for the console's status monitor.</summary>
+        public event Action<string, string> Notice;
+
+        /// <summary>
+        /// Every refused press answers the same way: a buzz, a double vibration on the hand that pressed, and (when a title is
+        /// given) the reason on the status monitor and, while building or on the pad, on the big screen and console monitor for a
+        /// few seconds. On the menu and in the intro the screens are not shown, so it is the buzz and the vibration only.
+        /// </summary>
+        public void Refuse(string title, string big, string detail)
+        {
+            if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz);
+            Refused?.Invoke();
+            if (string.IsNullOrEmpty(title)) return;
+            Notice?.Invoke(title, detail);
+            if (m_Screen != null && (phase == GamePhase.Assembly || phase == GamePhase.PreLaunch))
+                ShowMessage(() => m_Screen.ShowRefusal(title, big, detail));
+        }
 
         // The wiring mini game (Yi-Xuan's cable puzzle inside the console, VRRocket_Final). Rules agreed with Praise:
         // - it can be solved at any time in a play, even before the rocket is built;
@@ -79,7 +102,10 @@ namespace VRRocket
         public void ReportConsoleOffline()
         {
             if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz);
-            if (phase == GamePhase.Assembly && m_Screen != null) ShowMessage(m_Screen.ShowConsoleFault);
+            Refused?.Invoke();
+            if (phase != GamePhase.Assembly) return;
+            Notice?.Invoke("CONSOLE OFFLINE", "Reconnect the wiring under the hatch between SUBMIT and LAUNCH.");
+            if (m_Screen != null) ShowMessage(m_Screen.ShowConsoleFault);
         }
 
         [SerializeField, Tooltip("Seconds a console message (fault, online) stays on the screens before the build text returns")]
@@ -97,7 +123,8 @@ namespace VRRocket
         {
             yield return new WaitForSeconds(m_MessageSeconds);
             m_Message = null;
-            if (m_Assembly != null) OnAssemblyState(m_Assembly.State);
+            if (phase == GamePhase.PreLaunch && m_Screen != null) { if (m_PadReady) m_Screen.ShowPreLaunch(); else m_Screen.ShowReceived(); }
+            else if (m_Assembly != null) OnAssemblyState(m_Assembly.State);
         }
 
         /// <summary>Takes the console offline again until the puzzle is solved anew.</summary>
@@ -132,6 +159,7 @@ namespace VRRocket
                 m_Assembly.StateChanged += OnAssemblyState;
                 m_Assembly.Submitted += OnSubmitted;
             }
+            AssemblyEvents.PartRefused += OnPartRefused;
         }
 
         void OnDisable()
@@ -141,6 +169,14 @@ namespace VRRocket
                 m_Assembly.StateChanged -= OnAssemblyState;
                 m_Assembly.Submitted -= OnSubmitted;
             }
+            AssemblyEvents.PartRefused -= OnPartRefused;
+        }
+
+        /// <summary>A part was brought to a point that will not take it yet: the cap before the battery.</summary>
+        void OnPartRefused(RocketPart part, AttachPoint point)
+        {
+            if (phase != GamePhase.Assembly || part == null || part.partType != PartType.MotorCap) return;
+            Refuse("BATTERY FIRST", "CAP REFUSED", "Fit the battery first, + end up. Then the cap goes on.");
         }
 
         void Start()
@@ -254,8 +290,8 @@ namespace VRRocket
             m_PadReady = false;
             if (m_Assembly != null) m_Assembly.interactionEnabled = false;
             if (m_Audio != null) m_Audio.PlayOneShot(m_Chime);
-            // the prototype appears on the pad at its own size and grows to full size while the screen says so
-            if (m_Launch != null) m_Launch.PlaceVehicleOnPad(m_SubmitToPadSeconds);
+            // the prototype appears on the pad at its own size, built exactly as the player built it, and grows to full size
+            if (m_Launch != null) { m_Launch.MatchBuild(lastReport); m_Launch.PlaceVehicleOnPad(m_SubmitToPadSeconds); }
             if (m_Screen != null) m_Screen.ShowReceived();
             yield return new WaitForSeconds(m_SubmitToPadSeconds);
             m_PadReady = true;
@@ -264,18 +300,60 @@ namespace VRRocket
             m_Routine = null;
         }
 
-        /// <summary>Wired to the console's green Launch button. Refused until the vehicle is on the pad.</summary>
+        /// <summary>Wired to the console's green Launch button. Starts the countdown once the vehicle is on the pad; otherwise says why not.</summary>
         public void Launch()
         {
-            if (phase != GamePhase.PreLaunch || !m_PadReady) { if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz); return; }
-            if (m_Routine != null) StopCoroutine(m_Routine);
-            m_Routine = StartCoroutine(CountdownRoutine());
+            if (phase == GamePhase.PreLaunch && m_PadReady)
+            {
+                if (m_Routine != null) StopCoroutine(m_Routine);
+                m_Routine = StartCoroutine(CountdownRoutine());
+                return;
+            }
+            switch (phase)
+            {
+                case GamePhase.Assembly:
+                    if (!consoleOnline) ReportConsoleOffline();
+                    else Refuse("NO ROCKET ON THE PAD", "SUBMIT FIRST", "Submit a finished rocket first: put it in the bin, let go, press SUBMIT.");
+                    break;
+                case GamePhase.PreLaunch:
+                    Refuse("STAND BY", "READYING", "The rocket is still being readied. Press LAUNCH once it stands at full size.");
+                    break;
+                case GamePhase.Countdown:
+                case GamePhase.Launch:
+                    Refuse("LAUNCH IN PROGRESS", "ALREADY LAUNCHING", "The countdown has already started.");
+                    break;
+                case GamePhase.Result:
+                    Refuse("FLIGHT OVER", "STAND BY", "Wait for the next build.");
+                    break;
+                default:
+                    Refuse(null, null, null);   // the menu or the intro: nothing to launch, and the screens are not up
+                    break;
+            }
         }
 
-        /// <summary>Wired to the console's red Abort button. Works from PreLaunch and Countdown; returns the prototype editable.</summary>
+        /// <summary>Wired to the console's red Abort button. Works from PreLaunch and Countdown, returning the prototype editable; otherwise says why not.</summary>
         public void Abort()
         {
-            if (phase != GamePhase.PreLaunch && phase != GamePhase.Countdown) { if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz); return; }
+            if (phase != GamePhase.PreLaunch && phase != GamePhase.Countdown)
+            {
+                switch (phase)
+                {
+                    case GamePhase.Assembly:
+                        if (!consoleOnline) ReportConsoleOffline();
+                        else Refuse("NOTHING TO ABORT", "NO LAUNCH", "Nothing is on the pad. ABORT stops a launch before liftoff.");
+                        break;
+                    case GamePhase.Launch:
+                        Refuse("TOO LATE TO ABORT", "IN FLIGHT", "The rocket has left the pad.");
+                        break;
+                    case GamePhase.Result:
+                        Refuse("TOO LATE TO ABORT", "FLIGHT OVER", "The flight is over. Wait for the next build.");
+                        break;
+                    default:
+                        Refuse(null, null, null);
+                        break;
+                }
+                return;
+            }
             if (m_Routine != null) { StopCoroutine(m_Routine); m_Routine = null; }
             if (m_Launch != null) m_Launch.AbortCountdown();
             if (m_Audio != null) m_Audio.PlayOneShot(m_Buzz);
@@ -344,10 +422,10 @@ namespace VRRocket
                 if (m_Bin != null) m_Bin.PlayOpen();
                 if (m_Assembly != null)
                 {
-                    m_Assembly.ReturnPrototype(ReturnMode.InspectOnly, m_Bin != null ? m_Bin.returnSpot : null);
+                    m_Assembly.ReturnPrototype(ReturnMode.InspectOnly, m_FailedRocketSpot != null ? m_FailedRocketSpot : m_Bin != null ? m_Bin.returnSpot : null);
                     m_Assembly.BeginNewBuild();
                 }
-                EnterAssembly("Launch failed: " + (lastReport != null ? string.Join(", ", BuildReport.DisplayNames(lastReport.failedComponents)) : "") + ". Examine the returned prototype, then build a new one.");
+                EnterAssembly("Launch failed: " + (lastReport != null ? string.Join(", ", BuildReport.DisplayNames(lastReport.failedComponents)) : "") + ". Examine the failed rocket on the side desk under the painting, then build a new one.");
             }
             m_Routine = null;
         }

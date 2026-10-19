@@ -29,6 +29,7 @@ namespace VRRocket
             GuideSlideTick = null;
             TwistTexture = null;
             KitSpawned = null;
+            PartRefused = null;
         }
 
         public static event Action<RocketPart, AttachPoint> GuideEngaged;
@@ -48,6 +49,7 @@ namespace VRRocket
         public static event Action<RocketPart> GuideSlideTick;               // one slot-texture tick of guided travel
         public static event Action<RocketPart> TwistTexture;                 // one thread-texture tick between cap detents
         public static event Action KitSpawned;                               // a fresh kit arrived on the tray
+        public static event Action<RocketPart, AttachPoint> PartRefused;     // a part brought to a point that will not take it yet (the cap before the battery)
 
         internal static void RaiseCapDetent(RocketPart part) => CapDetent?.Invoke(part);
         internal static void RaiseCapLocked(RocketPart part) => CapLocked?.Invoke(part);
@@ -64,5 +66,6 @@ namespace VRRocket
         internal static void RaiseGuideSlideTick(RocketPart part) => GuideSlideTick?.Invoke(part);
         internal static void RaiseTwistTexture(RocketPart part) => TwistTexture?.Invoke(part);
         internal static void RaiseKitSpawned() => KitSpawned?.Invoke();
+        internal static void RaisePartRefused(RocketPart part, AttachPoint point) => PartRefused?.Invoke(part, point);
     }
 }

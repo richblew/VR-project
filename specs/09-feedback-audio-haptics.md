@@ -37,6 +37,8 @@ Because all values live in one asset, the team's final sounds can be dropped in 
 | Cap thread texture (every 6° between ticks) | | | `hapticTwistTexture`: 0.08, 0.012 s, 200 Hz | holding |
 | Cap locked (180°) | the gap closes | `capLock` → Button_22_Click.wav | `hapticCapLock`: 1.0, 0.20 s, 80 Hz; then 0.3, 0.10 s after 0.05 s | holding |
 | A part taken off | | `unseat` → Button_14_Hover.wav | `hapticPartRemoved`: 0.2, 0.04 s, 150 Hz | holding |
+| A refused press (SUBMIT, LAUNCH, ABORT at the wrong time; the cap before the battery; a plug at the wrong socket) | the reason on the big screen, the console monitor and the monitor beside the bin | buzz (160 Hz) | `hapticRefused`: 0.7, 0.06 s, 110 Hz, twice 0.07 s apart (the pressing hand; for the cap and a plug, `hapticPartRemoved` on the holding hand) | pressing or holding |
+| A rocket enters or leaves the bin | the bin monitor's state | `seat` / `unseat`, at 60% | | |
 | Rocket complete | | `standRelease` → Button_22_Click.wav, at the rocket | `hapticPrototypeComplete`: 0.3, 0.10 s, 90 Hz; then 0.2, 0.06 s after 0.08 s | both |
 | A dropped part respawns | it reappears on the pad | `respawnPop` → Button Pop.wav | | |
 | A part hits something | | `impactDesk` → impactGeneric_light_000.ogg (`impactPart` → impactMetal_002.ogg if it hit another part) | | |
@@ -69,7 +71,8 @@ Notes:
 - **Attach points:** each point on the body tube has a `Glow` child (an emissive mesh with `Assets/Materials/Rocket/Glow.mat`, URP Unlit, HDR orange). A held part lights **only the nearest point that fits it**, within the glow radius (0.12 m): the point it would go into. It glows brighter as the part gets closer, and at full brightness while the part is on its rail. The other points stay dark: when several lit at once, the near slot was hidden behind the part's own edge and the slots round the side of the tube looked like the one being picked.
 - **No flicker:** the light only moves to another point once that one is **Glow Switch Margin** (1 cm) closer than the lit one, so a part held between two slots keeps one lit.
 - **Slot strips** (fins and flaps) are 1.6 cm wide, so they show on the tube either side of the 2 mm edge of the part coming in.
-- **Parts:** each part has a `PartGlow` child that lights up the same way.
+- **Parts:** each part has a `PartGlow` child that lights up the same way. On fins and flaps it is a thin glowing band round the root edge (a cube 3.4 mm wide, 8 mm tall, the root's length), so it shows on both faces of the part from any angle; it used to be a flat strip, seen edge-on when the part was held. `Glow.mat` is double-sided (Cull Off).
+- **The unlocked cap**: after a short pause an arrow and a turning ghost cap show how to twist it, a ring of detent segments shows how far it has turned while twisting, and the ring flashes green on the lock ([spec 03](03-rocket-assembly.md) section 5).
 - Every frame each point and part shows the brightest request it got that frame, then resets, so the glow goes off as soon as the part leaves.
 - A point that is refused by the build rules (for example the cap seat before the motor) never glows. A battery held the wrong way up makes nothing glow; the right way up, its seat glows as its + end nears the tube's base.
 - Glow colour: **Glow Color** on `AttachPoint` and `RocketPart` (HDR (2, 1.1, 0.2)). Brightness goes from 25% to 100% of that colour.
