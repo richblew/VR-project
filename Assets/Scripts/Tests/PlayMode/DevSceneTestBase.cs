@@ -182,6 +182,35 @@ namespace VRRocket.Tests
 
         protected RocketPart Tube => assembly.tube;
 
+        /// <summary>
+        /// How big a part is in the world: its model mesh's diagonal times that mesh's scale. With <paramref name="mesh"/>, the
+        /// filter showing that mesh (a kit part); without, the child named Mesh (a launch vehicle part). Never a glow band or hint.
+        /// </summary>
+        protected static float PartSize(Transform part, Mesh mesh = null)
+        {
+            foreach (var mf in part.GetComponentsInChildren<MeshFilter>(true))
+                if (mesh != null ? mf.sharedMesh == mesh : mf.name == "Mesh")
+                    return mf.sharedMesh.bounds.size.magnitude * mf.transform.lossyScale.x;
+            Assert.Fail(part.name + " shows no " + (mesh != null ? mesh.name : "Mesh") + " mesh");
+            return 0f;
+        }
+
+        protected static Mesh VehicleMesh(Transform vehiclePart) => vehiclePart.Find("Mesh").GetComponent<MeshFilter>().sharedMesh;
+
+        protected static Transform VehiclePart(LaunchSequence launch, string name)
+        {
+            foreach (var t in launch.vehicle.GetComponentsInChildren<Transform>(true)) if (t.name == name) return t;
+            Assert.Fail("the launch vehicle has no " + name);
+            return null;
+        }
+
+        /// <summary>A launch vehicle part's size over the same model's size in the kit: 36 when the vehicle is built right.</summary>
+        protected static float VehicleRatio(LaunchSequence launch, string name, RocketPart kitPart)
+        {
+            var v = VehiclePart(launch, name);
+            return PartSize(v) / PartSize(kitPart.transform, VehicleMesh(v));
+        }
+
         protected AttachPoint Point(string name)
         {
             return Tube.transform.Find("AttachPoints/" + name).GetComponent<AttachPoint>();

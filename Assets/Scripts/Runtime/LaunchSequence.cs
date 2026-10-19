@@ -80,9 +80,10 @@ namespace VRRocket
         public ParticleSystem padFire => m_PadFire;
         public GameObject vehicle => m_Vehicle;
 
-        Vector3 m_MotorLocalPos;
+        Vector3 m_MotorLocalPos, m_MotorLocalScale = Vector3.one;
         Quaternion m_MotorLocalRot;
-        Vector3 m_CapLocalPos;
+        Vector3 m_CapLocalPos, m_CapLocalScale = Vector3.one;
+        Quaternion m_CapLocalRot = Quaternion.identity;
         Transform m_MotorParent;
         Transform m_CapParent;
         Coroutine m_Flight;
@@ -118,8 +119,9 @@ namespace VRRocket
         void Awake()
         {
             if (m_Vehicle != null) m_VehicleScale = m_Vehicle.transform.localScale;
-            if (m_VehicleMotor != null) { m_MotorParent = m_VehicleMotor.parent; m_MotorLocalPos = m_VehicleMotor.localPosition; m_MotorLocalRot = m_VehicleMotor.localRotation; }
-            if (m_VehicleCap != null) { m_CapParent = m_VehicleCap.parent; m_CapLocalPos = m_VehicleCap.localPosition; }
+            if (m_VehicleMotor != null) { m_MotorParent = m_VehicleMotor.parent; m_MotorLocalPos = m_VehicleMotor.localPosition; m_MotorLocalRot = m_VehicleMotor.localRotation; m_MotorLocalScale = m_VehicleMotor.localScale; }
+            if (m_VehicleCap != null) { m_CapParent = m_VehicleCap.parent; m_CapLocalPos = m_VehicleCap.localPosition; m_CapLocalRot = m_VehicleCap.localRotation; m_CapLocalScale = m_VehicleCap.localScale; }
+            CacheVehicle();   // each part's own point and scale, as built, before any flight can move them
             if (m_Flame != null)
             {
                 m_FlameLocalPos = m_Flame.transform.localPosition; m_FlameLocalRot = m_Flame.transform.localRotation;
@@ -142,8 +144,10 @@ namespace VRRocket
             StopEffects();
             if (m_ActiveExplosion != null) Destroy(m_ActiveExplosion);
             ClearDebris();
-            if (m_VehicleMotor != null && m_MotorParent != null) { m_VehicleMotor.SetParent(m_MotorParent, false); m_VehicleMotor.localPosition = m_MotorLocalPos; m_VehicleMotor.localRotation = m_MotorLocalRot; }
-            if (m_VehicleCap != null && m_CapParent != null) { m_VehicleCap.SetParent(m_CapParent, false); m_VehicleCap.localPosition = m_CapLocalPos; }
+            // A blown-out battery was taken off the 36x vehicle keeping its world size (its local scale became 36): put back its
+            // whole local pose, scale included, or the next launch shows it 36 x 36 times its size.
+            if (m_VehicleMotor != null && m_MotorParent != null) { m_VehicleMotor.SetParent(m_MotorParent, false); m_VehicleMotor.SetLocalPositionAndRotation(m_MotorLocalPos, m_MotorLocalRot); m_VehicleMotor.localScale = m_MotorLocalScale; }
+            if (m_VehicleCap != null && m_CapParent != null) { m_VehicleCap.SetParent(m_CapParent, false); m_VehicleCap.SetLocalPositionAndRotation(m_CapLocalPos, m_CapLocalRot); m_VehicleCap.localScale = m_CapLocalScale; }
             if (m_Flame != null) { m_Flame.transform.localPosition = m_FlameLocalPos; m_Flame.transform.localRotation = m_FlameLocalRot; }
             if (m_Vehicle != null)
             {
@@ -182,6 +186,7 @@ namespace VRRocket
         Dictionary<string, Transform> m_VehiclePoints;
         Dictionary<string, Transform> m_VehicleParts;
         Dictionary<Transform, Transform> m_DefaultPoint;
+        Dictionary<Transform, Vector3> m_DefaultScale;
 
         /// <summary>
         /// The next vehicle on the pad is built from this report: each fin, flap, nose, battery and cap on the point the player put
@@ -211,6 +216,7 @@ namespace VRRocket
             m_VehiclePoints = new Dictionary<string, Transform>();
             m_VehicleParts = new Dictionary<string, Transform>();
             m_DefaultPoint = new Dictionary<Transform, Transform>();
+            m_DefaultScale = new Dictionary<Transform, Vector3>();
             foreach (Transform point in points)
             {
                 m_VehiclePoints[point.name] = point;
@@ -218,6 +224,7 @@ namespace VRRocket
                 {
                     m_VehicleParts[part.name] = part;
                     m_DefaultPoint[part] = point;
+                    m_DefaultScale[part] = part.localScale;
                 }
             }
         }
@@ -256,9 +263,10 @@ namespace VRRocket
             }
         }
 
-        static void Place(Transform part, Transform point, bool upsideDown, float gapDown)
+        void Place(Transform part, Transform point, bool upsideDown, float gapDown)
         {
             part.SetParent(point, false);
+            if (m_DefaultScale != null && m_DefaultScale.TryGetValue(part, out var scale)) part.localScale = scale;   // never carry a scale over from an earlier flight
             part.localPosition = Vector3.down * gapDown;
             part.localRotation = upsideDown ? Quaternion.Euler(0f, 0f, 180f) : Quaternion.identity;
             part.gameObject.SetActive(true);

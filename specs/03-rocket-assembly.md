@@ -24,6 +24,8 @@ The rocket parts, how they are grabbed and attached, the motor cap twist, the bu
 
 `rocketScale = 1` in the tuning asset is the real model size. The meshes come from a BSD-licensed model rocket kit, cleaned up in Blender (see `Docs/ASSET_CREDITS.md`).
 
+**Exporting a part from Blender:** set Apply Scalings to **FBX All** (`apply_scale_options='FBX_SCALE_ALL'`) and keep the object and mesh names. With the default, Blender puts the unit conversion (100) on the node and leaves the mesh 100 times too small: the kit part still looks right, but the launch rocket uses the mesh on its own and shows the part tiny. In Unity the imported mesh must measure its real size (the tail fin is about 0.059 × 0.058 × 0.002 m) with a node scale of 1.
+
 ## 2. The `RocketWorkstation` prefab
 
 Open `Assets/Prefabs/Rocket/RocketWorkstation.prefab` (double-click) to see:

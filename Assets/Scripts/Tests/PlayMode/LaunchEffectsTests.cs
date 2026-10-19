@@ -152,6 +152,45 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator Every_Vehicle_Part_Is_36_Times_Its_Kit_Part()
+        {
+            yield return null;
+            var launch = Launch;
+            launch.PlaceVehicleOnPad(0f);
+            yield return null;
+            foreach (var (type, name) in new[] { (PartType.TailFin, "TailFin_1"), (PartType.TailFin, "TailFin_3"), (PartType.WingFlap, "WingFlap_1"), (PartType.NoseCone, "NoseCone_1"), (PartType.Motor, "Motor_1"), (PartType.MotorCap, "MotorCap_1") })
+                Assert.AreEqual(36f, VehicleRatio(launch, name, Part(type)), 0.5f, name + ": the launch rocket shows the kit part at 36 times (a model swap must not shrink it)");
+        }
+
+        [UnityTest]
+        public IEnumerator A_Blown_Out_Battery_Comes_Back_Its_Own_Size()
+        {
+            yield return null;
+            var launch = Launch;
+            launch.PlaceVehicleOnPad(0f);
+            yield return null;
+            var battery = VehiclePart(launch, "Motor_1");
+            var cap = VehiclePart(launch, "MotorCap_1");
+            var batterySize = PartSize(battery);
+            var capSize = PartSize(cap);
+            var seat = battery.parent;
+            launch.Ignite();
+            var done = false;
+            launch.Liftoff(LaunchOutcome.MotorRetentionLoss, () => done = true, 0);
+            var ejected = false;
+            for (var t = 0f; t < 15f && !done; t += Time.deltaTime) { ejected |= launch.model.motorEjected; yield return null; }
+            Assert.IsTrue(done, "the blow-out flight ends");
+            Assert.IsTrue(ejected, "the battery blew out of the base");
+            launch.PlaceVehicleOnPad(0f);   // the next submission: resets the pad, then builds the vehicle again
+            yield return null;
+            Assert.AreSame(seat, battery.parent, "the battery is back in its seat");
+            Assert.AreEqual(batterySize, PartSize(battery), batterySize * 0.01f, "at its own size, not 36 times it");
+            Assert.AreEqual("CapSeat", cap.parent.name, "the cap is back on its seat");
+            Assert.AreEqual(capSize, PartSize(cap), capSize * 0.01f, "at its own size");
+            Assert.Less(Vector3.Distance(battery.position, seat.position), 0.01f, "and in place");
+        }
+
+        [UnityTest]
         public IEnumerator Abort_During_Ignition_Puts_Everything_Out()
         {
             var launch = Launch;

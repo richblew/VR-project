@@ -237,6 +237,74 @@ namespace VRRocket.Tests
             Assert.Less(Vector3.Distance(plug.position, home), 0.03f, "it comes back to where it started in the box");
         }
 
+        /// <summary>Builds the rocket from the current kit, fin i in finSlots[i] and flap i in flapSlots[i], the cap seated but never twisted, and submits it.</summary>
+        IEnumerator BuildAndSubmit(string[] finSlots, string[] flapSlots, bool flap2UpsideDown)
+        {
+            for (var i = 0; i < 3; i++) yield return SeatPart(Part(PartType.TailFin, i + 1), Point(finSlots[i]));
+            for (var i = 0; i < 3; i++)
+            {
+                var slot = Point(flapSlots[i]);
+                if (i == 1 && flap2UpsideDown) yield return SeatPart(Part(PartType.WingFlap, 2), slot, slot.transform.rotation * Quaternion.Euler(0f, 0f, 180f));
+                else yield return SeatPart(Part(PartType.WingFlap, i + 1), slot);
+            }
+            yield return SeatPart(Part(PartType.NoseCone), Point("NoseSeat"), Quaternion.identity);
+            yield return SeatPart(Part(PartType.Motor), Point("MotorSeat"), Quaternion.identity);
+            yield return SeatPart(Part(PartType.MotorCap), Point("CapSeat"), Quaternion.identity);
+            Assert.AreEqual(AssemblyState.PrototypeComplete, assembly.State);
+            yield return PutInBin(Tube);
+            Assert.AreEqual(BinState.Ready, Bin.state);
+            Bin.Submit();
+            Assert.AreEqual(GamePhase.PreLaunch, Flow.phase);
+            yield return new WaitForSeconds(Flow.submitToPadSeconds + 0.3f);   // the vehicle has grown to full size on the pad
+        }
+
+        IEnumerator WaitForPhase(GamePhase phase, float seconds)
+        {
+            for (var t = 0f; t < seconds && Flow.phase != phase; t += Time.deltaTime) yield return null;
+            Assert.AreEqual(phase, Flow.phase);
+        }
+
+        [UnityTest]
+        public IEnumerator Two_Flights_The_Vehicle_Matches_Each_Build_And_The_Battery_Keeps_Its_Size()
+        {
+            yield return StartBuilding();
+            Flow.countdownSeconds = 1f;
+            Flow.resultSeconds = 1f;
+            var launch = Object.FindAnyObjectByType<LaunchSequence>();
+
+            // flight 1: every part where it belongs, the cap left unscrewed: the battery blows out of the base
+            yield return BuildAndSubmit(new[] { "FinSlot_1", "FinSlot_2", "FinSlot_3" }, new[] { "FlapSlot_Mid_1", "FlapSlot_Mid_2", "FlapSlot_Mid_3" }, false);
+            Assert.AreEqual(36f, VehicleRatio(launch, "TailFin_1", Part(PartType.TailFin, 1)), 0.5f, "flight 1: the fins go up at full size");
+            Assert.AreEqual(36f, VehicleRatio(launch, "Motor_1", Part(PartType.Motor)), 0.5f, "flight 1: the battery too");
+            Flow.Launch();
+            yield return WaitForPhase(GamePhase.Launch, 4f);
+            var ejected = false;
+            for (var t = 0f; t < 15f && Flow.phase == GamePhase.Launch; t += Time.deltaTime) { ejected |= launch.model.motorEjected; yield return null; }
+            Assert.IsTrue(ejected, "flight 1: the battery blew out");
+            yield return WaitForPhase(GamePhase.Assembly, 6f);
+            yield return new WaitForSeconds(0.5f);
+            StandTubeUpright();   // the new kit's tube lies flat on the bench, like the first one did before the set-up stood it up
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+
+            // flight 2, from the new kit: the fins each one slot round, flap 2 in a low slot and upside down
+            yield return BuildAndSubmit(new[] { "FinSlot_2", "FinSlot_3", "FinSlot_1" }, new[] { "FlapSlot_Mid_1", "FlapSlot_Low_1", "FlapSlot_Mid_3" }, true);
+            Assert.IsTrue(launch.TryGetVehiclePart("TailFin_1", out var point, out var shown, out _));
+            Assert.AreEqual("FinSlot_2", point, "flight 2: fin 1 goes up in the slot it went on");
+            Assert.IsTrue(shown);
+            Assert.IsTrue(launch.TryGetVehiclePart("TailFin_3", out point, out _, out _));
+            Assert.AreEqual("FinSlot_1", point);
+            foreach (var id in new[] { 1, 2, 3 })
+                Assert.AreEqual(36f, VehicleRatio(launch, "TailFin_" + id, Part(PartType.TailFin, id)), 0.5f, "fin " + id + " at full size");
+            Assert.IsTrue(launch.TryGetVehiclePart("WingFlap_2", out point, out shown, out var flipped));
+            Assert.AreEqual("FlapSlot_Low_1", point, "the flap in the wrong slot goes up in the wrong slot");
+            Assert.IsTrue(shown);
+            Assert.IsTrue(flipped, "upside down, as it went on");
+            Assert.AreEqual("MotorSeat", VehiclePart(launch, "Motor_1").parent.name, "the battery is back in the base");
+            Assert.AreEqual(36f, VehicleRatio(launch, "Motor_1", Part(PartType.Motor)), 0.5f, "at its own size, not 36 times it as after the blow-out");
+            Assert.AreEqual(36f, VehicleRatio(launch, "MotorCap_1", Part(PartType.MotorCap)), 0.5f, "the cap too");
+        }
+
         [UnityTest]
         public IEnumerator The_Launch_Vehicle_Is_Built_Like_The_Rocket()
         {

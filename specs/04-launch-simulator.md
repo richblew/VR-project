@@ -218,7 +218,8 @@ The big TV and the console monitor show what `PadCamera` films, from PreLaunch u
 
 - It is **built the way the player built the rocket** (`MatchBuild(report)`, applied in `PlaceVehicleOnPad`): each fin, flap, nose, battery and cap sits on the point the player put it on, a flap upside down where it went on upside down, parts the rocket did not have are left off, and an unlocked cap sits out of the base (Unlocked Cap Gap, 2 mm in model metres). So a rocket with a flap in a Low slot grows and launches with it there. Explosion debris only uses parts that are on the vehicle. `TryGetVehiclePart` reports where a vehicle part is (for tests). Without a report (the tests' own launches) every part is on its own point.
 - It arrives at model size and grows, so the player sees "their" rocket scaled up for launch, through the window and on the screens.
-- Vehicle Motor and Vehicle Cap are separate transforms inside it, so the retention-loss failure can pull them out. `ResetPad` puts them back.
+- Vehicle Motor and Vehicle Cap are separate transforms inside it, so the retention-loss failure can pull them out. `ResetPad` puts them back with their whole local pose **and scale**: a blown-out battery leaves the vehicle keeping its world size, so its own scale becomes 36, and putting it back without resetting that showed it 36 times too big on the next launch. Each part's own scale is also restored whenever the vehicle is built for a submission.
+- Its parts are the kit's models: their `Mesh` children use the kit FBX meshes directly, not through the FBX's own prefab. So an FBX must carry its size in its vertices (see [spec 03](03-rocket-assembly.md), section 1), or the launch rocket shows that part tiny. `LaunchEffectsTests` checks every vehicle part is 36 times its kit part.
 
 ## 10. Recipes
 
