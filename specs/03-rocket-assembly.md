@@ -16,8 +16,8 @@ The rocket parts, how they are grabbed and attached, the motor cap twist, the bu
 | Part | Count | Names in the Hierarchy | Mass | Attaches to | Rule |
 |---|---|---|---|---|---|
 | Body tube | 1 | `BodyTube` | 0.2 kg | (carries everything) | 0.30 m long, about 34 mm wide; all 12 attach points are on it |
-| Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight |
-| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose** |
+| Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight. Like the flaps, its attaching edge has a tab 2 mm proud along the middle 45 mm of its 58.6 mm root, notched at both ends (`TailFin.fbx`, rebuilt 19 October 2026) |
+| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose**. Its attaching edge has a tab 2 mm proud along the middle 60 mm of its 78 mm root |
 | Nose cone | 1 | `NoseCone_1` | 0.08 kg | `NoseSeat` on top | is pulled gently onto the seat (magnetism) |
 | Motor | 1 | `Motor_1` | 0.08 kg | `MotorSeat` at the bottom | the battery: + end into the tube only; held the wrong way up, nothing glows |
 | Motor cap | 1 | `MotorCap_1` | 0.06 kg | `CapSeat` at the bottom | needs the motor first; seats unlocked, then must be **twisted until it clicks** |
@@ -146,6 +146,14 @@ All parts share one mechanic, in `GuideGrabTransformer`. It runs inside XRI's gr
 
 The cap is guided onto `CapSeat` like any part, but it seats **unlocked**: it rests 2 mm proud of the tube (**Cap Unlocked Gap**). An unlocked cap makes the launch fail (the motor shoots out).
 
+**Twist hint** (playtesters could not tell the cap needs turning), in three stages, on the rocket being built only (`TwistHint`, a child of the cap seat, so it stays with the rocket):
+
+1. **Before, showing how:** once the cap has rested seated and untouched for **Hint Delay** (1.5 s: after seating, or after letting go mid-twist), an orange curved arrow circles the cap the way it locks (clockwise viewed from below) at **Hint Speed** (120 degrees per second), a see-through orange **ghost cap** (`Mat_CapGhost`, 12% larger) turns through **Ghost Swing** (90 degrees) every **Ghost Period** (1.4 s), and the cap's glow pulses. A quick player who twists at once never sees it.
+2. **During, showing how far:** gripping the cap hides the arrow and ghost; a ring of one segment per detent (six of 30 degrees for the 180 degree lock) lights segment by segment with each ratchet click, and the cap's glow brightens with progress. Let go short of the auto-finish (75%), the ring keeps the progress and the arrow returns after the delay.
+3. **On the lock:** the ring flashes green for **Flash Seconds** (0.45 s), then everything goes.
+
+The research behind it (cue before the action, feedback during it, state shown in light, hints after a short hesitation) is in Docs/PROGRESS.md, 2026-10-19. `MotorCapTwist` fields: **Show Twist Hint**, **Hint Delay**, **Hint Speed**, **Hint Radius** (2.6 cm), **Hint Color**, **Done Color**, **Flash Seconds**, **Ghost Material**, **Ghost Swing**, **Ghost Period**. The bin monitor's READY screen also asks "Cap twisted until it clicks?" (always, so it gives nothing away).
+
 To lock it:
 
 1. Grip the seated cap. It does not come off; it stays on the rocket.
@@ -175,7 +183,7 @@ stateDiagram-v2
     Submitted --> PrototypeComplete : ABORT (editable return)
 ```
 
-The state is recalculated from the counts every time a part seats or comes off, so taking parts off moves it back. The rule, in order: submitted → **Submitted**; cap seated → **PrototypeComplete**; motor in → **MotorFitted**; 3 fins, 3 flaps and the nose → **AirframeComplete**; otherwise **BuildingAirframe**.
+The state is recalculated from the counts every time a part seats or comes off, so taking parts off moves it back. The rule, in order: submitted → **Submitted**; any of the 3 fins, 3 flaps or the nose missing → **BuildingAirframe**; battery and cap in → **PrototypeComplete**; battery in → **MotorFitted**; otherwise **AirframeComplete**. So **PrototypeComplete means all nine parts** (the cap may still be unlocked: that is a launch failure to discover, not a missing part). `AssemblyStateMachine.MissingParts()` and `DescribeMissing()` name what is still needed ("2 fins, the nose cone and the battery").
 
 **Build order is free** (`Enforce Order` off in the tuning asset, Praise's decision on 11 October 2026). What still applies:
 
@@ -190,7 +198,7 @@ With **Enforce Order** on, the old strict order returns: the motor only fits onc
 
 `RocketAssembly.RefreshGating` pushes these rules into every attach point (`AttachPoint.gatingAllows`) whenever something changes. Points of the inspection prototype never accept anything.
 
-> **Known gap (free order).** Because the state only looks at the cap and motor first, a rocket with the motor and cap fitted counts as PrototypeComplete even if fins, flaps or the nose are missing, and it can be submitted. The build report only checks the flaps and the cap (section 7): missing flaps count as wrong, but **missing fins or a missing nose are not detected**, so such a rocket can even fly as a success. The blueprint panel still shows the fins step in that case. Fix idea: require `airframeComplete` for PrototypeComplete (and MotorFitted) in `AssemblyStateMachine.State`, and update `AssemblyStateMachineTests`.
+**An unfinished rocket** can be put in the bin and SUBMIT pressed: the bin takes it for a moment (`TryTakeIncomplete`: frozen, sinks 30 cm), the screens say PARTS MISSING with the list, and it comes back up on its spot on the workbench, next to the parts still on the tray, editable (`ReturnIncomplete`). It is not launched and does not count as a flight ([spec 07](07-console-and-bin.md)).
 
 ## 7. The build report
 
@@ -204,6 +212,8 @@ With **Enforce Order** on, the old strict order returns: the motor only fits onc
 | `outcome` | `MotorRetentionLoss` if the cap is not locked (checked first); otherwise `UnstableFlight` if any flap is wrong; otherwise `Success` |
 | `failedComponents` | for example `{ "MotorCap", "WingFlap_2" }` |
 | `FailedCount` | how many failed |
+| `wrongFlapCount` | flaps in the wrong place or upside down (one veers off course, more break up) |
+| `parts` | every part on the rocket: type, id, the point it is on, and whether it is upside down (flaps). The launch vehicle is built from it ([spec 04](04-launch-simulator.md)) |
 
 A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits is read from its rotation compared with its slot (`GuideMath.FlapOrientationFor`).
 
@@ -217,14 +227,14 @@ A flap that is missing counts as `Base`/`Down` (wrong). Which way up a flap sits
 
 **The dropped rocket** (`RocketAssembly.Update`): the working rocket, out of bounds and not held, goes back to the tube's original spot on the tray after the same delay. A dropped **inspection prototype** goes back to where it was returned.
 
-**Submitting** (`TrySubmit`, called by the bin, [spec 07](07-console-and-bin.md)): only when the state is PrototypeComplete and the rocket is not held. It builds the report, marks the machine submitted, freezes the rocket (kinematic) and raises `Submitted`.
+**Submitting** (`TrySubmit`, called by the bin, [spec 07](07-console-and-bin.md)): only when the state is PrototypeComplete (all nine parts) and the rocket is not held. It builds the report, marks the machine submitted, freezes the rocket (kinematic) and raises `Submitted`.
 
 **Returning** (`ReturnPrototype`, called by the game engine):
 
 | Mode | When | What happens |
 |---|---|---|
 | `Editable` | ABORT | the same rocket goes back to its spot on the desk with all its parts, unfrozen and editable; the state leaves Submitted |
-| `InspectOnly` | failed launch (the previous inspection prototype is removed when the next rocket is submitted, so at most two rockets exist: the one being built and the last failed one) | the rocket is placed at the bin's return spot on the console shelf as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
+| `InspectOnly` | failed launch (the previous inspection prototype is removed when the next rocket is submitted, so at most two rockets exist: the one being built and the last failed one) | the rocket is placed on the side desk under the moon-landing painting (the game engine's Failed Rocket Spot), lying along the desk, as the **inspection prototype**: it can be picked up and examined, never changed, and its guide is switched off. The workstation no longer owns it as the working rocket. |
 
 **A new kit** (`BeginNewBuild`, after every launch): the loose parts and the working rocket are destroyed (not the inspection prototype), and a fresh tube and nine parts are spawned from the prefabs in the `RocketWorkstation` component, in the places they started. Both hands get a soft pulse ("kit spawned").
 

@@ -19,9 +19,21 @@ namespace VRRocket
         public bool IsCorrect => position == FlapPosition.Midpoint && orientation == FlapOrientation.Up;
     }
 
+    /// <summary>One part on the submitted rocket: what it is, which point it is on, and whether it went on upside down (flaps).</summary>
+    [Serializable]
+    public struct BuiltPart
+    {
+        public PartType type;
+        public int partId;
+        public string pointName;
+        public bool upsideDown;
+    }
+
     [Serializable]
     public sealed class BuildReport
     {
+        /// <summary>Every part on the rocket as it was submitted, so the launch vehicle can be built the same way.</summary>
+        public BuiltPart[] parts = Array.Empty<BuiltPart>();
         public FlapPlacement[] flapPlacement = Array.Empty<FlapPlacement>();   // always 3 entries once complete
         public bool capLocked;
         public bool FlapError;                  // any flap not correct

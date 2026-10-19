@@ -231,13 +231,17 @@ namespace VRRocket.Tests
             Assert.IsTrue(manager.IsSelectPossible(hand, part.grabInteractable), "near grab of " + part.name + " must be possible (state " + part.state + ", pos " + part.transform.position.ToString("F2") + ")");
             manager.SelectEnter((IXRSelectInteractor)hand, part.grabInteractable);
             Assert.IsTrue(part.grabInteractable.isSelected, part.name + " selected" + SelectDiagnosis(part.grabInteractable));
-            yield return null;
+            // a part with a GrabPose (Yi-Xuan's hand models) eases its pivot to the hand's hold point: measure once it is there
+            yield return new WaitForSeconds(0.25f);
             m_Held = part;
             var inv = Quaternion.Inverse(part.transform.rotation);
             m_GrabLocalPos = inv * (controller.position - part.transform.position);
             m_GrabLocalRot = inv * controller.rotation;
-            yield return new WaitForSeconds(0.2f);
+            heldOffset = controller.position - part.transform.position;
         }
+
+        /// <summary>Where the hand is relative to the held part's origin, measured once the grab settled (hand = part + heldOffset, hand unturned).</summary>
+        protected Vector3 heldOffset { get; private set; } = Vector3.up * 0.03f;
 
         /// <summary>Can the right hand grab this part from right next to it?</summary>
         protected IEnumerator CanGrabFromNear(RocketPart part, System.Action<bool> result)

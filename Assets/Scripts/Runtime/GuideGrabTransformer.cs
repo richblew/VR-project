@@ -45,6 +45,7 @@ namespace VRRocket
         bool m_MovementOverridden;
         XRBaseInteractable.MovementType m_SavedMovementType;
         bool m_WrongWayWarned;
+        bool m_RefusedWarned;
         bool m_Blending;
         float m_BlendStart;
         Pose m_BlendFrom;
@@ -123,6 +124,7 @@ namespace VRRocket
             if (m_Grab.interactorsSelecting.Count > 0) return; // second hand joining: keep state
             m_Grab.throwOnDetach = true;
             m_Highlight = null;
+            m_RefusedWarned = false;
             if (m_SeatRoutine != null)
             {
                 StopCoroutine(m_SeatRoutine);
@@ -280,6 +282,7 @@ namespace VRRocket
                     m_Highlight = nearestDist < glowR ? nearest : null;
                     litDist = nearestDist;
                 }
+                if (m_Highlight == null && m_Part.partType == PartType.MotorCap) WarnCapBeforeBattery(targetPose.position, t, s);
                 if (m_Highlight != null)
                 {
                     var amount = 1f - litDist / glowR;
@@ -369,6 +372,31 @@ namespace VRRocket
                 if (d <= bestDist) { bestDist = d; best = p; }
             }
             return best;
+        }
+
+        /// <summary>
+        /// The cap brought to a rocket's base before the battery is in: the cap seat will not take it, so once per grab the hand
+        /// gets a buzz and the game says why (fit the battery first), instead of nothing happening.
+        /// </summary>
+        void WarnCapBeforeBattery(Vector3 capPosition, AssemblyTuning t, float s)
+        {
+            if (m_RefusedWarned) return;
+            var points = AttachPoint.active;
+            for (var i = 0; i < points.Count; i++)
+            {
+                var p = points[i];
+                if (p.accepts != PartType.MotorCap || p.isOccupied || p.Accepts(m_Part)) continue;
+                if (Vector3.Distance(capPosition, p.transform.position) > t.captureRadius * s) continue;
+                var batteryIn = false;
+                for (var j = 0; j < points.Count; j++)
+                    if (points[j].accepts == PartType.Motor && points[j].tube == p.tube && points[j].isOccupied) batteryIn = true;
+                if (batteryIn) continue;   // refused for another reason (the rocket is submitted, the build is locked)
+                m_RefusedWarned = true;
+                var fb = AssemblyFeedback.instance;
+                if (fb != null && fb.library != null && m_Grab.interactorsSelecting.Count > 0) fb.Play(m_Grab.interactorsSelecting[0], fb.library.hapticPartRemoved);
+                AssemblyEvents.RaisePartRefused(m_Part, p);
+                return;
+            }
         }
 
         /// <summary>The battery's + end (its pivot is the - end; it goes into the tube + end first).</summary>

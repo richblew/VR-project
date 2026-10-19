@@ -58,8 +58,11 @@ namespace VRRocket.Tests
                 Assert.IsFalse(jump.enabled, "Jump off");
             Assert.AreEqual(XROrigin.TrackingOriginMode.Floor, origin.RequestedTrackingOriginMode, "floor tracking: the player is their real height");
             Assert.AreEqual(0f, origin.CameraYOffset, "no camera offset to add height in any mode");
+            // Yi-Xuan's room-scale rig (hand models, calibrated to the real room) has no stick locomotion: the player walks the room
+            var roomScale = false;
+            foreach (var mb in Object.FindObjectsByType<MonoBehaviour>()) if (mb.GetType().Name == "RoomCalibrator" && mb.isActiveAndEnabled) roomScale = true;
             var mediator = origin.GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.LocomotionMediator>(true);
-            Assert.IsTrue(mediator != null && mediator.gameObject.activeInHierarchy, "locomotion (move, turn, teleport, gravity) is on");
+            if (!roomScale) Assert.IsTrue(mediator != null && mediator.gameObject.activeInHierarchy, "locomotion (move, turn, teleport, gravity) is on");
             var cc = origin.GetComponent<CharacterController>();
             if (cc != null) Assert.GreaterOrEqual(cc.center.y - cc.height * 0.5f, -0.001f, "the body capsule does not reach below the feet");
             for (var i = 0; i < 90; i++) yield return null;
@@ -241,14 +244,15 @@ namespace VRRocket.Tests
             Assert.Greater(left.position.x, right.position.x, "facing the console (-Z), GO / NO-GO is on the player's left");
             screens.Refresh();
             StringAssert.Contains("STBY", screens.pollText, "standby on the menu");
-            Assert.AreEqual("RANGE STATUS", screens.dataTitle);
+            Assert.AreEqual("SUBMISSION BIN", screens.dataTitle, "the right monitor, beside the bin, shows the bin");
+            StringAssert.Contains("EMPTY", screens.dataText);
             Flow.StartWithoutIntro();
             Flow.MiniGameSolved();   // the wiring done: the poll is about the build (Console_Is_Offline_... covers the wiring)
             yield return null;
             screens.Refresh();
             StringAssert.Contains("NO-GO", screens.pollText, "an empty bench is not ready");
             StringAssert.Contains("HOLD", screens.pollVerdict);
-            StringAssert.Contains("FLIGHTS    0", screens.dataText);
+            StringAssert.Contains("EMPTY", screens.dataText, "nothing in the bin yet");
             StringAssert.DoesNotContain("LOCK", screens.pollText, "the poll never gives away whether the cap is locked");
         }
 

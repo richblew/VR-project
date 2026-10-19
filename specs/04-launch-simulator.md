@@ -174,7 +174,7 @@ and the tilt direction turns 220° per second, so the rocket corkscrews. The til
 
 The airframe **never leaves the pad**. At 0.6 s the battery is driven out of the base at 25 m/s with a puff of smoke, slowing to a stop over 2.5 s (about 31 m). On screen, the battery (taking the cap with it) shoots out low off the deck and skids along the ground, tumbling, with the flame following it for 2.5 s; a low explosion sound plays and the engine sound fades over 2.5 s. The flight ends at 4.6 s. The result screens say BATTERY RETENTION LOSS, BATTERY BLEW OUT ON THE PAD.
 
-The second result line comes from `BuildReport.FlightDetail` (the big TV's status line and the FLIGHT DATA monitor).
+The second result line comes from `BuildReport.FlightDetail` (the big TV's status line and the result on the monitor beside the bin).
 
 ## 7. The effects
 
@@ -216,7 +216,7 @@ The big TV and the console monitor show what `PadCamera` films, from PreLaunch u
 
 `LaunchVehicle.prefab` is the assembled rocket (the same layout as `Assets/Prefabs/Rocket/AssembledRocket_Static.prefab`) scaled 36 times, plus the engine effects at its base.
 
-- It always looks **correctly built**. The player's mistakes do not change how it looks; they change how it flies.
+- It is **built the way the player built the rocket** (`MatchBuild(report)`, applied in `PlaceVehicleOnPad`): each fin, flap, nose, battery and cap sits on the point the player put it on, a flap upside down where it went on upside down, parts the rocket did not have are left off, and an unlocked cap sits out of the base (Unlocked Cap Gap, 2 mm in model metres). So a rocket with a flap in a Low slot grows and launches with it there. Explosion debris only uses parts that are on the vehicle. `TryGetVehiclePart` reports where a vehicle part is (for tests). Without a report (the tests' own launches) every part is on its own point.
 - It arrives at model size and grows, so the player sees "their" rocket scaled up for launch, through the window and on the screens.
 - Vehicle Motor and Vehicle Cap are separate transforms inside it, so the retention-loss failure can pull them out. `ResetPad` puts them back.
 

@@ -113,6 +113,32 @@ namespace CablePuzzle
         {
             if (args.interactorObject is XRSocketInteractor) return;
             foreach (var e in m_Ends) if (ReferenceEquals(e.grab, args.interactableObject)) e.lastHand = args.interactorObject;
+            var plug = args.interactableObject is Component c ? c.GetComponent<CableConnector>() : null;
+            if (plug != null && plug.isPlug && isActiveAndEnabled && !m_Resetting) StartCoroutine(CheckWrongSocket(plug, args.interactorObject));
+        }
+
+        /// <summary>
+        /// A plug let go right next to a socket of another colour: the socket will not take it, so the hand gets a buzz and the
+        /// screens say why, instead of nothing happening.
+        /// </summary>
+        IEnumerator CheckWrongSocket(CableConnector plug, IXRInteractor hand)
+        {
+            yield return null;
+            yield return null;
+            var grab = plug.GetComponent<XRGrabInteractable>();
+            if (grab == null || grab.isSelected) yield break;   // in its socket, or picked up again
+            PairSocket nearest = null;
+            var best = 0.045f * transform.lossyScale.x / 0.3f;
+            foreach (var socket in m_Sockets)
+            {
+                if (socket == null || socket.hasSelection) continue;
+                var d = Vector3.Distance(socket.transform.position, plug.transform.position);
+                if (d < best) { best = d; nearest = socket; }
+            }
+            if (nearest == null || nearest.pairId == plug.pairId) yield break;
+            var fb = AssemblyFeedback.instance;
+            if (fb != null && fb.library != null && hand != null) fb.Play(hand, fb.library.hapticPartRemoved);
+            if (flow != null) flow.Refuse("WRONG SOCKET", "NO CONNECTION", "Each plug only fits the socket of its own colour.");
         }
 
         IXRInteractor HandFor(int pairId)

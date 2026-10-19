@@ -71,38 +71,60 @@ On Release calls `ButtonPressHaptics.OnRelease`.
 
 **`ButtonPressHaptics`** sends a crisp click to the hand that is pressing (strength 0.6 for 30 ms on press, 0.25 for 20 ms on release, from `FeedbackLibrary`, [spec 09](09-feedback-audio-haptics.md)). It finds the hand among the button's hovering or selecting interactors.
 
-Pressing a button at the wrong time is harmless: LAUNCH and ABORT buzz, SUBMIT is refused ([spec 02](02-game-engine.md)).
+Pressing a button at the wrong time is harmless and always answered: the screens say why, with a buzz, and `ButtonPressHaptics` gives the pressing hand a double vibration (`hapticRefused`, when `GameFlowController.Refused` fires in the same frame as the press). The full list is in [spec 02](02-game-engine.md), section 4.
 
 ## 3. The submission bin
 
-**What the player does:** carry the finished rocket to the console, drop it into the bin on the right end of the shelf, let go, and press SUBMIT.
+**What the player does:** carry the rocket to the console, drop it into the bin on the right end of the shelf, let go, and press SUBMIT. The monitor beside the bin (section 3a) says what the bin sees.
 
 **How it works** (`SubmissionBin` on `ConsoleAddOn/SubmissionBin`):
 
 1. The object has a **trigger box** (0.44 × 0.60 × 0.44 m) filling the bin's opening and shaft.
-2. When a collider of a body tube enters the trigger, the bin remembers that rocket. When it leaves, it forgets it.
-3. **Submit** (from the SUBMIT button) checks:
-   - a rocket is inside, its object is active, and **nobody is holding it**;
-   - the rocket's state is **PrototypeComplete** ([spec 03](03-rocket-assembly.md)).
+2. When a collider of a body tube enters the trigger, the bin remembers that rocket, with a soft click; when the last of its colliders leaves, it forgets it, with a softer click.
+3. `state` (`BinState`) is what is in it: **Empty**, **RocketHeld** (still in a hand), **Ready** (the rocket being built, all nine parts), **PartsMissing** (the rocket being built, unfinished), **OldRocket** (the rocket that failed, not the one being built) or **Busy** (taking a rocket).
+4. **Submit** (from the SUBMIT button), in order:
+   - on the menu or in the intro: a buzz only;
+   - the console offline: CONSOLE FAULT;
+   - a rocket already submitted: ALREADY SUBMITTED;
+   - Empty, RocketHeld, OldRocket: refused with the reason ([spec 02](02-game-engine.md) section 4);
+   - **PartsMissing:** the bin takes it (`RocketAssembly.TryTakeIncomplete`), sinks it 0.3 m over 0.8 s, shows PARTS MISSING with the list, then brings it back up on the workbench at its spot, editable (`ReturnIncomplete`). Not a flight;
+   - **Ready:** `RocketAssembly.TrySubmit()`, `onAccepted`, the rocket is frozen and the game engine moves to PreLaunch. The bin plays the door-close sound and **sinks** the rocket 0.45 m down over 1.2 s, then hides it. If the player aborts during the sink, it stops.
 
-   If not, it raises `onRefused` and stops.
-4. It calls `RocketAssembly.TrySubmit()`. If that refuses too, `onRefused`. Otherwise `onAccepted`, and the rocket is frozen and the game engine moves to PreLaunch.
-5. The bin plays the door-close sound and **sinks** the rocket 0.45 m down over 1.2 s, then hides it. If the player aborts during the sink, it stops.
+### 3a. The status monitor beside the bin
+
+The console's right side monitor (`ConsoleAddOn/ConsoleMonitorRight`, written by `ConsoleStatusScreens`) is the bin's display:
+
+| When | It shows |
+|---|---|
+| Building, bin empty | SUBMISSION BIN · EMPTY: place your finished rocket in the bin and let go of it |
+| A rocket over the bin, still held | LET GO |
+| The finished rocket in the bin | READY (green): press SUBMIT |
+| An unfinished rocket in the bin | PARTS MISSING (amber) with the list, and that SUBMIT sends it back to the bench |
+| The failed rocket in the bin | FAILED ROCKET (amber): put your new build in the bin |
+| The bin taking a rocket | CHECKING |
+| The rocket on the pad | SUBMITTED (green): LAUNCH or ABORT |
+| Countdown, flight, result | the countdown, live altitude and speed, then the flight's result (the bin is empty then) |
+| The console offline | a CONSOLE OFFLINE line under the bin state |
+| A refused press | CONSOLE: the refusal's title in red and the whole explanation, for 4 s |
 
 **Fields:**
 
 | Field | Value |
 |---|---|
 | Assembly | `RocketWorkstation` (`RocketAssembly`); found automatically if empty |
-| Return Spot | `SubmissionBin/ReturnSpot` |
+| Flow | `GameFlow` (the game engine, for refusals); found automatically if empty |
+| Return Spot | `SubmissionBin/ReturnSpot` (only used when the game engine has no Failed Rocket Spot) |
 | Sink Depth | 0.45 m |
 | Sink Seconds | 1.2 s |
+| Check Depth, Check Seconds | 0.3 m, 0.8 s: how an unfinished rocket sinks before it comes back |
 | Audio | its own `AudioSource` |
 | Close Clip | `Assets/Audio/Kenney/doorClose_000.ogg` (on submit) |
 | Open Clip | `Assets/Audio/Kenney/doorOpen_000.ogg` (when a rocket comes back) |
 | On Accepted, On Refused | UnityEvents, empty today: hook a light or a sound here if you like |
 
-**Coming back:** on ABORT the same rocket returns to the desk; after a failed launch it returns at `ReturnSpot` as the inspection prototype ([spec 03](03-rocket-assembly.md)). Both play the bin's open sound (`PlayOpen`).
+**Coming back:** on ABORT, or after PARTS MISSING, the same rocket returns to its spot on the workbench, editable; after a failed launch it returns on the side desk under the moon-landing painting (`FailedRocketDesk/FailedRocketSpot`) as the inspection prototype ([spec 03](03-rocket-assembly.md)). All play the bin's open sound (`PlayOpen`).
+
+**Safe zones** also include `FailedRocketDesk/FailedRocketZone` over that side desk, so the failed rocket stays where it was put.
 
 **Safe zones:** the bin's trigger and `ConsoleZone` (a 4.0 × 0.4 × 0.6 m trigger over the shelf) are registered with `PartRespawner` as safe zones, so a rocket or part resting there never jumps back to the desk, even though the bin shaft is lower than the desk.
 
@@ -127,7 +149,7 @@ If the room team changes the console model, these boxes may need resizing: selec
 
 **Make the buttons easier or harder to press.** Change Press Distance on the prefab (all buttons) or on one instance.
 
-**Replace the bin with your own.** Your bin must call `RocketAssembly.TrySubmit()` with a complete rocket that nobody holds, and keep the SUBMIT button wired to it. Keep a return spot for failed rockets and pass it to the game engine (`GameFlowController.Bin` uses `returnSpot` and `PlayOpen`). See `Docs/INTEGRATION.md` section 4.
+**Replace the bin with your own.** Your bin must call `RocketAssembly.TrySubmit()` with a complete rocket that nobody holds (and `TryTakeIncomplete` / `ReturnIncomplete` for an unfinished one), and keep the SUBMIT button wired to it. Keep a return spot for failed rockets and pass it to the game engine (`GameFlowController.Bin` uses `returnSpot` and `PlayOpen`). See `Docs/INTEGRATION.md` section 4.
 
 ## 6. Troubleshooting
 

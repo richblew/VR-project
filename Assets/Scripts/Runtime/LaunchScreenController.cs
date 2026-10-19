@@ -137,6 +137,15 @@ namespace VRRocket
             Set(m_Status, "Console wiring disconnected. Slide open the hatch between SUBMIT and LAUNCH and reconnect every cable to its socket.");
         }
 
+        /// <summary>A console button or the bin refused: what was refused and what to do instead.</summary>
+        public void ShowRefusal(string title, string big, string detail)
+        {
+            Surface(false); Diagram(false);
+            Set(m_Title, title);
+            Set(m_Big, string.IsNullOrEmpty(big) ? "" : "<color=#FFC14C>" + big + "</color>");   // amber: something to put right
+            Set(m_Status, detail);
+        }
+
         /// <summary>The wiring has just been reconnected: the console works again.</summary>
         public void ShowConsoleOnline()
         {
@@ -184,7 +193,7 @@ namespace VRRocket
             {
                 sb.Append(report.FlightDetail).Append("   |   ");
                 sb.Append("Failed components (").Append(report.FailedCount).Append("): ").Append(string.Join(", ", BuildReport.DisplayNames(report.failedComponents)));
-                sb.Append("   |   The prototype is returned for inspection. A new kit is on the bench.");
+                sb.Append("   |   The failed rocket is on the side desk under the painting. A new kit is on the bench.");
             }
             else if (success) sb.Append("Clean launch. Well built.");
             Set(m_Status, sb.ToString());

@@ -430,3 +430,36 @@ From Praise: bringing a flap to the tube lit almost the opposite slot.
 - **Cause found** (checked with a throwaway test and pictures): every slot that fits the part within 12 cm glowed (a flap near the tube lit five or six flap slots, the nearest barely brighter: 57% against 30 to 44%), and the nearest slot's strip sits right behind the edge of the flap coming in, so what the player saw lit were the neighbouring slots round the side of the tube, the other height.
 - **Now:** only the nearest slot that fits the part glows, the one it would go into, brighter as it nears and full on its track; the light moves to another slot only once that one is 1 cm closer (Glow Switch Margin), so it does not flicker between two; the slot strips are 1.6 cm wide (were 1 cm) so they show either side of the part's edge. Fins the same.
 - **Verified:** edit mode 43/43, play mode 60/60 (new `SlotGlowTests`, 5 tests).
+
+## 2026-10-19: Every refused press answered; the bin has a status screen; unfinished rockets bounce back; the launch rocket is the one built (done)
+
+From Praise: only SUBMIT on a dead console said anything; LAUNCH and ABORT got no response, the bin gave no sign of what was in it, and the failed rocket came back beside the bin.
+- **Audit** (in the session): 15 cases answered with nothing or a bare buzz (SUBMIT with an empty bin, with the rocket still in the hand, after a submission; LAUNCH and ABORT on a dead console, with nothing on the pad, during the countdown or flight; the cap before the battery; a plug at the wrong socket...). Also found: the failed rocket in the bin could be launched in place of the new build; a rocket with only the battery and cap counted as complete; the launch rocket was always a correctly built copy.
+- **Refusals:** each one now gives a buzz, a double vibration on the hand that pressed (`hapticRefused`) and the reason with what to do, on the big screen and console monitor for 4 s and on the monitor beside the bin. On the menu and in the intro, the buzz and vibration only.
+- **The bin's screen:** the console's right monitor shows the bin: EMPTY, LET GO, READY, PARTS MISSING with the list, FAILED ROCKET, CHECKING, SUBMITTED; then the countdown, flight data and result during a launch. The weather, wind and range lines are gone. A soft click when a rocket goes in or comes out.
+- **Complete means all nine parts.** An unfinished rocket can be submitted: it sinks, PARTS MISSING lists what is missing, and it comes back up on the workbench next to the remaining parts, editable. Not a flight.
+- **Failed rockets** come back on the side desk under the moon-landing painting, lying along it, examinable but not editable.
+- **The launch rocket is the one built:** flaps on the slots they were put on, upside down where they went on upside down, missing parts left off, an unlocked cap sitting out of the base.
+- **Verified:** edit mode 44/44, play mode 69/69 (new `ConsoleFeedbackTests`, 9 tests; checked the side desk and the screens in pictures). Feel in the headset still to check.
+
+## 2026-10-19: Main merged (Yi-Xuan's hand rig and plug respawn); the team's playtest list worked through (done)
+
+- **Merged main:** Yi-Xuan's hand-model rig with room calibration is now the rig in use (room-scale, no stick locomotion); her plug respawn replaces the guard colliders, so a plug that falls out of the box comes back; the puzzle box is a prefab; rocket parts carry her GrabPose and gentler throw settings; Richard's intro video without the "leave a like" end. Her changes are kept as they are, cable thickness included. Tests updated for her rig (the hand-part offset is measured once a grab settles; room-scale has no locomotion).
+- **Fixed:** "Particle Velocity curves must all be in the same mode" errors from the explosion and pad smoke (one axis had a range, the others fixed numbers).
+- **Cap twist cue:** an unlocked seated cap shows an orange arrow circling it the way it locks, and its glow pulses, until it locks. The bin monitor's READY screen asks "Cap twisted until it clicks?".
+- **Fin and flap glow** is a band round the root edge, visible from both faces at any angle; the glow material is double-sided.
+- **Verified:** edit mode 44/44, play mode 72/72 (new: twist arrow, glow band, plug comes back). Feel in the headset still to check.
+
+## 2026-10-19: The cap twist hint shows how, then how far, then the lock (done)
+
+From Praise: the twist arrow showed the same thing the whole time; how long should it last, and how is this best done?
+- **Research** (Ultraleap and Leap Motion XR guidelines, Meta's hands design and onboarding guidance, Road to VR on Half-Life: Alyx, Roblox onboarding techniques): give a cue before the action and feedback during it; show state through light (Alyx's half-bright half-full magazine); give hints at the moment of need, after a short hesitation, resetting on input; make the cue as specific as the motion (a turning ghost for a turn).
+- **Now:** before (after 1.5 s left alone) an arrow and a see-through ghost cap turning the locking way, with a pulsing glow; during the twist a ring of six detent segments lights with each click; let go early, the ring keeps the progress and the hint returns; on the lock the ring flashes green and everything goes. The ghost uses a new transparent material referenced by the cap prefab, so it is in the Quest build.
+- **Verified:** edit mode 44/44, play mode 72/72 (the cap hint test now walks all three stages); each stage checked in pictures. Feel in the headset still to check.
+
+## 2026-10-19: Tail fins get the wing flaps' notched tab (done)
+
+From Yi-Xuan: the tail fins should have the same attaching-edge affordance as the wing flaps.
+- **Before:** the wing flap's root has a tab 2 mm proud along its middle 60 mm, so both ends read as notches; the tail fin had a plain lip along its whole root. Yi-Xuan's test model (`testTail.fbx`, the fin plus a block) was not used anywhere and kept the full lip.
+- **Now:** `TailFin.fbx` is rebuilt in Blender as a clean fin with the same outline and thickness and a tab 2 mm proud along the middle 45 mm of its 58.6 mm root (the flaps' proportion), notched at both ends. Same object and mesh names, so the kit fins and the launch rocket's fins all use it; the colliders, slots and glow band are unchanged. The old mesh's leftover boolean slivers are gone (177 vertices down to 18). `testTail.fbx` is deleted (agreed with Praise).
+- **Verified:** edit mode 44/44, play mode 72/72; the new fin checked next to the wing flap in pictures. The build-step pictures still show the old fin (the difference is a 2 mm notch).
