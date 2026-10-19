@@ -16,8 +16,8 @@ The rocket parts, how they are grabbed and attached, the motor cap twist, the bu
 | Part | Count | Names in the Hierarchy | Mass | Attaches to | Rule |
 |---|---|---|---|---|---|
 | Body tube | 1 | `BodyTube` | 0.2 kg | (carries everything) | 0.30 m long, about 34 mm wide; all 12 attach points are on it |
-| Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight |
-| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose** |
+| Tail fin | 3 | `TailFin_1` to `_3` | 0.05 kg | `FinSlot_1` to `_3` at the base | any fin in any fin slot; the fin snaps straight. Like the flaps, its attaching edge has a tab 2 mm proud along the middle 45 mm of its 58.6 mm root, notched at both ends (`TailFin.fbx`, rebuilt 19 October 2026) |
+| Wing flap | 3 | `WingFlap_1` to `_3` | 0.05 kg | 6 slots: `FlapSlot_Mid_1` to `_3` (correct) and `FlapSlot_Low_1` to `_3` (wrong) | fits either way up; correct is a **Mid** slot with the **swept edge toward the nose**. Its attaching edge has a tab 2 mm proud along the middle 60 mm of its 78 mm root |
 | Nose cone | 1 | `NoseCone_1` | 0.08 kg | `NoseSeat` on top | is pulled gently onto the seat (magnetism) |
 | Motor | 1 | `Motor_1` | 0.08 kg | `MotorSeat` at the bottom | the battery: + end into the tube only; held the wrong way up, nothing glows |
 | Motor cap | 1 | `MotorCap_1` | 0.06 kg | `CapSeat` at the bottom | needs the motor first; seats unlocked, then must be **twisted until it clicks** |
