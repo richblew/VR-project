@@ -192,6 +192,25 @@ namespace VRRocket.Tests
         }
 
         [UnityTest]
+        public IEnumerator StepMonitor_CountsEachFinAndFlap_AsTheyGoOn()
+        {
+            yield return FindFlow();
+            BeginPlay();
+            yield return null;
+            var blueprint = Object.FindAnyObjectByType<BlueprintDisplay>();
+            StringAssert.Contains("TAIL FINS  0/3", blueprint.shownText);
+            yield return SeatPart(Part(PartType.TailFin, 1), Point("FinSlot_1"));
+            StringAssert.Contains("TAIL FINS  1/3", blueprint.shownText, "each fin counts as it goes on");
+            yield return SeatPart(Part(PartType.TailFin, 2), Point("FinSlot_2"));
+            StringAssert.Contains("TAIL FINS  2/3", blueprint.shownText);
+            yield return SeatPart(Part(PartType.TailFin, 3), Point("FinSlot_3"));
+            StringAssert.Contains("WING FLAPS  0/3", blueprint.shownText, "three fins move the monitor to the flaps");
+            Assert.AreEqual(1, blueprint.shownImage, "with the flaps picture");
+            yield return SeatPart(Part(PartType.WingFlap, 1), Point("FlapSlot_Mid_1"));
+            StringAssert.Contains("WING FLAPS  1/3", blueprint.shownText);
+        }
+
+        [UnityTest]
         public IEnumerator Menu_Start_Build_LockCap_Submit_Launch_Success_BackToMenuWithNewKit()
         {
             yield return FindFlow();
@@ -223,6 +242,12 @@ namespace VRRocket.Tests
             Assert.IsFalse(launch.model.hasExploded);
             Assert.GreaterOrEqual(launch.altitude, 1000f, "a clean flight climbs to the success altitude");
             Assert.AreEqual("MISSION SUCCESS", GameObject.Find("ScreenTitle").GetComponent<TMPro.TextMeshPro>().text);
+            Assert.AreEqual(1, flow.successes, "the success counts while its result is on show");
+            if (sideScreens != null)
+            {
+                sideScreens.Refresh();
+                StringAssert.Contains("SUCCESSES 1", sideScreens.dataText, "the result screen counts this flight");
+            }
 
             yield return WaitForPhase(GamePhase.Menu, 5f);
             Assert.AreEqual(1, flow.successes);

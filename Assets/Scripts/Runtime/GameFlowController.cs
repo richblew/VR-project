@@ -157,6 +157,8 @@ namespace VRRocket
             if (m_Assembly != null)
             {
                 m_Assembly.StateChanged += OnAssemblyState;
+                m_Assembly.PartAttached += OnPartCountChanged;
+                m_Assembly.PartRemoved += OnPartCountChanged;
                 m_Assembly.Submitted += OnSubmitted;
             }
             AssemblyEvents.PartRefused += OnPartRefused;
@@ -167,6 +169,8 @@ namespace VRRocket
             if (m_Assembly != null)
             {
                 m_Assembly.StateChanged -= OnAssemblyState;
+                m_Assembly.PartAttached -= OnPartCountChanged;
+                m_Assembly.PartRemoved -= OnPartCountChanged;
                 m_Assembly.Submitted -= OnSubmitted;
             }
             AssemblyEvents.PartRefused -= OnPartRefused;
@@ -259,6 +263,12 @@ namespace VRRocket
             if (m_Launch != null) m_Launch.ResetPad();
             if (m_Screen != null) m_Screen.ShowAssembly(m_Assembly != null ? m_Assembly.State : AssemblyState.BuildingAirframe, hint);
             if (m_Blueprint != null && m_Assembly != null) m_Blueprint.ShowState(m_Assembly.machine);
+        }
+
+        // The step monitor counts fins and flaps within a stage, so it follows every part, not only stage changes.
+        void OnPartCountChanged()
+        {
+            if (phase == GamePhase.Assembly && m_Blueprint != null && m_Assembly != null) m_Blueprint.ShowState(m_Assembly.machine);
         }
 
         void OnAssemblyState(AssemblyState state)
@@ -407,13 +417,13 @@ namespace VRRocket
 
         IEnumerator ResultRoutine(LaunchOutcome outcome)
         {
+            if (outcome == LaunchOutcome.Success) successes++;   // before the result shows, so the result screens count this flight
             SetPhase(GamePhase.Result);
             if (m_Screen != null) m_Screen.ShowResult(lastReport);
             if (m_Audio != null) m_Audio.PlayOneShot(outcome == LaunchOutcome.Success ? m_Chime : m_Buzz);
             yield return new WaitForSeconds(m_ResultSeconds);
             if (outcome == LaunchOutcome.Success)
             {
-                successes++;
                 if (m_Assembly != null) m_Assembly.BeginNewBuild();
                 EnterMenu(true);
             }

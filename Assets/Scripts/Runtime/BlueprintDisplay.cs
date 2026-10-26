@@ -35,6 +35,9 @@ namespace VRRocket
         /// <summary>Index into the step images of the picture on show, or -1 when there is no image screen.</summary>
         public int shownImage { get; private set; } = -1;
 
+        /// <summary>The text on the blueprint panel.</summary>
+        public string shownText => m_Text != null ? m_Text.text : null;
+
         /// <summary>The step being browsed (0 to 4), or -1 while the screens follow the build.</summary>
         public int browsedStep { get; private set; } = -1;
 
