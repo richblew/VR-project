@@ -16,6 +16,8 @@ Must do
 - OpenXR needs to have its render mode set to Multi-pass
 - Run it in the unity IDE
 - Use scene VRRocket_Final
+- Run it in the ER2 lab
+- Project name is VR-rich
 
 # Tutorial
 
